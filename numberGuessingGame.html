@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guessing Game</title>
+    <style source="numberGuessingGame.css"></style>
+</head>
+<body>
+    <main class="card" id="app">
+        <header>
+            <button id="backBtn" class="back-btn" onclick="location.href='../games.html'">← Return</button>
+            <h1>🔢 Number Guessing Game</h1>
+            <div style="margin-left:auto;color:var(--muted);font-size:0.9rem">Guess the number — range 1 to 100 by default</div>
+        </header>
+
+        <!-- Settings -->
+        <section class="row" aria-label="settings" style="gap: 10px;">
+            <div>
+                <label for="min">Min</label><br>
+                <input id="min" type="number" value="1" min="-100000"/>
+            </div>
+            <div>
+                <label for="max">Max</label><br>
+                <input id="max" type="number" value="100" min="-100000"/>
+            </div>
+            <div class="controls" style="margin-left: auto;">
+                <button id="newRange">Start / Apply Range</button>
+                <button id="resetAll" class="ghost" title="Reset stored best score">Reset Best</button>
+            </div>
+        </section>
+        
+        <!-- Game input -->
+        <section style="margin-top: 16px;">
+            <div class="row" style="align-items: center;">
+                <div style="flex: 1;">
+                    <label for="guess">Your guess</label><br>
+                    <input id="guess" type="number" placeholder="Enter a number" />
+                </div>
+                <div style="display:flex;gap:8px;align-items:end">
+                    <button id="submit">Guess</button>
+                    <button id="hint" class="ghost">Hint</button>
+                </div>
+            </div>
+
+            <div class="status" id="status" role="status" aria-live="polite">
+                <div>Attempts: <span id="attempts">0</span> &nbsp; • &nbsp; Best (fewest attempts): <span id="best">—</span></div>
+            </div>
+
+            <div class="big">
+                <div class="hint" id="message">Make a guess to begin!</div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.9rem;color: var(--muted);">Past Guesses:</div>
+                    <div class="guesses" id="past"></div>
+                </div>
+            </div>
+
+            <footer>
+                <div class="muted">Tip: press Enter to submit. Range is inclusive.</div>
+                <div>
+                    <button id="playAgain" class="ghost">Play Again</button>
+                </div>
+            </footer>
+        </section>
+    </main>
+    <script src="numberGuessingGame.js"></script>
+</body>
+</html>
