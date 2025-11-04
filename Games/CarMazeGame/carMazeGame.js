@@ -23,11 +23,18 @@
 
 
     (function init() {
+        // Populate levels list
         getLevelFolders().then(folders => {
             folders.forEach(folder => {
                 console.log('Found level folder:', folder);
                 const li = document.createElement('li');
-                li.textContent = folder;
+                const button = document.createElement('button');
+                button.textContent = folder;
+                button.onclick = () => {
+                    // Load the selected level
+                    loadLevel(LEVELS_FOLDER + folder + `/${folder.toLowerCase()}.json`);
+                }
+                li.appendChild(button);
                 levelsList.appendChild(li);
             });
         });
