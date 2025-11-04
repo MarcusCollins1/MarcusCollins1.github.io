@@ -1,19 +1,15 @@
 (function() {
-    const fs = require('fs');
-    const LEVELS_FOLDER = "Levels/";
+    const LEVELS_JSON = "Levels/index.json";
     
     const levelsList = document.getElementById('levels-list');
 
     // helpers
     async function getLevelNames() {
-        try {
-            const files = fs.readdirSync(LEVELS_FOLDER);
-            return files
-        }
-        catch (error) {
-            console.error('Error reading levels directory:', error);
-            return [];
-        }
+        fetch(LEVELS_JSON)
+        .then(response => response.json())
+        .then(data => {
+            return data;
+        });
     }
 
 
