@@ -164,6 +164,9 @@ function resetPuzzle() {
 
 function revealAnswers() {
     if (!showingAnswers) {
+        if (prompt("Enter password to reaveal answers:") !== "polygon") {
+            return;
+        }
         found = new Set(puzzle.answers.map(normalize));
         showingAnswers = true;
         renderFoundWords();
@@ -178,7 +181,8 @@ function revealAnswers() {
 
 function share() {
     const date = new Date();
-    const string = `Polygon Puzzle - ${date.toDateString()}\nFound ${found.size} of ${puzzle.answers.length}\nhttps://marcuscollins1.github.io/Games/Polygon/polygon.html`;
+    const maxScore = puzzle.answers.reduce((sum, w) => sum + scoreForWord(w), 0);
+    const string = `Polygon Puzzle - ${date.toDateString()}\nFound ${found.size}/${puzzle.answers.length}\nScore: ${scoreEl.textContent}/${maxScore}\nhttps://marcuscollins1.github.io/Games/Polygon/polygon.html`;
     navigator.clipboard.writeText(string).then(() => {
         setMessage("Results copied to clipboard!", "good");
     }).catch(() => {
