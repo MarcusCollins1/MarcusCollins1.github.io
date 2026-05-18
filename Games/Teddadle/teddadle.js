@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const boardEl = document.getElementById("board");
     const keyboardEl = document.getElementById("keyboard");
 
