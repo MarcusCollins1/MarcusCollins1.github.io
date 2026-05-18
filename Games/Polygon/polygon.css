@@ -38,7 +38,7 @@ body {
 }
 .return-button:hover {
     background: lightblue;
-    color: var(--accent);
+    color: #60a5fa;
 }
 .app {
     width: min(860px, 100%);
