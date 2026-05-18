@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const VALID_ENGLISH_WORDS = text.split("\n").map(w => w.trim().toUpperCase()).filter(w => w.length === COLS);
         return VALID_ENGLISH_WORDS;
     }
-    const VALID_ENGLISH_WORDS = loadValidWords();
+    const VALID_ENGLISH_WORDS = await loadValidWords();
 
     let currentRow = 0;
     let currentCol = 0;
