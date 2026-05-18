@@ -22,6 +22,7 @@ const puzzle = getPuzzle(VALID_ENGLISH_WORDS);
 
 
 const board = document.getElementById("board");
+const centerLetterBtn = document.getElementById("centerLetterBtn");
 const centerLetter = document.getElementById("centerLetter");
 const wordInput = document.getElementById("wordInput");
 const submitBtn = document.getElementById("submitBtn");
@@ -55,7 +56,7 @@ function buildBoard() {
         board.appendChild(tile);
     });
 
-    centerLetter.addEventListener("click", () => {
+    centerLetterBtn.addEventListener("click", () => {
         wordInput.value += puzzle.center.toLowerCase();
         wordInput.focus();
     });
