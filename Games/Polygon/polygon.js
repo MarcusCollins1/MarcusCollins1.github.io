@@ -33,7 +33,7 @@ function getPuzzle(validWords) {
 const VALID_ENGLISH_WORDS = await loadValidWords();
 const puzzle = getPuzzle(VALID_ENGLISH_WORDS);
 
-
+const isPhone = window.matchMedia("(max-width: 768px)").matches;
 
 const board = document.getElementById("board");
 const centerLetterBtn = document.getElementById("centerLetterBtn");
@@ -65,14 +65,18 @@ function buildBoard() {
         tile.innerHTML = `<span>${letter}</span>`;
         tile.addEventListener("click", () => {
             wordInput.value += letter.toLowerCase();
-            wordInput.focus();
+            if (!isPhone) {
+                wordInput.focus();
+            }
         });
         board.appendChild(tile);
     });
 
     centerLetterBtn.addEventListener("click", () => {
         wordInput.value += puzzle.center.toLowerCase();
-        wordInput.focus();
+        if (!isPhone) {
+            wordInput.focus();
+        }
     });
 
     totalCount.textContent = puzzle.answers.length;
@@ -142,7 +146,9 @@ function submitWord() {
     updateStats();
     setMessage(`Nice! Added "${word}".`, "good");
     wordInput.value = "";
-    wordInput.focus();
+    if (!isPhone) {
+        wordInput.focus();
+    }
 }
 
 function resetPuzzle() {
