@@ -1,0 +1,170 @@
+async function loadValidWords() {
+    const response = await fetch("English words.txt");
+    const text = await response.text();
+    const VALID_ENGLISH_WORDS = text.split("\n").map(w => w.trim().toLowerCase()).filter(w => w.length >= 4);
+    return VALID_ENGLISH_WORDS;
+}
+function getPuzzle(validWords) {
+    const candidates = validWords.filter(w => w.length >= 7 && new Set(w).size === 7);
+    const puzzleWord = candidates[Math.floor(Math.random() * candidates.length)];
+    const center = puzzleWord[Math.floor(Math.random() * puzzleWord.length)].toUpperCase();
+    const outer = [...new Set(puzzleWord)].filter(l => l.toUpperCase() !== center).map(l => l.toUpperCase());
+    const answers = validWords.filter(w => {
+        const letters = new Set(w.toUpperCase());
+        return w.length >= 4 && letters.has(center) && [...letters].every(l => outer.includes(l) || l === center);
+    });
+    return {center, outer, answers};
+}
+
+const VALID_ENGLISH_WORDS = await loadValidWords();
+const puzzle = getPuzzle(VALID_ENGLISH_WORDS);
+
+
+
+const board = document.getElementById("board");
+const centerLetter = document.getElementById("centerLetter");
+const wordInput = document.getElementById("wordInput");
+const submitBtn = document.getElementById("submitBtn");
+const resetBtn = document.getElementById("resetBtn");
+const revealBtn = document.getElementById("revealBtn");
+const message = document.getElementById("message");
+const foundWords = document.getElementById("foundWords");
+const foundCount = document.getElementById("foundCount");
+const scoreEl = document.getElementById("score");
+const totalCount = document.getElementById("totalCount");
+
+let found = new Set();
+let showingAnswers = false;
+
+function normalize(word) {
+    return word.trim().toLowerCase();
+}
+
+function buildBoard() {
+    centerLetter.textContent = puzzle.center;
+    const positions = ["p0", "p1", "p2", "p3", "p4", "p5"];
+
+    puzzle.outer.forEach((letter, i) => {
+        const tile = document.createElement("div");
+        tile.className = `letter ${positions[i]}`;
+        tile.innerHTML = `<span>${letter}</span>`;
+        tile.addEventListener("click", () => {
+            wordInput.value += letter.toLowerCase();
+            wordInput.focus();
+        });
+        board.appendChild(tile);
+    });
+
+    centerLetter.addEventListener("click", () => {
+        wordInput.value += puzzle.center.toLowerCase();
+        wordInput.focus();
+    });
+
+    totalCount.textContent = puzzle.answers.length;
+}
+
+function updateStats() {
+    foundCount.textContent = found.size;
+    scoreEl.textContent = [...found].reduce((sum, w) => sum + scoreForWord(w), 0);
+}
+
+function scoreForWord(word) {
+    return Math.max(1, word.length - 3);
+}
+
+function renderFoundWords() {
+    foundWords.innerHTML = "";
+    [...found].sort().forEach(word => {
+        const pill = document.createElement("span");
+        pill.className = "word";
+        pill.textContent = word;
+        foundWords.appendChild(pill);
+    });
+}
+
+function setMessage(text, type = "") {
+    message.textContent = text;
+    message.className = `msg ${type}`;
+}
+
+function validLetters(word) {
+    const allowed = new Set([puzzle.center, ...puzzle.outer].map(l => l.toLowerCase()));
+    return [...word].every(ch => allowed.has(ch));
+}
+
+function containsCenter(word) {
+    return word.includes(puzzle.center.toLowerCase());
+}
+
+function submitWord() {
+    const word = normalize(wordInput.value);
+    if (!word)  return;
+    if (word.length < 4) {
+        setMessage("Word must be at least 4 letters.", "bad");
+        return;
+    }
+    if (!containsCenter(word)) {
+        setMessage(`Word must include "${puzzle.center.toLowerCase()}".`, "bad");
+        return;
+    }
+    if (!validLetters(word)) {
+        setMessage("Use only the polygon letters.", "bad");
+        return;
+    }
+
+    const answerSet = new Set(puzzle.answers.map(normalize));
+    if (!answerSet.has(word)) {
+        setMessage("Not in the answer list for this puzzle.", "bad");
+        return;
+    }
+    if (found.has(word)) {
+        setMessage("Already found.", "bad");
+        return;
+    }
+
+    found.add(word);
+    renderFoundWords();
+    updateStats();
+    setMessage(`Nice! Added "${word}".`, "good");
+    wordInput.value = "";
+    wordInput.focus();
+}
+
+function resetPuzzle() {
+    found = new Set();
+    showingAnswers = false;
+    renderFoundWords();
+    updateStats();
+    setMessage("Puzzle reset.");
+    wordInput.value = "";
+}
+
+function revealAnswers() {
+    if (!showingAnswers) {
+        found = new Set(puzzle.answers.map(normalize));
+        showingAnswers = true;
+        renderFoundWords();
+        updateStats();
+        setMessage("All answers revealed.")
+        revealBtn.textContent = "Hide Answers";
+    } else {
+        resetPuzzle();
+        revealBtn.textContent = "Show Answers";
+    }
+}
+
+submitBtn.addEventListener("click", submitWord);
+resetBtn.addEventListener("click", () => {
+    resetPuzzle();
+    revealBtn.textContent = "Show Answers";
+});
+revealBtn.addEventListener("click", revealAnswers);
+wordInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        submitWord();
+    }
+});
+
+buildBoard();
+renderFoundWords();
+updateStats();
