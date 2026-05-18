@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polygon Game</title>
+    <link rel="stylesheet" href="polygon.css">
+</head>
+<body>
+    <div class="app">
+        <section class="card">
+            <h1>Polygon Word Puzzle</h1>
+            <p class="subtitle">
+                Make words using the letters in the polygon. Every word must include the center letter.
+            </p>
+
+            <div class="board-wrap">
+                <div class="board" id="board">
+                    <div class="center"><span id="centerLetter">A</span></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="input-row">
+                    <input id="wordInput" type="text" placeholder="Type a word and press Enter" autocomplete="off" />
+                    <button id="submitBtn">Submit</button>
+                </div>
+                <div class="msg" id="message"></div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="label">Found</div>
+                        <div class="value" id="foundCount">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="label">Score</div>
+                        <div class="value" id="score">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="label">Total</div>
+                        <div class="value" id="totalCount">0</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <aside class="card side">
+            <h2>Found words</h2>
+            <div class="words" id="foundWords"></div>
+
+            <div class="rules">
+                <strong>Rules:</strong><br />
+                • Use only the letters shown.<br />
+                • Every word must include the center letter.<br />
+                • Words must be at least 4 letters long.<br />
+                • Press Reset to start over.
+            </div>
+
+            <div style:"margin-top:16px; display:flex; gap:10px;">
+                <button class="secondary" id="resetBtn">Reset</button>
+                <button class="secondary" id="revealBtn">Show Answers</button>
+            </div>
+        </aside>
+    </div>
+    <script src="polygon.js"></script>
+</body>
+</html>
