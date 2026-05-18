@@ -1,3 +1,14 @@
+function dateKeyUTC(date = new Date()) {
+    return date.toISOString().slice(0, 10);
+}
+function hashStringToInt(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+    }
+    return hash;
+}
+
 async function loadValidWords() {
     const response = await fetch("English words.txt");
     const text = await response.text();
@@ -6,7 +17,10 @@ async function loadValidWords() {
 }
 function getPuzzle(validWords) {
     const candidates = validWords.filter(w => w.length >= 7 && new Set(w).size === 7);
-    const puzzleWord = candidates[Math.floor(Math.random() * candidates.length)];
+    const key = dateKeyUTC();
+    const seed = hashStringToInt(key);
+    const index = seed % candidates.length;
+    const puzzleWord = candidates[index];
     const center = puzzleWord[Math.floor(Math.random() * puzzleWord.length)].toUpperCase();
     const outer = [...new Set(puzzleWord)].filter(l => l.toUpperCase() !== center).map(l => l.toUpperCase());
     const answers = validWords.filter(w => {
