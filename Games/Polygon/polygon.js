@@ -42,6 +42,7 @@ const wordInput = document.getElementById("wordInput");
 const submitBtn = document.getElementById("submitBtn");
 const resetBtn = document.getElementById("resetBtn");
 const revealBtn = document.getElementById("revealBtn");
+const shareBtn = document.getElementById("shareBtn");
 const message = document.getElementById("message");
 const foundWords = document.getElementById("foundWords");
 const foundCount = document.getElementById("foundCount");
@@ -174,12 +175,23 @@ function revealAnswers() {
     }
 }
 
+function share() {
+    const date = new Date();
+    const string = `Polygon Puzzle - ${date.toDateString()}\nFound ${found.size} of ${puzzle.answers.length}\nhttps://marcuscollins1.github.io/Games/Polygon/polygon.html`;
+    navigator.clipboard.writeText(string).then(() => {
+        setMessage("Results copied to clipboard!", "good");
+    }).catch(() => {
+        setMessage("Failed to copy results.", "bad");
+    });
+}
+
 submitBtn.addEventListener("click", submitWord);
 resetBtn.addEventListener("click", () => {
     resetPuzzle();
     revealBtn.textContent = "Show Answers";
 });
 revealBtn.addEventListener("click", revealAnswers);
+shareBtn.addEventListener("click", share)
 wordInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
         submitWord();
