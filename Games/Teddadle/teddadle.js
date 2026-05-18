@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return VALID_ENGLISH_WORDS;
     }
     const VALID_ENGLISH_WORDS = await loadValidWords();
+    VALID_ENGLISH_WORDS.push(TARGET_WORD); // Ensure target word is valid
 
     let currentRow = 0;
     let currentCol = 0;
