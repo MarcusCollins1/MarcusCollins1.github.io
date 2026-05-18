@@ -18,13 +18,10 @@ async function loadValidWords() {
 function getPuzzle(validWords) {
     const candidates = validWords.filter(w => w.length >= 7 && new Set(w).size === 7);
     const key = dateKeyUTC();
-    console.log(key);
     const seed = hashStringToInt(key);
-    console.log(seed);
     const index = seed % candidates.length;
-    console.log(index);
     const puzzleWord = candidates[index];
-    const center = puzzleWord[Math.floor(Math.random() * puzzleWord.length)].toUpperCase();
+    const center = puzzleWord[seed % puzzleWord.length].toUpperCase();
     const outer = [...new Set(puzzleWord)].filter(l => l.toUpperCase() !== center).map(l => l.toUpperCase());
     const answers = validWords.filter(w => {
         const letters = new Set(w.toUpperCase());
