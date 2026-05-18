@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadValidWords() {
         const response = await fetch("English words.txt");
         const text = await response.text();
-        const VALID_ENGLISH_WORDS = text.split("\n");
+        const VALID_ENGLISH_WORDS = text.split("\n").map(w => w.trim().toUpperCase()).filter(w => w.length === COLS);
         return VALID_ENGLISH_WORDS;
     }
     const VALID_ENGLISH_WORDS = loadValidWords();
@@ -98,6 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const guess = guesses[currentRow].join("");
+
+        if (!VALID_ENGLISH_WORDS.includes(guess.toUpperCase())) return
+
         const result = evaluateGuess(guess);
 
         for (let i = 0; i < COLS; i++) {
