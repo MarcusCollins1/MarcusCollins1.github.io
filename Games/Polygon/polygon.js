@@ -39,6 +39,7 @@ const board = document.getElementById("board");
 const centerLetterBtn = document.getElementById("centerLetterBtn");
 const centerLetter = document.getElementById("centerLetter");
 const wordInput = document.getElementById("wordInput");
+const backSpaceBtn = document.getElementById("backSpaceBtn");
 const submitBtn = document.getElementById("submitBtn");
 const resetBtn = document.getElementById("resetBtn");
 const revealBtn = document.getElementById("revealBtn");
@@ -185,6 +186,9 @@ function share() {
     });
 }
 
+backSpaceBtn.addEventListener("click", () => {
+    wordInput.value = wordInput.value.slice(0, -1);
+});
 submitBtn.addEventListener("click", submitWord);
 resetBtn.addEventListener("click", () => {
     resetPuzzle();
