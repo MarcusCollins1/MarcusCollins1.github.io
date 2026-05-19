@@ -1,0 +1,46 @@
+html, body {
+    font-family: Arial, sans-serif;
+    background-color: #0b0f19;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    color: white;
+    overflow: hidden;
+}
+button {
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 4px;
+}
+button:hover {
+    background-color: lightcoral;
+}
+canvas {
+    width: min(100vw - 40px, 1200px);
+    height: min(70vh, 600px);
+    border: 1px solid #23304a;
+    border-radius: 12px;
+}
+
+.return-button {
+    background-color: lightblue;
+    color: hotpink;
+    font-size: large;
+    font-weight: bold;
+}
+.return-button:hover {
+    background-color: hotpink;
+    color: lightblue;
+}
+.wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 16px;
+    padding: 20px;
+    box-sizing: border-box;
+}
