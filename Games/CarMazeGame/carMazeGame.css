@@ -9,9 +9,9 @@
     background-color: hotpink;
     color: lightblue;
     font-weight: 600;
+    cursor: pointer;
 }
 #return-button:hover {
     background-color: lightblue;
     color: hotpink;
-    cursor: pointer;
 }
