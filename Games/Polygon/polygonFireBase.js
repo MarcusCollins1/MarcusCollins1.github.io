@@ -67,14 +67,22 @@ if (currentUser?.username) {
     showLoggedInUser(currentUser.username);
 }
 
-loginButton.addEventListener("click", () => {
+function openAuthBox() {
     authMsg.textContent = "";
+    authUsername.value = "";
+    authPassword.value = "";
     authOverlay.classList.remove("hidden");
-});
+}
 
-closeAuthBtn.addEventListener("click", () => {
+function closeAuthBox() {
     authOverlay.classList.add("hidden");
-});
+    authMsg.textContent = "";
+    authUsername.value = "";
+    authPassword.value = "";
+}
+
+loginButton.addEventListener("click", openAuthBox);
+closeAuthBtn.addEventListener("click", closeAuthBox);
 
 logoutBtn.addEventListener("click", () => {
     clearLoggedInUser();
@@ -107,10 +115,7 @@ async function signup() {
     localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
     showLoggedInUser(username);
 
-    authOverlay.classList.add("hidden");
-    authUsername.value = "";
-    authPassword.value = "";
-    authMsg.textContent = "";
+    closeAuthBox();
 }
 
 async function login() {
@@ -141,11 +146,14 @@ async function login() {
     localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
     showLoggedInUser(username);
 
-    authOverlay.classList.add("hidden");
-    authUsername.value = "";
-    authPassword.value = "";
-    authMsg.textContent = "";
+    closeAuthBox();
 }
 
-signupBtn.addEventListener("click", signup);
-loginButton.addEventListener("click", login);
+signupBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await signup();
+});
+loginSubmitBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await login();
+});
