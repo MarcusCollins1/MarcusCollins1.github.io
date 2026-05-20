@@ -194,7 +194,7 @@ export async function addWordForToday(word) {
 }
 
 export async function getWordsForToday() {
-    if (!currentUser) return;
+    if (!currentUser) return [];
 
     // Example: 2026-05-20
     const today = new Date().toISOString().split("T")[0];
