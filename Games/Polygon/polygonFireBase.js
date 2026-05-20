@@ -81,7 +81,13 @@ function closeAuthBox() {
     authPassword.value = "";
 }
 
-loginButton.addEventListener("click", openAuthBox);
+loginButton.addEventListener("click", () => {
+    if (currentUser) {
+        openAuthBox();
+    } else {
+        console.log("Already logged in");
+    }
+});
 closeAuthBtn.addEventListener("click", closeAuthBox);
 
 logoutBtn.addEventListener("click", () => {
