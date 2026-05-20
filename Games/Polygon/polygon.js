@@ -1,3 +1,8 @@
+import {
+    addWordForToday,
+    getWordsForToday
+} from "./polygonFireBase";
+
 function dateKeyUTC(date = new Date()) {
     return date.toISOString().slice(0, 10);
 }
@@ -117,8 +122,11 @@ function containsCenter(word) {
     return word.includes(puzzle.center.toLowerCase());
 }
 
-function submitWord() {
-    const word = normalize(wordInput.value);
+function submitWord(word = null) {
+    const userWord = word !== null;
+    if (!userWord) {
+        word = normalize(wordInput.value);
+    }
     if (!word)  return;
     if (word.length < 4) {
         setMessage("Word must be at least 4 letters.", "bad");
@@ -150,6 +158,9 @@ function submitWord() {
     wordInput.value = "";
     if (!isPhone) {
         wordInput.focus();
+    }
+    if (userWord) {
+        addWordForToday(word);
     }
 }
 
@@ -190,6 +201,13 @@ function share() {
     });
 }
 
+async function loadUserWords() {
+    const words = getWordsForToday();
+    words.forEach((word) => {
+        submitWord(word);
+    });
+}
+
 backSpaceBtn.addEventListener("click", () => {
     wordInput.value = wordInput.value.slice(0, -1);
 });
@@ -209,3 +227,4 @@ wordInput.addEventListener("keypress", (e) => {
 buildBoard();
 renderFoundWords();
 updateStats();
+loadUserWords();
