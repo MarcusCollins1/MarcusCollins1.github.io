@@ -40,6 +40,7 @@ async function addDocument(collectionName, fields) {
 // ---------- login / signup UI ----------
 const loginButton = document.getElementById("login-button");
 const authOverlay = document.getElementById("authOverlay");
+const accountOverlay = document.getElementById("accountOverlay");
 const closeAuthBtn = document.getElementById("closeAuthBtn");
 const signupBtn = document.getElementById("signupBtn");
 const loginSubmitBtn = document.getElementById("loginSubmitBtn");
@@ -83,11 +84,19 @@ function closeAuthBox() {
     authPassword.value = "";
 }
 
+function openAccountBox() {
+    accountOverlay.classList.remove("hidden");
+}
+
+function closeAccountBox() {
+    accountOverlay.classList.add("hidden");
+}
+
 loginButton.addEventListener("click", () => {
     if (!currentUser) {
         openAuthBox();
     } else {
-        console.log("Already logged in");
+        openAccountBox();
     }
 });
 closeAuthBtn.addEventListener("click", closeAuthBox);
