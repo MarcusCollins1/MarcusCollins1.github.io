@@ -157,7 +157,7 @@ async function signup() {
     showLoggedInUser(username);
 
     closeAuthBox();
-    getFound().forEach((word) => {
+    window.getFound?.().forEach((word) => {
         addWordForToday(word);
     });
 }
@@ -191,7 +191,7 @@ async function login() {
     showLoggedInUser(username);
 
     closeAuthBox();
-    loadUserWords();
+    window.loadUserWords?.();
 }
 
 signupBtn.addEventListener("click", async (e) => {
