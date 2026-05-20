@@ -201,14 +201,14 @@ function share() {
     });
 }
 
-export async function loadUserWords() {
+async function loadUserWords() {
     const words = await getWordsForToday();
     words.forEach((word) => {
         submitWord(word);
     });
 }
 
-export function getFound() {
+function getFound() {
     return [...found];
 }
 
@@ -234,3 +234,6 @@ buildBoard();
 renderFoundWords();
 updateStats();
 loadUserWords();
+
+window.loadUserWords = loadUserWords;
+window.getFound = getFound;
