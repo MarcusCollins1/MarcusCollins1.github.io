@@ -35,6 +35,8 @@ const puzzle = getPuzzle(VALID_ENGLISH_WORDS);
 
 const isPhone = window.matchMedia("(max-width: 768px)").matches;
 
+const loginBtn = document.getElementById("login-button");
+
 const board = document.getElementById("board");
 const centerLetterBtn = document.getElementById("centerLetterBtn");
 const centerLetter = document.getElementById("centerLetter");
@@ -189,6 +191,12 @@ function share() {
         setMessage("Failed to copy results.", "bad");
     });
 }
+
+function login() {
+    console.log("Login...");
+}
+
+loginBtn.addEventListener("click", login)
 
 backSpaceBtn.addEventListener("click", () => {
     wordInput.value = wordInput.value.slice(0, -1);
