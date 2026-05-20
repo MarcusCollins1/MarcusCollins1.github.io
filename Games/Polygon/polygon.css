@@ -118,6 +118,11 @@ button {
     gap: 8px;
     flex-wrap: wrap;
 }
+.password-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
 .show-hide-password-button {
     display: inline-flex;
     vertical-align: middle;
