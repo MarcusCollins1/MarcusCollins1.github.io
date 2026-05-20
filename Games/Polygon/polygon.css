@@ -124,6 +124,15 @@ button {
     background: white;
     color: black;
 }
+.icon-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.icon-button img {
+    width: 18px;
+    height: 18px;
+}
 .user-bar {
     margin: 10px 0 0;
     display: flex;
