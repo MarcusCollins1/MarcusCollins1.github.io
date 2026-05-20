@@ -119,17 +119,22 @@ button {
     flex-wrap: wrap;
 }
 .show-hide-password-button {
+    display: inline-flex;
+    vertical-align: middle;
+    background: none;
+    border: none;
     font-weight: lighter;
     padding: 0px;
-    background: white;
     color: black;
 }
 .icon-button {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
 }
 .icon-button img {
+    display: block;
     width: 18px;
     height: 18px;
 }
