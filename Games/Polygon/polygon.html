@@ -30,13 +30,21 @@
     </div>
 
     <div id="userBar" class="user-bar hidden">
-        <span>Logged in as <strong id="currentUserName"></strong></span>
+        <span>Logged in as <strong id="currentUsernameAuth"></strong></span>
         <button id="logoutBtn" class="logout-button" type="button">Logout</button>
     </div>
 
     <div id="accountOverlay" class="account-overlay hidden">
         <div class="account-box">
             <h2>Account</h2>
+            <p>Username: <strong id="currentUsernameAccount"></strong></p>
+            <br>
+            <p>Password: <strong id="currentPasswordAccount"></strong></p>
+            <button id="showHideCurrentPasswordAccountButton"></button>
+
+            <div class="account-actions">
+                <button id="closeAccountBtn">Close</button>
+            </div>
         </div>
     </div>
 
