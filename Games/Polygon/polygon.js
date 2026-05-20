@@ -211,7 +211,9 @@ async function loadUserWords() {
 backSpaceBtn.addEventListener("click", () => {
     wordInput.value = wordInput.value.slice(0, -1);
 });
-submitBtn.addEventListener("click", submitWord);
+submitBtn.addEventListener("click", () => {
+    submitWord();
+});
 resetBtn.addEventListener("click", () => {
     resetPuzzle();
     revealBtn.textContent = "Show Answers";
