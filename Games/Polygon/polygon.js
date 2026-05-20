@@ -203,6 +203,7 @@ function share() {
 
 async function loadUserWords() {
     const words = await getWordsForToday();
+    console.log(words);
     words.forEach((word) => {
         submitWord(word);
     });
