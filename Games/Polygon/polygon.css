@@ -20,6 +20,17 @@ body {
     min-height: 100vh;
     padding: 24px;
 }
+button {
+    font: inherit;
+    font-weight: 700;
+    padding: 13px 16px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+}
+
 .return-button {
     position: absolute;
     top: 20px;
@@ -90,6 +101,15 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+.logout-button {
+    font-weight: normal;
+    padding: 3px;
+    border: 0;
+    border-radius: 12px;
+}
+.login-button:hover {
+    background: lightcoral;
 }
 .app {
     width: min(860px, 100%);
@@ -209,16 +229,6 @@ input {
 input:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.2);
-}
-button {
-    font: inherit;
-    font-weight: 700;
-    padding: 13px 16px;
-    border: 0;
-    border-radius: 12px;
-    background: var(--accent);
-    color: white;
-    cursor: pointer;
 }
 button.secondary {
     background: #e9edf7;
