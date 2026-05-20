@@ -52,7 +52,8 @@ const userBar = document.getElementById("userBar");
 const currentUsernameAuth = document.getElementById("currentUsernameAuth");
 const currentUsernameAccount = document.getElementById("currentUsernameAccount");
 const currentPasswordAccount = document.getElementById("currentPasswordAccount");
-const showHideCurrentPasswordAccountButton = document.getElementById("showHideCurrentPasswordAccountButton")
+const showHideCurrentPasswordAccountButton = document.getElementById("showHideCurrentPasswordAccountButton");
+const showHideCurrentPasswordAccountButtonImage = document.getElementById("showHideCurrentPasswordAccountButtonImage");
 const closeAccountBtn = document.getElementById("closeAccountBtn");
 
 let currentUser = JSON.parse(localStorage.getItem("polygonCurrentUser") || "null");
@@ -112,8 +113,10 @@ closeAccountBtn.addEventListener("click", closeAccountBox);
 showHideCurrentPasswordAccountButton.addEventListener("click", () => {
     if (currentPasswordAccount.textContent == "********") {
         currentPasswordAccount.textContent = currentUser.password;
+        showHideCurrentPasswordAccountButtonImage.src = "closed-eye-icon.png";
     } else {
         currentPasswordAccount.textContent = "********";
+        showHideCurrentPasswordAccountButtonImage.src = "eye-icon.png";
     }
 });
 
