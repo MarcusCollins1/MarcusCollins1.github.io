@@ -16,11 +16,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
 
-import {
-    loadUserWords,
-    getFound
-} from "./polygon.js";
-
 const firebaseConfig = {
     apiKey: "AIzaSyA_CXSZVz6meJgcJyktktWNmPtLmeFNXn0",
     authDomain: "marcus-collins-github-website.firebaseapp.com",
