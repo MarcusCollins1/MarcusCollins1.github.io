@@ -124,7 +124,7 @@ function containsCenter(word) {
 
 function submitWord(word = null) {
     const userWord = word !== null;
-    if (!userWord) {
+    if (userWord) {
         word = normalize(wordInput.value);
     }
     if (!word)  return;
