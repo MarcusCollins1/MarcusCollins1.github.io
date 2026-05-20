@@ -201,11 +201,15 @@ function share() {
     });
 }
 
-async function loadUserWords() {
+export async function loadUserWords() {
     const words = await getWordsForToday();
     words.forEach((word) => {
         submitWord(word);
     });
+}
+
+export function getFound() {
+    return [...found];
 }
 
 backSpaceBtn.addEventListener("click", () => {
