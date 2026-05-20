@@ -82,7 +82,7 @@ function closeAuthBox() {
 }
 
 loginButton.addEventListener("click", () => {
-    if (currentUser) {
+    if (!currentUser) {
         openAuthBox();
     } else {
         console.log("Already logged in");
