@@ -58,7 +58,7 @@ const closeAccountBtn = document.getElementById("closeAccountBtn");
 let currentUser = JSON.parse(localStorage.getItem("polygonCurrentUser") || "null");
 
 function showLoggedInUser(username) {
-    currentUserName.textContent = username;
+    currentUsernameAuth.textContent = username;
     userBar.classList.remove("hidden");
     loginButton.textContent = "Account";
 }
