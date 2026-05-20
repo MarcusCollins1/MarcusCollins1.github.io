@@ -1,227 +1,230 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import {
-    getFirestore,
-    collection,
-    query,
-    orderBy,
-    getDoc,
-    setDoc,
-    getDocs,
-    deleteDoc,
-    doc,
-    addDoc,
-    serverTimestamp,
-    arrayUnion,
-    updateDoc
-} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+    addWordForToday,
+    getWordsForToday
+} from "./polygonFireBase.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyA_CXSZVz6meJgcJyktktWNmPtLmeFNXn0",
-    authDomain: "marcus-collins-github-website.firebaseapp.com",
-    projectId: "marcus-collins-github-website",
-    storageBucket: "marcus-collins-github-website.firebasestorage.app",
-    messagingSenderId: "328004594228",
-    appId: "1:328004594228:web:47074e07c446a328bbf861",
-    measurementId: "G-6M9HBX4E3Z"
-};
+function dateKeyUTC(date = new Date()) {
+    return date.toISOString().slice(0, 10);
+}
+function hashStringToInt(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
+    }
+    return hash;
+}
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const analytics = getAnalytics(app);
+async function loadValidWords() {
+    const response = await fetch("English words.txt");
+    const text = await response.text();
+    const VALID_ENGLISH_WORDS = text.split("\n").map(w => w.trim().toLowerCase()).filter(w => w.length >= 4);
+    return VALID_ENGLISH_WORDS;
+}
+function getPuzzle(validWords) {
+    const candidates = validWords.filter(w => w.length >= 7 && new Set(w).size === 7);
+    const key = dateKeyUTC();
+    const seed = hashStringToInt(key);
+    const index = seed % candidates.length;
+    const puzzleWord = candidates[index];
+    const center = puzzleWord[seed % puzzleWord.length].toUpperCase();
+    const outer = [...new Set(puzzleWord)].filter(l => l.toUpperCase() !== center).map(l => l.toUpperCase());
+    const answers = validWords.filter(w => {
+        const letters = new Set(w.toUpperCase());
+        return w.length >= 4 && letters.has(center) && [...letters].every(l => outer.includes(l) || l === center);
+    });
+    return {center, outer, answers};
+}
 
-async function addDocument(collectionName, fields) {
-    await addDoc(collection(db, collectionName), {
-        ...fields,
-        createdAt: serverTimestamp()
+const VALID_ENGLISH_WORDS = await loadValidWords();
+const puzzle = getPuzzle(VALID_ENGLISH_WORDS);
+
+const isPhone = window.matchMedia("(max-width: 768px)").matches;
+
+const board = document.getElementById("board");
+const centerLetterBtn = document.getElementById("centerLetterBtn");
+const centerLetter = document.getElementById("centerLetter");
+const wordInput = document.getElementById("wordInput");
+const backSpaceBtn = document.getElementById("backSpaceBtn");
+const submitBtn = document.getElementById("submitBtn");
+const resetBtn = document.getElementById("resetBtn");
+const revealBtn = document.getElementById("revealBtn");
+const shareBtn = document.getElementById("shareBtn");
+const message = document.getElementById("message");
+const foundWords = document.getElementById("foundWords");
+const foundCount = document.getElementById("foundCount");
+const scoreEl = document.getElementById("score");
+const totalCount = document.getElementById("totalCount");
+
+let found = new Set();
+let showingAnswers = false;
+
+function normalize(word) {
+    return word.trim().toLowerCase();
+}
+
+function buildBoard() {
+    centerLetter.textContent = puzzle.center;
+    const positions = ["p0", "p1", "p2", "p3", "p4", "p5"];
+
+    puzzle.outer.forEach((letter, i) => {
+        const tile = document.createElement("div");
+        tile.className = `letter ${positions[i]}`;
+        tile.innerHTML = `<span>${letter}</span>`;
+        tile.addEventListener("click", () => {
+            wordInput.value += letter.toLowerCase();
+            if (!isPhone) {
+                wordInput.focus();
+            }
+        });
+        board.appendChild(tile);
+    });
+
+    centerLetterBtn.addEventListener("click", () => {
+        wordInput.value += puzzle.center.toLowerCase();
+        if (!isPhone) {
+            wordInput.focus();
+        }
+    });
+
+    totalCount.textContent = puzzle.answers.length;
+}
+
+function updateStats() {
+    foundCount.textContent = found.size;
+    scoreEl.textContent = [...found].reduce((sum, w) => sum + scoreForWord(w), 0);
+}
+
+function scoreForWord(word) {
+    return Math.max(1, word.length - 3);
+}
+
+function renderFoundWords() {
+    foundWords.innerHTML = "";
+    [...found].sort().forEach(word => {
+        const pill = document.createElement("span");
+        pill.className = "word";
+        pill.textContent = word;
+        foundWords.appendChild(pill);
     });
 }
 
-// ---------- login / signup UI ----------
-const loginButton = document.getElementById("login-button");
-const authOverlay = document.getElementById("authOverlay");
-const accountOverlay = document.getElementById("accountOverlay");
-const closeAuthBtn = document.getElementById("closeAuthBtn");
-const signupBtn = document.getElementById("signupBtn");
-const loginSubmitBtn = document.getElementById("loginSubmitBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const authMsg = document.getElementById("authMsg");
-const authUsername = document.getElementById("authUsername");
-const authPassword = document.getElementById("authPassword");
-const userBar = document.getElementById("userBar");
-const currentUserName = document.getElementById("currentUserName");
-
-let currentUser = JSON.parse(localStorage.getItem("polygonCurrentUser") || "null");
-
-function showLoggedInUser(username) {
-    currentUserName.textContent = username;
-    userBar.classList.remove("hidden");
-    loginButton.textContent = "Account";
+function setMessage(text, type = "") {
+    message.textContent = text;
+    message.className = `msg ${type}`;
 }
 
-function clearLoggedInUser() {
-    currentUser = null;
-    localStorage.removeItem("polygonCurrentUser");
-    userBar.classList.add("hidden");
-    loginButton.textContent = "Login / Sign up";
+function validLetters(word) {
+    const allowed = new Set([puzzle.center, ...puzzle.outer].map(l => l.toLowerCase()));
+    return [...word].every(ch => allowed.has(ch));
 }
 
-if (currentUser?.username) {
-    showLoggedInUser(currentUser.username);
+function containsCenter(word) {
+    return word.includes(puzzle.center.toLowerCase());
 }
 
-function openAuthBox() {
-    authMsg.textContent = "";
-    authUsername.value = "";
-    authPassword.value = "";
-    authOverlay.classList.remove("hidden");
+function submitWord(word = null) {
+    const userWord = word == null;
+    if (userWord) {
+        word = normalize(wordInput.value);
+    }
+    if (!word)  return;
+    if (word.length < 4) {
+        setMessage("Word must be at least 4 letters.", "bad");
+        return;
+    }
+    if (!containsCenter(word)) {
+        setMessage(`Word must include "${puzzle.center.toLowerCase()}".`, "bad");
+        return;
+    }
+    if (!validLetters(word)) {
+        setMessage("Use only the polygon letters.", "bad");
+        return;
+    }
+
+    const answerSet = new Set(puzzle.answers.map(normalize));
+    if (!answerSet.has(word)) {
+        setMessage("Not in the answer list for this puzzle.", "bad");
+        return;
+    }
+    if (found.has(word)) {
+        setMessage("Already found.", "bad");
+        return;
+    }
+
+    found.add(word);
+    renderFoundWords();
+    updateStats();
+    setMessage(`Nice! Added "${word}".`, "good");
+    wordInput.value = "";
+    if (!isPhone) {
+        wordInput.focus();
+    }
+    if (userWord) {
+        addWordForToday(word);
+    }
 }
 
-function closeAuthBox() {
-    authOverlay.classList.add("hidden");
-    authMsg.textContent = "";
-    authUsername.value = "";
-    authPassword.value = "";
+function resetPuzzle() {
+    found = new Set();
+    showingAnswers = false;
+    renderFoundWords();
+    updateStats();
+    setMessage("Puzzle reset.");
+    wordInput.value = "";
 }
 
-function openAccountBox() {
-    accountOverlay.classList.remove("hidden");
-}
-
-function closeAccountBox() {
-    accountOverlay.classList.add("hidden");
-}
-
-loginButton.addEventListener("click", () => {
-    if (!currentUser) {
-        openAuthBox();
+function revealAnswers() {
+    if (!showingAnswers) {
+        if (prompt("Enter password to reaveal answers:") !== "polygon") {
+            return;
+        }
+        found = new Set(puzzle.answers.map(normalize));
+        showingAnswers = true;
+        renderFoundWords();
+        updateStats();
+        setMessage("All answers revealed.")
+        revealBtn.textContent = "Hide Answers";
     } else {
-        openAccountBox();
+        resetPuzzle();
+        revealBtn.textContent = "Show Answers";
     }
-});
-closeAuthBtn.addEventListener("click", closeAuthBox);
-
-logoutBtn.addEventListener("click", () => {
-    clearLoggedInUser();
-});
-
-async function signup() {
-    const username = authUsername.value.trim();
-    const password = authPassword.value;
-
-    if (!username || !password) {
-        authMsg.textContent = "Enter a username and password.";
-        return;
-    }
-
-    const userRef = doc(db, "users", username);
-    const userSnap = await getDoc(userRef);
-
-    if (userSnap.exists()) {
-        authMsg.textContent = "That username already exists.";
-        return;
-    }
-
-    await setDoc(userRef, {
-        username,
-        password,
-        createdAt: serverTimestamp()
-    });
-
-    currentUser = { username };
-    localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
-    showLoggedInUser(username);
-
-    closeAuthBox();
 }
 
-async function login() {
-    const username = authUsername.value.trim();
-    const password = authPassword.value;
-
-    if (!username || !password) {
-        authMsg.textContent = "Enter a username and password.";
-        return;
-    }
-
-    const userRef = doc(db, "users", username);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-        authMsg.textContent = "User not found.";
-        return;
-    }
-
-    const data = userSnap.data();
-
-    if (data.password !== password) {
-        authMsg.textContent = "Incorrect password.";
-        return;
-    }
-
-    currentUser = { username };
-    localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
-    showLoggedInUser(username);
-
-    closeAuthBox();
-}
-
-signupBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await signup();
-});
-loginSubmitBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await login();
-});
-
-
-export async function addWordForToday(word) {
-    if (!currentUser) return;
-
-    // Example: 2026-05-20
-    const today = new Date().toISOString().split("T")[0];
-
-    // users/{username}/days/{date}
-    const dayRef = doc(
-        db,
-        "users",
-        currentUser.username,
-        "days",
-        today
-    );
-
-    // Create/update document
-    await setDoc(dayRef, {
-        updatedAt: serverTimestamp()
-    }, { merge: true });
-
-    // Add word to array
-    await updateDoc(dayRef, {
-        words: arrayUnion(word)
+function share() {
+    const date = new Date();
+    const maxScore = puzzle.answers.reduce((sum, w) => sum + scoreForWord(w), 0);
+    const string = `Polygon Puzzle - ${date.toDateString()}\nFound ${found.size}/${puzzle.answers.length}\nScore: ${scoreEl.textContent}/${maxScore}\nhttps://marcuscollins1.github.io/Games/Polygon/polygon.html`;
+    navigator.clipboard.writeText(string).then(() => {
+        setMessage("Results copied to clipboard!", "good");
+    }).catch(() => {
+        setMessage("Failed to copy results.", "bad");
     });
 }
 
-export async function getWordsForToday() {
-    if (!currentUser) return [];
-
-    // Example: 2026-05-20
-    const today = new Date().toISOString().split("T")[0];
-
-    // users/{username}/days/{date}
-    const dayRef = doc(
-        db,
-        "users",
-        currentUser.username,
-        "days",
-        today
-    );
-
-    const snap = await getDoc(dayRef);
-
-    if (!snap.exists()) return [];
-
-    const data = snap.data();
-
-    return data.words || [];
+async function loadUserWords() {
+    const words = await getWordsForToday();
+    words.forEach((word) => {
+        submitWord(word);
+    });
 }
+
+backSpaceBtn.addEventListener("click", () => {
+    wordInput.value = wordInput.value.slice(0, -1);
+});
+submitBtn.addEventListener("click", submitWord);
+resetBtn.addEventListener("click", () => {
+    resetPuzzle();
+    revealBtn.textContent = "Show Answers";
+});
+revealBtn.addEventListener("click", revealAnswers);
+shareBtn.addEventListener("click", share)
+wordInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+        submitWord();
+    }
+});
+
+buildBoard();
+renderFoundWords();
+updateStats();
+loadUserWords();
