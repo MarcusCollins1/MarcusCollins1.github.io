@@ -10,7 +10,9 @@ import {
     deleteDoc,
     doc,
     addDoc,
-    serverTimestamp
+    serverTimestamp,
+    arrayUnion,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
 
@@ -163,3 +165,54 @@ loginSubmitBtn.addEventListener("click", async (e) => {
     e.preventDefault();
     await login();
 });
+
+
+export async function addWordForToday(word) {
+    if (!currentUser) return;
+
+    // Example: 2026-05-20
+    const today = new Date().toISOString().split("T")[0];
+
+    // users/{username}/days/{date}
+    const dayRef = doc(
+        db,
+        "users",
+        currentUser.username,
+        "days",
+        today
+    );
+
+    // Create/update document
+    await setDoc(dayRef, {
+        updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    // Add word to array
+    await updateDoc(dayRef, {
+        words: arrayUnion(word)
+    });
+}
+
+export async function getWordsForToday() {
+    if (!currentUser) return;
+
+    // Example: 2026-05-20
+    const today = new Date().toISOString().split("T")[0];
+
+    // users/{username}/days/{date}
+    const dayRef = doc(
+        db,
+        "users",
+        currentUser.username,
+        "days",
+        today
+    );
+
+    const snap = await getDoc(dayRef);
+
+    if (!snap.exists()) return [];
+
+    const data = snap.data();
+
+    return data.words || [];
+}
