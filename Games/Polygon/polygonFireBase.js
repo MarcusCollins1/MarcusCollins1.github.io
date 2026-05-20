@@ -4,6 +4,8 @@ import {
     collection,
     query,
     orderBy,
+    getDoc,
+    setDoc,
     getDocs,
     deleteDoc,
     doc,
@@ -26,6 +28,124 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const analytics = getAnalytics(app);
 
-async function addDocument(collection, fields) {
-    await addDoc(collection(db, collection), fields);
+async function addDocument(collectionName, fields) {
+    await addDoc(collection(db, collectionName), {
+        ...fields,
+        createdAt: serverTimestamp()
+    });
 }
+
+// ---------- login / signup UI ----------
+const loginButton = document.getElementById("login-button");
+const authOverlay = document.getElementById("authOverlay");
+const closeAuthBtn = document.getElementById("closeAuthBtn");
+const signupBtn = document.getElementById("signupBtn");
+const loginSubmitBtn = document.getElementById("loginSubmitBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const authMsg = document.getElementById("authMsg");
+const authUsername = document.getElementById("authUsername");
+const authPassword = document.getElementById("authPassword");
+const userBar = document.getElementById("userBar");
+const currentUserName = document.getElementById("currentUserName");
+
+let currentUser = JSON.parse(localStorage.getItem("polygonCurrentUser") || "null");
+
+function showLoggedInUser(username) {
+    currentUserName.textContent = username;
+    userBar.classList.remove("hidden");
+    loginButton.textContent = "Account";
+}
+
+function clearLoggedInUser() {
+    currentUser = null;
+    localStorage.removeItem("polygonCurrentUser");
+    userBar.classList.add("hidden");
+    loginButton.textContent = "Login / Sign up";
+}
+
+if (currentUser?.username) {
+    showLoggedInUser(currentUser.username);
+}
+
+loginButton.addEventListener("click", () => {
+    authMsg.textContent = "";
+    authOverlay.classList.remove("hidden");
+});
+
+closeAuthBtn.addEventListener("click", () => {
+    authOverlay.classList.add("hidden");
+});
+
+logoutBtn.addEventListener("click", () => {
+    clearLoggedInUser();
+});
+
+async function signup() {
+    const username = authUsername.value.trim().toLowerCase();
+    const password = authPassword.value;
+
+    if (!username || !password) {
+        authMsg.textContent = "Enter a username and password.";
+        return;
+    }
+
+    const userRef = doc(db, "users", username);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+        authMsg.textContent = "That username already exists.";
+        return;
+    }
+
+    await setDoc(userRef, {
+        username,
+        password,
+        createdAt: serverTimestamp()
+    });
+
+    currentUser = { username };
+    localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
+    showLoggedInUser(username);
+
+    authOverlay.classList.add("hidden");
+    authUsername.value = "";
+    authPassword.value = "";
+    authMsg.textContent = "";
+}
+
+async function login() {
+    const username = authUsername.value.trim().toLowerCase();
+    const password = authPassword.value;
+
+    if (!username || !password) {
+        authMsg.textContent = "Enter a username and password.";
+        return;
+    }
+
+    const userRef = doc(db, "users", username);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+        authMsg.textContent = "User not found.";
+        return;
+    }
+
+    const data = userSnap.data();
+
+    if (data.password !== password) {
+        authMsg.textContent = "Incorrect password.";
+        return;
+    }
+
+    currentUser = { username };
+    localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
+    showLoggedInUser(username);
+
+    authOverlay.classList.add("hidden");
+    authUsername.value = "";
+    authPassword.value = "";
+    authMsg.textContent = "";
+}
+
+signupBtn.addEventListener("click", signup);
+loginButton.addEventListener("click", login);
