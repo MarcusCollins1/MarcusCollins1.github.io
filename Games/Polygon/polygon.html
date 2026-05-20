@@ -8,7 +8,32 @@
 </head>
 <body>
     <button id="return-button" class="return-button" onclick="location.href='../../games.html'">← Return</button>
-    <button id="login-button" class="login-button">Login</button>
+    
+    <button id="login-button" class="login-button">Login / Sign Up</button>
+
+    <div id="authOverlay" class="auth-overlay hidden">
+        <div class="auth-box">
+            <h2>Account</h2>
+
+            <input id="authUsername" type="text" placeholder="Username" autocomplete="username" />
+            <input id="authPassword" type="password" placeholder="Password" autocomplete="current-password" />
+
+            <div class="auth-actions">
+                <button id="signupBtn">Sign Up</button>
+                <button id="loginSubmitBtn">Login In</button>
+                <button id="closeAuthBtn" class="secondary" type="button">Cancel</button>
+            </div>
+
+            <p id="authMsg"></p>
+        </div>
+    </div>
+
+    <div id="userBar" class="user-bar hidden">
+        <span>Logged in as <strong id="currentUserName"></strong></span>
+        <button id="logoutBtn" class="secondary" type="button">Logout</button>
+    </div>
+
+
     <div class="app">
         <section class="card">
             <h1>Polygon Word Puzzle</h1>
