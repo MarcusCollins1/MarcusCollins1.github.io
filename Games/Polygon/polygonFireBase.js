@@ -49,7 +49,11 @@ const authMsg = document.getElementById("authMsg");
 const authUsername = document.getElementById("authUsername");
 const authPassword = document.getElementById("authPassword");
 const userBar = document.getElementById("userBar");
-const currentUserName = document.getElementById("currentUserName");
+const currentUsernameAuth = document.getElementById("currentUsernameAuth");
+const currentUsernameAccount = document.getElementById("currentUsernameAccount");
+const currentPasswordAccount = document.getElementById("currentPasswordAccount");
+const showHideCurrentPasswordAccountButton = document.getElementById("showHideCurrentPasswordAccountButton")
+const closeAccountBtn = document.getElementById("closeAccountBtn");
 
 let currentUser = JSON.parse(localStorage.getItem("polygonCurrentUser") || "null");
 
@@ -85,11 +89,15 @@ function closeAuthBox() {
 }
 
 function openAccountBox() {
+    currentUsernameAccount.textContent = currentUser.username;
+    currentPasswordAccount.textContent = "********";
     accountOverlay.classList.remove("hidden");
 }
 
 function closeAccountBox() {
     accountOverlay.classList.add("hidden");
+    currentUsernameAccount.textContent = "";
+    currentPasswordAccount.textContent = "";
 }
 
 loginButton.addEventListener("click", () => {
@@ -100,6 +108,14 @@ loginButton.addEventListener("click", () => {
     }
 });
 closeAuthBtn.addEventListener("click", closeAuthBox);
+closeAccountBtn.addEventListener("click", closeAccountBox);
+showHideCurrentPasswordAccountButton.addEventListener("click", () => {
+    if (currentPasswordAccount.textContent == "********") {
+        currentPasswordAccount.textContent = currentUser.password;
+    } else {
+        currentPasswordAccount.textContent = "********";
+    }
+});
 
 logoutBtn.addEventListener("click", () => {
     clearLoggedInUser();
@@ -128,7 +144,7 @@ async function signup() {
         createdAt: serverTimestamp()
     });
 
-    currentUser = { username };
+    currentUser = { username, password };
     localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
     showLoggedInUser(username);
 
@@ -159,7 +175,7 @@ async function login() {
         return;
     }
 
-    currentUser = { username };
+    currentUser = { username, password };
     localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
     showLoggedInUser(username);
 
