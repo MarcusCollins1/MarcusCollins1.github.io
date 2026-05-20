@@ -1,7 +1,7 @@
 import {
     addWordForToday,
     getWordsForToday
-} from "./polygonFireBase";
+} from "./polygonFireBase.js";
 
 function dateKeyUTC(date = new Date()) {
     return date.toISOString().slice(0, 10);
