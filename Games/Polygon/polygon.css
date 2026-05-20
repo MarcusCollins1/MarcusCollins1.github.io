@@ -112,6 +112,11 @@ button {
     display: grid;
     gap: 10px;
 }
+.account-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
 .user-bar {
     margin: 10px 0 0;
     display: flex;
