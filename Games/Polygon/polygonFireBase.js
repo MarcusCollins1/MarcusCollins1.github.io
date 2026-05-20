@@ -81,7 +81,7 @@ logoutBtn.addEventListener("click", () => {
 });
 
 async function signup() {
-    const username = authUsername.value.trim().toLowerCase();
+    const username = authUsername.value.trim();
     const password = authPassword.value;
 
     if (!username || !password) {
@@ -114,7 +114,7 @@ async function signup() {
 }
 
 async function login() {
-    const username = authUsername.value.trim().toLowerCase();
+    const username = authUsername.value.trim();
     const password = authPassword.value;
 
     if (!username || !password) {
