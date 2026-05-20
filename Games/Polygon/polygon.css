@@ -20,9 +20,6 @@ body {
     min-height: 100vh;
     padding: 24px;
 }
-.hidden {
-    display: none;
-}
 .return-button {
     position: absolute;
     top: 20px;
@@ -286,4 +283,9 @@ button.secondary {
         transform: scale(0.94);
         transform-origin: center;
     }
+}
+
+
+.hidden {
+    display: none;
 }
