@@ -42,6 +42,7 @@ const loginButton = document.getElementById("login-button");
 const authOverlay = document.getElementById("authOverlay");
 const accountOverlay = document.getElementById("accountOverlay");
 const leaderboardOverlay = document.getElementById("leaderboardOverlay");
+const leaderboardBox = document.getElementById("leaderboardBox");
 const closeAuthBtn = document.getElementById("closeAuthBtn");
 const signupBtn = document.getElementById("signupBtn");
 const loginSubmitBtn = document.getElementById("loginSubmitBtn");
@@ -140,7 +141,20 @@ async function loadLeaderboard() {
 
     usersWithScores.sort((a, b) => b.score - a.score);
 
-    console.log(usersWithScores);
+    leaderboardBox.innerHTML = "";
+
+    usersWithScores.forEach((user, index) => {
+        const row = document.createElement("div");
+
+        row.className = "leaderboard-row";
+
+        row.innerHTML = `
+            <span>#${index+1}</span>
+            <span>${user.name || user.id}</span>
+            <span>${user.score}</span>
+        `;
+        leaderboardBox.appendChild(row);
+    });
     
 }
 
