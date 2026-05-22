@@ -146,6 +146,14 @@ button {
     justify-content: center;
     z-index: 1000;
 }
+.leaderboard-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: min(90vw, 360px);
+    display: grid;
+    gap: 10px;
+}
 .leaderboard-actions {
     display: flex;
     gap: 8px;
