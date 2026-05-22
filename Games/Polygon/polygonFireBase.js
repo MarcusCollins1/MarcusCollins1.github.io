@@ -41,6 +41,7 @@ async function addDocument(collectionName, fields) {
 const loginButton = document.getElementById("login-button");
 const authOverlay = document.getElementById("authOverlay");
 const accountOverlay = document.getElementById("accountOverlay");
+const leaderboardOverlay = document.getElementById("leaderboardOverlay");
 const closeAuthBtn = document.getElementById("closeAuthBtn");
 const signupBtn = document.getElementById("signupBtn");
 const loginSubmitBtn = document.getElementById("loginSubmitBtn");
@@ -55,6 +56,8 @@ const currentPasswordAccount = document.getElementById("currentPasswordAccount")
 const showHideCurrentPasswordAccountButton = document.getElementById("showHideCurrentPasswordAccountButton");
 const showHideCurrentPasswordAccountButtonImage = document.getElementById("showHideCurrentPasswordAccountButtonImage");
 const closeAccountBtn = document.getElementById("closeAccountBtn");
+const leaderboardBtn = document.getElementById("leaderboardBtn");
+const closeLeaderboardBtn = document.getElementById("closeLeaderboardBtn")
 
 let currentUser = JSON.parse(localStorage.getItem("polygonCurrentUser") || "null");
 
@@ -101,6 +104,14 @@ function closeAccountBox() {
     currentPasswordAccount.textContent = "";
 }
 
+function openLeaderboardBox() {
+    leaderboardOverlay.classList.remove("hidden");
+}
+
+function closeLeaderboardBox() {
+    leaderboardOverlay.classList.add("hidden");
+}
+
 loginButton.addEventListener("click", () => {
     if (!currentUser) {
         openAuthBox();
@@ -119,6 +130,8 @@ showHideCurrentPasswordAccountButton.addEventListener("click", () => {
         showHideCurrentPasswordAccountButtonImage.src = "eye-icon.png";
     }
 });
+leaderboardBtn.addEventListener("click", openLeaderboardBox);
+closeLeaderboardBtn.addEventListener("click", closeLeaderboardBox);
 
 logoutBtn.addEventListener("click", () => {
     clearLoggedInUser();
