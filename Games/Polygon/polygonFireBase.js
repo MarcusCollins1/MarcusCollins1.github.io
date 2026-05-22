@@ -114,7 +114,7 @@ async function getScoreFromDay(user, dayStr) {
             ...doc.data()
         });
     });
-    const words = days[dayStr]?.words || [];
+    const words = days.find(day => day.id == dayStr).words || [];
     let score = 0;
     words.forEach((word) => {
         score += Math.max(0, word.length - 3);
