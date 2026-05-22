@@ -133,7 +133,7 @@ async function loadLeaderboard() {
         users.push({
             id: doc.id,
             ...userData,
-            score: await getScoreFromDay(userData, dayStr)
+            score: getScoreFromDay(userData, dayStr)
         });
     });
 
