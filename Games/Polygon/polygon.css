@@ -184,6 +184,11 @@ button {
     padding: 8px;
     border-bottom: 1px solid #ccc;
 }
+.current-user-row {
+    background: rgba(255, 215, 0, 0.2);
+    border: 2px solid gold;
+    font-weight: bold;
+}
 .leaderboard-actions {
     display: flex;
     gap: 8px;
