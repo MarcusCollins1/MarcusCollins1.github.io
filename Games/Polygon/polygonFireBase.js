@@ -121,7 +121,7 @@ async function loadLeaderboard() {
 
     querySnapshot.forEach((doc) => {
         const userData = doc.data();
-        userspush({
+        users.push({
             id: doc.id,
             ...userData,
             score: getScoreFromDay(userData, dayStr)
