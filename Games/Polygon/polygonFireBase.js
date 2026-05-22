@@ -105,7 +105,16 @@ function closeAccountBox() {
 }
 
 function getScoreFromDay(user, dayStr) {
-    const words = user.days?.[dayStr]?.words || [];
+    const userRef = collection(db, "users", user.username, "days")
+    const snapshot = await getDocs(userRef);
+    const days = [];
+    snapshot.forEach((doc) => {
+        days.push({
+            id: doc.id,
+            ...doc.data()
+        });
+    });
+    const words = days[dayStr]?.words || [];
     let score = 0;
     words.forEach((word) => {
         score += Math.max(0, word.length - 3);
