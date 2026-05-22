@@ -2,8 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/fireba
 import {
     getFirestore,
     collection,
-    query,
-    orderBy,
     getDoc,
     setDoc,
     getDocs,
@@ -37,6 +35,71 @@ async function addDocument(collectionName, fields) {
     });
 }
 
+function getLocalDayStr(date = new Date()) {
+    return new Intl.DateTimeFormat("en-CA").format(date);
+}
+
+function scoreFromWords(words = []) {
+    let score = 0;
+
+    for (const word of words) {
+        score += Math.max(0, word.length - 3);
+    }
+
+    return score;
+}
+
+async function getUserDays(user) {
+    const username = user?.username || user?.id;
+    if (!username) return [];
+
+    const daysRef = collection(db, "users", username, "days");
+    const snapshot = await getDocs(daysRef);
+
+    return snapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data()
+    }));
+}
+
+async function getScoreFromDay(user, dayStr) {
+    const days = await getUserDays(user);
+    const day = days.find((entry) => entry.id === dayStr);
+    const words = day?.words || [];
+    return scoreFromWords(words);
+}
+
+async function getAllTimeScore(user) {
+    const days = await getUserDays(user);
+    return days.reduce((total, day) => total + scoreFromWords(day.words || []), 0);
+}
+
+async function getAverageScore(user) {
+    const days = await getUserDays(user);
+
+    if (days.length === 0) return 0;
+
+    const total = days.reduce((sum, day) => {
+        return sum + scoreFromWords(day.words || []);
+    }, 0);
+
+    return total / days.length;
+}
+
+async function getBestScore(user) {
+    const days = await getUserDays(user);
+
+    if (days.length === 0) return 0;
+
+    let best = 0;
+
+    for (const day of days) {
+        best = Math.max(best, scoreFromWords(day.words || []));
+    }
+
+    return best;
+}
+
 // ---------- login / signup UI ----------
 const loginButton = document.getElementById("login-button");
 const authOverlay = document.getElementById("authOverlay");
@@ -59,21 +122,25 @@ const showHideCurrentPasswordAccountButtonImage = document.getElementById("showH
 const closeAccountBtn = document.getElementById("closeAccountBtn");
 const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 const leaderboardBtn = document.getElementById("leaderboardBtn");
-const closeLeaderboardBtn = document.getElementById("closeLeaderboardBtn")
+const closeLeaderboardBtn = document.getElementById("closeLeaderboardBtn");
+const leaderboardTabs = document.querySelectorAll(".leaderboard-tab");
 
 let currentUser = JSON.parse(localStorage.getItem("polygonCurrentUser") || "null");
+let usersWithScores = [];
+let currentLeaderboardView = "today";
 
 function showLoggedInUser(username) {
-    currentUsernameAuth.textContent = username;
-    userBar.classList.remove("hidden");
-    loginButton.textContent = "Account";
+    if (currentUsernameAuth) currentUsernameAuth.textContent = username;
+    if (userBar) userBar.classList.remove("hidden");
+    if (loginButton) loginButton.textContent = "Account";
 }
 
 function clearLoggedInUser() {
     currentUser = null;
     localStorage.removeItem("polygonCurrentUser");
-    userBar.classList.add("hidden");
-    loginButton.textContent = "Login / Sign up";
+
+    if (userBar) userBar.classList.add("hidden");
+    if (loginButton) loginButton.textContent = "Login / Sign up";
 }
 
 if (currentUser?.username) {
@@ -81,127 +148,208 @@ if (currentUser?.username) {
 }
 
 function openAuthBox() {
-    authMsg.textContent = "";
-    authUsername.value = "";
-    authPassword.value = "";
-    authOverlay.classList.remove("hidden");
+    if (authMsg) authMsg.textContent = "";
+    if (authUsername) authUsername.value = "";
+    if (authPassword) authPassword.value = "";
+
+    if (authOverlay) authOverlay.classList.remove("hidden");
 }
 
 function closeAuthBox() {
-    authOverlay.classList.add("hidden");
-    authMsg.textContent = "";
-    authUsername.value = "";
-    authPassword.value = "";
+    if (authOverlay) authOverlay.classList.add("hidden");
+    if (authMsg) authMsg.textContent = "";
+    if (authUsername) authUsername.value = "";
+    if (authPassword) authPassword.value = "";
 }
 
 function openAccountBox() {
-    currentUsernameAccount.textContent = currentUser.username;
-    currentPasswordAccount.textContent = "********";
-    accountOverlay.classList.remove("hidden");
-}
+    if (!currentUser) return;
 
-async function deleteAccount() {
-    const result = confirm("Are you sure you want to delete your account?");
+    if (currentUsernameAccount) {
+        currentUsernameAccount.textContent = currentUser.username;
+    }
 
-    if (!result) return;
+    if (currentPasswordAccount) {
+        currentPasswordAccount.textContent = "********";
+    }
 
-    await deleteDoc(doc(db, "users", currentUser.username));
-    clearLoggedInUser();
+    if (accountOverlay) {
+        accountOverlay.classList.remove("hidden");
+    }
 }
 
 function closeAccountBox() {
-    accountOverlay.classList.add("hidden");
-    currentUsernameAccount.textContent = "";
-    currentPasswordAccount.textContent = "";
+    if (accountOverlay) {
+        accountOverlay.classList.add("hidden");
+    }
+
+    if (currentUsernameAccount) {
+        currentUsernameAccount.textContent = "";
+    }
+
+    if (currentPasswordAccount) {
+        currentPasswordAccount.textContent = "";
+    }
 }
 
-async function getScoreFromDay(user, dayStr) {
-    const userRef = collection(db, "users", user.username, "days")
-    const snapshot = await getDocs(userRef);
-    const days = [];
-    snapshot.docs.forEach((doc) => {
-        days.push({
-            id: doc.id,
-            ...doc.data()
-        });
-    });
-    const words = days.find(day => day.id == dayStr).words || [];
-    let score = 0;
-    words.forEach((word) => {
-        score += Math.max(0, word.length - 3);
-    });
-    return score;
+async function deleteAccount() {
+    if (!currentUser?.username) return;
+
+    const confirmed = confirm("Are you sure you want to delete your account?");
+
+    if (!confirmed) return;
+
+    await deleteDoc(doc(db, "users", currentUser.username));
+
+    clearLoggedInUser();
+    closeAccountBox();
 }
 
-async function loadLeaderboard() {
+async function loadLeaderboard(view = currentLeaderboardView) {
     const querySnapshot = await getDocs(collection(db, "users"));
-    const dayStr = new Date().toISOString().split("T")[0];;
+    const dayStr = getLocalDayStr();
 
     const userPromises = querySnapshot.docs.map(async (docSnap) => {
         const userData = docSnap.data();
 
+        const [today, allTime, average, best] = await Promise.all([
+            getScoreFromDay(userData, dayStr),
+            getAllTimeScore(userData),
+            getAverageScore(userData),
+            getBestScore(userData)
+        ]);
+
         return {
             id: docSnap.id,
             ...userData,
-            score: await getScoreFromDay(userData, dayStr),
+            today,
+            allTime,
+            average,
+            best
         };
     });
 
-    const usersWithScores = await Promise.all(userPromises);
+    usersWithScores = await Promise.all(userPromises);
 
-    usersWithScores.sort((a, b) => b.score - a.score);
+    currentLeaderboardView = view;
 
-    leaderboardBoxLeaderboard.innerHTML = "";
+    renderLeaderboard(view);
+    setActiveTab(view);
+}
 
-    usersWithScores.forEach((user, index) => {
-        const row = document.createElement("div");
+function renderLeaderboard(view) {
+    if (!leaderboardBoxLeaderboard) return;
 
-        row.className = "leaderboard-row";
+    const sorted = [...usersWithScores].sort((a, b) => {
+        if (view === "today") return b.today - a.today;
+        if (view === "allTime") return b.allTime - a.allTime;
+        if (view === "average") return b.average - a.average;
+        if (view === "best") return b.best - a.best;
 
-        row.innerHTML = `
-            <span>#${index+1}</span>
-            <span>${user.name || user.id}</span>
-            <span>${user.score}</span>
-        `;
-        leaderboardBoxLeaderboard.appendChild(row);
+        return 0;
     });
-    
+
+    leaderboardBoxLeaderboard.innerHTML = sorted.map((user, index) => {
+        let value = 0;
+
+        if (view === "today") value = user.today;
+        if (view === "allTime") value = user.allTime;
+        if (view === "average") value = user.average.toFixed(2);
+        if (view === "best") value = user.best;
+
+        return `
+            <div class="leaderboard-row">
+                <span>#${index + 1} ${user.name || user.username || user.id}</span>
+                <span>${value}</span>
+            </div>
+        `;
+    }).join("");
+}
+
+function setActiveTab(view) {
+    leaderboardTabs.forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.view === view);
+    });
 }
 
 async function openLeaderboardBox() {
-    await loadLeaderboard();
-    leaderboardOverlay.classList.remove("hidden");
+    await loadLeaderboard(currentLeaderboardView);
+
+    if (leaderboardOverlay) {
+        leaderboardOverlay.classList.remove("hidden");
+    }
 }
 
 function closeLeaderboardBox() {
-    leaderboardOverlay.classList.add("hidden");
+    if (leaderboardOverlay) {
+        leaderboardOverlay.classList.add("hidden");
+    }
 }
 
-loginButton.addEventListener("click", () => {
-    if (!currentUser) {
-        openAuthBox();
-    } else {
-        openAccountBox();
-    }
-});
-closeAuthBtn.addEventListener("click", closeAuthBox);
-closeAccountBtn.addEventListener("click", closeAccountBox);
-deleteAccountBtn.addEventListener("click", deleteAccount);
-showHideCurrentPasswordAccountButton.addEventListener("click", () => {
-    if (currentPasswordAccount.textContent == "********") {
-        currentPasswordAccount.textContent = currentUser.password;
-        showHideCurrentPasswordAccountButtonImage.src = "closed-eye-icon.png";
-    } else {
-        currentPasswordAccount.textContent = "********";
-        showHideCurrentPasswordAccountButtonImage.src = "eye-icon.png";
-    }
-});
-leaderboardBtn.addEventListener("click", openLeaderboardBox);
-closeLeaderboardBtn.addEventListener("click", closeLeaderboardBox);
+if (loginButton) {
+    loginButton.addEventListener("click", () => {
+        if (!currentUser) {
+            openAuthBox();
+        } else {
+            openAccountBox();
+        }
+    });
+}
 
-logoutBtn.addEventListener("click", () => {
-    clearLoggedInUser();
+if (closeAuthBtn) {
+    closeAuthBtn.addEventListener("click", closeAuthBox);
+}
+
+if (closeAccountBtn) {
+    closeAccountBtn.addEventListener("click", closeAccountBox);
+}
+
+if (deleteAccountBtn) {
+    deleteAccountBtn.addEventListener("click", deleteAccount);
+}
+
+if (leaderboardBtn) {
+    leaderboardBtn.addEventListener("click", openLeaderboardBox);
+}
+
+if (closeLeaderboardBtn) {
+    closeLeaderboardBtn.addEventListener("click", closeLeaderboardBox);
+}
+
+if (showHideCurrentPasswordAccountButton) {
+    showHideCurrentPasswordAccountButton.addEventListener("click", () => {
+        if (
+            !currentPasswordAccount ||
+            !showHideCurrentPasswordAccountButtonImage ||
+            !currentUser
+        ) {
+            return;
+        }
+
+        if (currentPasswordAccount.textContent === "********") {
+            currentPasswordAccount.textContent = currentUser.password;
+            showHideCurrentPasswordAccountButtonImage.src = "closed-eye-icon.png";
+        } else {
+            currentPasswordAccount.textContent = "********";
+            showHideCurrentPasswordAccountButtonImage.src = "eye-icon.png";
+        }
+    });
+}
+
+leaderboardTabs.forEach((btn) => {
+    btn.addEventListener("click", () => {
+        currentLeaderboardView = btn.dataset.view || "today";
+
+        renderLeaderboard(currentLeaderboardView);
+        setActiveTab(currentLeaderboardView);
+    });
 });
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        clearLoggedInUser();
+    });
+}
 
 async function signup() {
     const username = authUsername.value.trim();
@@ -227,10 +375,16 @@ async function signup() {
     });
 
     currentUser = { username, password };
-    localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
+
+    localStorage.setItem(
+        "polygonCurrentUser",
+        JSON.stringify(currentUser)
+    );
+
     showLoggedInUser(username);
 
     closeAuthBox();
+
     window.getFound?.().forEach((word) => {
         addWordForToday(word);
     });
@@ -261,30 +415,38 @@ async function login() {
     }
 
     currentUser = { username, password };
-    localStorage.setItem("polygonCurrentUser", JSON.stringify(currentUser));
+
+    localStorage.setItem(
+        "polygonCurrentUser",
+        JSON.stringify(currentUser)
+    );
+
     showLoggedInUser(username);
 
     closeAuthBox();
+
     window.loadUserWords?.();
 }
 
-signupBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await signup();
-});
-loginSubmitBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await login();
-});
+if (signupBtn) {
+    signupBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        await signup();
+    });
+}
 
+if (loginSubmitBtn) {
+    loginSubmitBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        await login();
+    });
+}
 
 export async function addWordForToday(word) {
     if (!currentUser) return;
 
-    // Example: 2026-05-20
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDayStr();
 
-    // users/{username}/days/{date}
     const dayRef = doc(
         db,
         "users",
@@ -293,12 +455,10 @@ export async function addWordForToday(word) {
         today
     );
 
-    // Create/update document
     await setDoc(dayRef, {
         updatedAt: serverTimestamp()
     }, { merge: true });
 
-    // Add word to array
     await updateDoc(dayRef, {
         words: arrayUnion(word)
     });
@@ -307,10 +467,8 @@ export async function addWordForToday(word) {
 export async function getWordsForToday() {
     if (!currentUser) return [];
 
-    // Example: 2026-05-20
-    const today = new Date().toISOString().split("T")[0];
+    const today = getLocalDayStr();
 
-    // users/{username}/days/{date}
     const dayRef = doc(
         db,
         "users",
