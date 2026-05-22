@@ -57,6 +57,7 @@ const currentPasswordAccount = document.getElementById("currentPasswordAccount")
 const showHideCurrentPasswordAccountButton = document.getElementById("showHideCurrentPasswordAccountButton");
 const showHideCurrentPasswordAccountButtonImage = document.getElementById("showHideCurrentPasswordAccountButtonImage");
 const closeAccountBtn = document.getElementById("closeAccountBtn");
+const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 const leaderboardBtn = document.getElementById("leaderboardBtn");
 const closeLeaderboardBtn = document.getElementById("closeLeaderboardBtn")
 
@@ -97,6 +98,15 @@ function openAccountBox() {
     currentUsernameAccount.textContent = currentUser.username;
     currentPasswordAccount.textContent = "********";
     accountOverlay.classList.remove("hidden");
+}
+
+async function deleteAccount() {
+    const result = confirm("Are you sure you want to delete your account?");
+
+    if (!result) return;
+
+    await deleteDoc(doc(db, "users", currentUser.username));
+    clearLoggedInUser();
 }
 
 function closeAccountBox() {
@@ -176,6 +186,7 @@ loginButton.addEventListener("click", () => {
 });
 closeAuthBtn.addEventListener("click", closeAuthBox);
 closeAccountBtn.addEventListener("click", closeAccountBox);
+deleteAccountBtn.addEventListener("click", deleteAccount);
 showHideCurrentPasswordAccountButton.addEventListener("click", () => {
     if (currentPasswordAccount.textContent == "********") {
         currentPasswordAccount.textContent = currentUser.password;
