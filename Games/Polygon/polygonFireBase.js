@@ -104,7 +104,39 @@ function closeAccountBox() {
     currentPasswordAccount.textContent = "";
 }
 
-function openLeaderboardBox() {
+function getScoreFromDay(user, dayStr) {
+    const words = user.days?.[dayStr]?.words || [];
+    let score = 0;
+    words.forEach((word) => {
+        score += Math.max(0, word.length - 3);
+    });
+    return score;
+}
+
+async function loadLeaderboard() {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    if (!querySnapshot.exists()) return;
+
+    const users = [];
+    const dayStr = new Date().toISOString().split("T")[0];;
+
+    querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        userspush({
+            id: doc.id,
+            ...userData,
+            score: getScoreFromDay(userData, dayStr)
+        });
+    });
+
+    users.sort((a, b) => b.score - a.score);
+
+    console.log(users);
+    
+}
+
+async function openLeaderboardBox() {
+    await loadLeaderboard();
     leaderboardOverlay.classList.remove("hidden");
 }
 
