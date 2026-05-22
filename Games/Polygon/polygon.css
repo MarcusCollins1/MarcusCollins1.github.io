@@ -163,6 +163,21 @@ button {
     display: grid;
     gap: 10px;
 }
+.leaderboard-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.leaderboard-tab {
+    background: #e9edf7;
+    columns: #233;
+    border-radius: 10px;
+    padding: 10px;
+}
+.leaderboard-tab.active {
+    background: var(--accent);
+    color: white;
+}
 .leaderboard-row {
     display: flex;
     justify-content: space-between;
