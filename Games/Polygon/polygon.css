@@ -137,6 +137,15 @@ button {
     gap: 8px;
     flex-wrap: wrap;
 }
+.delete-button {
+    background: red;
+    color: white;
+    font-weight: bold;
+}
+.delete-button:hover {
+    background: red;
+    color: black;
+}
 .leaderboard-overlay {
     position: fixed;
     inset: 0;
