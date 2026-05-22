@@ -257,8 +257,13 @@ function renderLeaderboard(view) {
         if (view === "average") value = user.average.toFixed(2);
         if (view === "best") value = user.best;
 
+        const isCurrentUser = 
+            currentUser && 
+            (user.username === currentUser.username ||
+             user.id === currentUser.username)
+
         return `
-            <div class="leaderboard-row">
+            <div class="leaderboard-row ${isCurrentUser ? "current-user-row" : ""}">
                 <span>#${index + 1} ${user.name || user.username || user.id}</span>
                 <span>${value}</span>
             </div>
