@@ -108,7 +108,7 @@ async function getScoreFromDay(user, dayStr) {
     const userRef = collection(db, "users", user.username, "days")
     const snapshot = await getDocs(userRef);
     const days = [];
-    snapshot.forEach((doc) => {
+    snapshot.docs.forEach((doc) => {
         days.push({
             id: doc.id,
             ...doc.data()
@@ -124,7 +124,6 @@ async function getScoreFromDay(user, dayStr) {
 
 async function loadLeaderboard() {
     const querySnapshot = await getDocs(collection(db, "users"));
-    const users = [];
     const dayStr = new Date().toISOString().split("T")[0];;
 
     const userPromises = querySnapshot.docs.map(async (docSnap) => {
