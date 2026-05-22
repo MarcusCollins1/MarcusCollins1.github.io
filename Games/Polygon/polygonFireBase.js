@@ -153,7 +153,7 @@ async function loadLeaderboard() {
             <span>${user.name || user.id}</span>
             <span>${user.score}</span>
         `;
-        leaderboardBox.appendChild(row);
+        leaderboardBoxLeaderboard.appendChild(row);
     });
     
 }
