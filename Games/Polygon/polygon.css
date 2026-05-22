@@ -400,12 +400,12 @@ button.secondary {
     }
     .app {
         margin-top: 0;
-        /* grid-template-columns: 1fr; */
+        grid-template-columns: 1fr;
     }
-    /* .board {
+    .board {
         transform: scale(0.94);
         transform-origin: center;
-    } */
+    }
 }
 
 
