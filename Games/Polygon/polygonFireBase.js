@@ -115,7 +115,6 @@ function getScoreFromDay(user, dayStr) {
 
 async function loadLeaderboard() {
     const querySnapshot = await getDocs(collection(db, "users"));
-    if (!querySnapshot.exists()) return;
 
     const users = [];
     const dayStr = new Date().toISOString().split("T")[0];;
