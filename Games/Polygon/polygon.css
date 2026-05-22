@@ -64,9 +64,28 @@ button {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
     cursor: pointer;
-    transform-origin: background 0.2s, color 0.2s;
+    transform: background 0.2s, color 0.2s;
 }
 .login-button:hover {
+    background: white;
+    color: black;
+}
+.leaderboard-button {
+    position: absolute;
+    top: 140px;
+    left: 20px;
+
+    padding: 10px 16px;
+    font-size: 0.9rem;
+
+    background: black;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    transform: background 0.2s, color 0.2s;
+}
+.leaderboard-button:hover {
     background: white;
     color: black;
 }
