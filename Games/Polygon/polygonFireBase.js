@@ -104,7 +104,7 @@ function closeAccountBox() {
     currentPasswordAccount.textContent = "";
 }
 
-function getScoreFromDay(user, dayStr) {
+async function getScoreFromDay(user, dayStr) {
     const userRef = collection(db, "users", user.username, "days")
     const snapshot = await getDocs(userRef);
     const days = [];
@@ -133,7 +133,7 @@ async function loadLeaderboard() {
         users.push({
             id: doc.id,
             ...userData,
-            score: getScoreFromDay(userData, dayStr)
+            score: await getScoreFromDay(userData, dayStr)
         });
     });
 
