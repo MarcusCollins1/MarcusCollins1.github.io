@@ -287,7 +287,7 @@ els.modal.addEventListener('click', (e) => {
 els.modalApply.addEventListener('click', () => {
     if (!activeInput) return;
 
-    const score = calculateCardScore(activeRound, els.cardEntry.value);
+    const score = calculateCardScore(els.cardEntry.value, activeRound);
     activeInput.value = score;
     closeCardModal();
     calculate();
