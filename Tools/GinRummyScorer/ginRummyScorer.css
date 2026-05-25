@@ -191,6 +191,68 @@ tbody tr:nth-child(odd) { background: rgba(15, 23, 42, 0.44); }
     font-size: 12px;
     white-space: nowrap;
 }
+.score-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.score-cell .num-input {
+    flex: 1;
+    min-height: 0;
+}
+.calc-btn {
+    padding: 11px 12px;
+    white-space: nowrap;
+}
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 6, 23, 0.72);
+    z-index: 2000;
+    padding: 16px;
+}
+.modal {
+    width: min(560px, 100%);
+    background: #0f172a;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    padding: 16px;
+}
+.modal h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+}
+.modal p {
+    margin: 0 0 12px;
+    color: #cbd5e1;
+    line-height: 1.5;
+}
+.modal textarea {
+    width: 100%;
+    min-height: 120px;
+    resize: vertical;
+    background: #0b1220;
+    color: #e5e7eb;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 15px;
+    outline: none;
+}
+.modal textarea:focus {
+    border-color: rgba(56, 189, 248, 0.85);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
+}
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
 @media (max-width: 920px) {
     .cards, .controls, .summary-grid, .names { grid-template-columns: 1fr; }
 }
