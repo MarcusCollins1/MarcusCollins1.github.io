@@ -16,6 +16,18 @@
             </p>
         </header>
 
+        <div id="cardModal" class="modal-backdrop">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+                <h2 id="modalTitle">Card score</h2>
+                <p id="modalHelp"></p>
+                <textarea id="cardEntry" placeholder="Example: A, 7, 10, Q, K, 2"></textarea>
+                <div class="modal-actions">
+                    <button type="button" id="modalCancel">Cancel</button>
+                    <button type="button" class="primary" id="modalApply">Use score</button>
+                </div>
+            </div>
+        </div>
+
         <div class="names">
             <div>
                 <input id="name1" type="text" placeholder="Player 1 name" value="Player 1" />
