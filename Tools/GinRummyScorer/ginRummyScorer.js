@@ -16,19 +16,47 @@ const els = {
     scoreBody: document.getElementById('scoreBody'),
     h1: document.getElementById('h1'),
     h2: document.getElementById('h2'),
+    modal: document.getElementById('cardModal'),
+    modalTitle: document.getElementById('modalTitle'),
+    modalHelp: document.getElementById('modalHelp'),
+    cardEntry: document.getElementById('cardEntry'),
+    modalCancel: document.getElementById('modalCancel'),
+    modalApply: document.getElementById('modalApply'),
 };
 
+let activeInput = null;
+let activeRound = 1;
+
 function makeRow(round) {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td class="round-col">${round}</td>
-        <td><input class="num-input p1" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></td>
-        <td><input class="num-input p2" type="number" min="0" step="1" inputmode="numeric" placeholder="0"></td>
-        <td class="center"><span class="winner">-</span></td>
-        <td class="right"><span class="rt1">0</span></td>
-        <td class="right"><span class="rt2">0</span></td>
-    `;
-    return tr;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td class="round-col">${round}</td>
+    <td>
+      <div class="score-cell">
+        <input class="num-input p1" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+        <button type="button" class="calc-btn p1-btn">Cards</button>
+      </div>
+    </td>
+    <td>
+      <div class="score-cell">
+        <input class="num-input p2" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+        <button type="button" class="calc-btn p2-btn">Cards</button>
+      </div>
+    </td>
+    <td class="center"><span class="winner">-</span></td>
+    <td class="right"><span class="rt1">0</span></td>
+    <td class="right"><span class="rt2">0</span></td>
+  `;
+
+  tr.querySelector('.p1-btn').addEventListener('click', () => {
+    openCardModal(tr.querySelector('.p1'), round, els.name1.value || 'Player 1');
+  });
+
+  tr.querySelector('.p2-btn').addEventListener('click', () => {
+    openCardModal(tr.querySelector('.p2'), round, els.name2.value || 'Player 2');
+  });
+
+  return tr;
 }
 
 function allRows() {
@@ -185,6 +213,94 @@ function resetAll() {
     els.name2.value = "Player 2";
     clearScores();
 }
+
+function wildRankLabel(round) {
+    const labels = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King"];
+    return labels[round - 1] || `Round ${round}`;
+}
+
+function isWildCard(round, card) {
+    const t = card.toUpperCase().trim();
+    const wild = wildRankLabel(round).toUpperCase();
+
+    if (wild === 'ACE') return t === 'A' || t === 'ACE';
+    if (wild === '10') return t === '10' || t === 'TEN' || t === 'T';
+    if (wild === 'JACK') return t === 'J' || t === 'JACK';
+    if (wild === 'QUEEN') return t === 'Q' || t === 'QUEEN';
+    if (wild === 'KING') return t === 'K' || t === 'KING';
+
+    return t === wild;
+}
+
+function normalizeCardToken(token) {
+    return token
+        .trim()
+        .toUpperCase()
+        .replace(/[♣♦♥♠]/g, '')
+        .replace(/[CDHS]$/g, '');
+}
+
+function cardValue(round, card) {
+    const t = normalizeCardToken(card);
+
+    if (!t) return 0;
+
+    if (isWildCard(round, t)) return 15;
+    if (t === 'A' || t === 'ACE') return 1;
+    if (/^(?:[2-9]|10)$/.test(t)) return Number(t);
+    if (t === 'J' || t === 'JACK') return 11;
+    if (t === 'Q' || t === 'QUEEN') return 12;
+    if (t === 'K' || t === 'KING') return 13;
+
+    return 0;
+}
+
+function calculateCardScore(text, round) {
+  return text
+    .split(/[\s,]+/)
+    .filter(Boolean)
+    .reduce((sum, token) => sum + cardValue(token, round), 0);
+}
+
+function openCardModal(inputEl, round, playerName) {
+    activeInput = inputEl;
+    activeRound = round;
+    
+    els.modalTitle.textContent = `${playerName} — Round ${round}`;
+    els.modalHelp.textContent = `Wild card this round: ${wildRankLabel(round)}. Wild cards score 15. Enter cards separated by commas or spaces.`;
+    els.cardEntry.value = '';
+    els.modal.style.display = 'flex';
+    els.cardEntry.focus();
+}
+
+function closeCardModal() {
+    els.modal.style.display = 'none';
+    activeInput = null;
+}
+
+els.modalCancel.addEventListener('click', closeCardModal);
+
+els.modal.addEventListener('click', (e) => {
+    if (e.target === els.modal) closeCardModal();
+});
+
+els.modalApply.addEventListener('click', () => {
+    if (!activeInput) return;
+
+    const score = calculateCardScore(activeRound, els.cardEntry.value);
+    activeInput.value = score;
+    closeCardModal();
+    calculate();
+});
+
+els.cardEntry.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        modalApply.click();
+    }
+    if (e.key === 'Escape') {
+        closeCardModal();
+    }
+});
 
 for (let i = 1; i <= ROUND_COUNT; i++) {
     els.scoreBody.appendChild(makeRow(i));
