@@ -90,10 +90,10 @@ function calculate() {
         rt1.textContent = total1.toString();
         rt2.textContent = total2.toString();
 
-        if (s1 > s2) {
+        if (s1 < s2) {
             winner.textContent = els.name1.value || "Player 1";
             winner.className = "winner p1";
-        } else if (s2 > s1) {
+        } else if (s2 < s1) {
             winner.textContent = els.name2.value || "Player 2";
             winner.className = "winner p2";
         } else if (s1 == 0 && s2 == 0) {
@@ -123,7 +123,7 @@ function calculate() {
         els.leadText.textContent = "Tied";
         els.gameStatus.textContent = roundsEntered === ROUND_COUNT ? "Final tie" : "Game in progress";
         els.gameStatus.className = "status-pill status-warn";
-    } else if (total1 > total2) {
+    } else if (total1 < total2) {
         els.leadText.textContent = `${p1Name} by ${diff}`;
         els.gameStatus.textContent = roundsEntered === ROUND_COUNT ? `${p1Name} wins` : `${p1Name} leading`;
         els.gameStatus.className = roundsEntered === ROUND_COUNT ? 'status-pill status-good' : 'status-pill status-warn';
