@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gin Rummy Scorer</title>
+    <link rel="stylesheet" href="ginRummyScorer.css">
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <h1>Gin Rummy Scorer</h1>
+            <p class="subtitle">
+                Enter the score for each round, and the page will keep running totals for both players.
+                It is designed for a 13-round table game and saves your entries in this browser.
+            </p>
+        </header>
+
+        <div class="names">
+            <div>
+                <input id="name1" type="text" placeholder="Player 1 name" value="Player 1" />
+                <div class="mini-help">Left side player</div>
+            </div>
+            <div>
+                <input id="name2" type="text" placeholder="Player 2 name" value="Player 2" />
+                <div class="mini-help">Right side player</div>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h3 id="cardName1">Player 1</h3>
+                <div class="stat-value" id="total1">0</div>
+                <div class="stat-label">Total score</div>
+            </div>
+            <div class="card">
+                <h3>Lead</h3>
+                <div class="stat-value" id="leadText">Tied</div>
+                <div class="stat-label">Current advantage</div>
+            </div>
+            <div class="card">
+                <h3 id="cardName2">Player 2</h3>
+                <div class="stat-value" id="total2">0</div>
+                <div class="stat-label">Total score</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="primary" id="fillExample">Load sample scores</button>
+            <button id="clearScores">Clear round scores</button>
+            <button id="swapNames">Swap players</button>
+            <button class="danger" id="resetAll">Reset everything</button>
+        </div>
+
+        <div class="panel">
+            <h2>Round scores</h2>
+            <div class="table-wrap">
+                <table aria-label="Gin rummy score table">
+                    <thead>
+                        <tr>
+                            <th class="round-col">Round</th>
+                            <th id="h1">Player 1</th>
+                            <th id="h2">Player 2</th>
+                            <th class="center">Winner</th>
+                            <th class="right">P1 running total</th>
+                            <th class="right">P2 running total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoreBody"></tbody>
+                    <tfoot>
+                        <tr>
+                            <td class="round-col">Total</td>
+                            <td class="right"><strong id="sum1">0</strong></td>
+                            <td class="right"><strong id="sum2">0</strong></td>
+                            <td class="center"><span class="status-pill" id="gameStatus">Game in progress</span></td>
+                            <td class="right" colspan="2"><strong id="roundsCount">0 / 13 rounds entered</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="footer-note">
+                Tip: enter only the points that belong to the round winner if that is how your group scores, or enter the full round totals for both players if you prefer. The running totals update automatically.
+            </div>
+            <div class="legend">
+                <span class="chip">Auto-saves in browser</span>
+                <span class="chip">13 rounds</span>
+                <span class="chip">Live totals</span>
+                <span class="chip">Works offline</span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="ginRummyScorer.js"></script>
+</body>
+</html>
