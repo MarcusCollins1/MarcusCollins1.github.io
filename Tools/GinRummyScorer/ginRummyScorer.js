@@ -259,7 +259,7 @@ function calculateCardScore(text, round) {
   return text
     .split(/[\s,]+/)
     .filter(Boolean)
-    .reduce((sum, token) => sum + cardValue(token, round), 0);
+    .reduce((sum, token) => sum + cardValue(round, token), 0);
 }
 
 function openCardModal(inputEl, round, playerName) {
