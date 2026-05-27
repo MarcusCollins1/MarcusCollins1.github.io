@@ -13,6 +13,12 @@ import {
     updateDoc
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-storage.js"
 
 const firebaseConfig = {
     apiKey: "AIzaSyA_CXSZVz6meJgcJyktktWNmPtLmeFNXn0",
@@ -27,6 +33,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const analytics = getAnalytics(app);
+
+const storage = getStorage(app);
 
 async function addDocument(collectionName, fields) {
     await addDoc(collection(db, collectionName), {
@@ -119,6 +127,8 @@ const currentUsernameAccount = document.getElementById("currentUsernameAccount")
 const currentPasswordAccount = document.getElementById("currentPasswordAccount");
 const showHideCurrentPasswordAccountButton = document.getElementById("showHideCurrentPasswordAccountButton");
 const showHideCurrentPasswordAccountButtonImage = document.getElementById("showHideCurrentPasswordAccountButtonImage");
+const profileImageInput = document.getElementById("profileImageInput");
+const profileImageUploadBtn = document.getElementById("profileImageUploadBtn");
 const closeAccountBtn = document.getElementById("closeAccountBtn");
 const deleteAccountBtn = document.getElementById("deleteAccountBtn");
 const leaderboardBtn = document.getElementById("leaderboardBtn");
@@ -289,6 +299,15 @@ function closeLeaderboardBox() {
     if (leaderboardOverlay) {
         leaderboardOverlay.classList.add("hidden");
     }
+}
+
+async function uploadProfileImage() {
+    if (!currentUser) return;
+    const file = profileImageInput.files[0];
+    const storageRef = ref(storage, "users/" + currentUser.username + "/profileImage");
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    console.log(url);
 }
 
 if (loginButton) {
