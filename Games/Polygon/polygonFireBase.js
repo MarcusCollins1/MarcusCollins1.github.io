@@ -466,6 +466,10 @@ if (loginSubmitBtn) {
     });
 }
 
+if (profileImageUploadBtn) {
+    profileImageUploadBtn.addEventListener("click", uploadProfileImage);
+}
+
 export async function addWordForToday(word) {
     if (!currentUser) return;
 
