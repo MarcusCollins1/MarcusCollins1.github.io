@@ -21,14 +21,15 @@
     </div>
 
     <script>
-        const group = document.querySelector(".button-group");
-        const mainBtn = group.querySelector(".main-button");
-
-        mainBtn.addEventListener("mouseenter", () => {
-            group.classList.add("open");
-        });
-        group.addEventListener("mouseleave", () => {
-            group.classList.remove("open");
+        const groups = document.querySelectorAll(".button-group");
+        groups.forEach(group => {
+            const mainBtn = group.querySelector(".main-button");
+            mainBtn.addEventListener("mouseenter", () => {
+                group.classList.add("open");
+            });
+            group.addEventListener("mouseleave", () => {
+                group.classList.remove("open");
+            });
         });
     </script>
 </body>
