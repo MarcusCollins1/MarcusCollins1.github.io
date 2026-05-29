@@ -48,6 +48,7 @@ export async function submitQuizForm(data) {
             ...data
         });
 
+        alert("Successfully uploaded answers");
     } catch (error) {
         console.error(error);
     }
