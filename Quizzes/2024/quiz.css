@@ -121,6 +121,10 @@ button {
     background-color: blueviolet;
     color: aquamarine;
 }
+#submitBtn:hover {
+    background-color: aquamarine;
+    color: blueviolet;
+}
 #matchContainer {
     display: flex;
     justify-content: start;
