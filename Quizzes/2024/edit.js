@@ -21,6 +21,8 @@ async function submissionSelectChange(value) {
     console.log(data);
     for (const [key, value] of Object.entries(data)) {
         const curr = document.getElementById(key);
+        console.log(key, value);
+        console.log(curr);
         curr.value = value;
     }
 }
