@@ -4,7 +4,7 @@ import {
 } from "./editFireBase.js";
 
 const submissionSelect = document.getElementById("submissionSelect");
-
+const quizFormFieldSet = document.getElementById("quizFormFieldSet");
 
 async function populateSubmissionSelect() {
     const options = await getSubmissionIds();
@@ -26,6 +26,7 @@ async function submissionSelectChange(value) {
     }
     updater2q6Container();
     updater2q9Container();
+    quizFormFieldSet.disabled = false;
 }
 
 submissionSelect.addEventListener("change", (event) => {
