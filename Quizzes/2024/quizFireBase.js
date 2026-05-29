@@ -23,11 +23,12 @@ export async function submitQuizForm(data) {
         const name = data.name;
 
         const submissionsRef = collection(db, "quizzes", "2024", "submissions");
-        const snapshot = await getDocs(submissionsRef).docs.map((docSnap) => ({
+        const snapshot = await getDocs(submissionsRef);
+        const submissions = snapshot.docs.map((docSnap) => ({
             id: docSnap.id,
             ...docSnap.data()
         }));
-        console.log(snapshot);
+        console.log(submissions);
     } catch (error) {
         console.error(error);
     }
