@@ -60,11 +60,11 @@ button:hover {
     transform: scale(1.05);
 }
 
-#delete-button {
+#deleteBtn {
     background-color: black;
     color: red;
 }
-#delete-button:hover {
+#deleteBtn:hover {
     background-color: red;
     color: black;
 }
