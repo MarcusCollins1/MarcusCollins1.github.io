@@ -28,7 +28,12 @@ export async function submitQuizForm(data) {
             id: docSnap.id,
             ...docSnap.data()
         }));
-        console.log(submissions);
+        
+        if (Object.values(submissions).map(item => item.id).contains(name)) {
+            alert("Name already taken");
+            return;
+        }
+
     } catch (error) {
         console.error(error);
     }
