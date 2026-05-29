@@ -3,6 +3,10 @@ import {
     getFirestore,
     collection,
     getDocs,
+    setDoc,
+    updateDoc,
+    serverTimestamp,
+    doc,
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -33,6 +37,16 @@ export async function submitQuizForm(data) {
             alert("Name already taken");
             return;
         }
+
+        const submissionRef = doc(db, "quizzes", "2024", "submissions", name);
+
+        await setDoc(submissionRef, {
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        await updateDoc(submissionRef, {
+            ...data
+        });
 
     } catch (error) {
         console.error(error);
