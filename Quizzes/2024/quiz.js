@@ -74,6 +74,7 @@ r2q9Container.addEventListener("dragend", (event) => {
 r2q9Container.addEventListener("dragover", (event) => {
     event.preventDefault();
     const draggingOverElement = getDragAfterElement(r2q9Container, event.clientY);
+    console.log(draggingOverElement);
     if (draggingOverElement == null) {
         r2q9Container.appendChild(draggingElement);
     } else {
@@ -83,16 +84,18 @@ r2q9Container.addEventListener("dragover", (event) => {
 
 function getDragAfterElement(container, y) {
     const sortableItems = [...container.querySelectorAll(".sortable-item:not(.dragging)")];
-    return sortableItems.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset < closest.offset) {
-            return {offset: offset, element: child};
-        } else {
-            return closest;
-        }
-    },
-    { offset: Number.NEGATIVE_INFINITY }).element;
+    return sortableItems.reduce(
+        (closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        },
+        { offset: Number.NEGATIVE_INFINITY }
+    ).element;
 }
 
 function updater2q6Order() {
