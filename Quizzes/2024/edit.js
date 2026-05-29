@@ -1,4 +1,7 @@
-import { getSubmissionIds } from "./editFireBase.js";
+import {
+    getSubmissionIds,
+    getSubmission,
+} from "./editFireBase.js";
 
 const submissionSelect = document.getElementById("submissionSelect");
 
@@ -14,7 +17,12 @@ async function populateSubmissionSelect() {
 }
 
 async function submissionSelectChange(value) {
-    console.log("Selected:", value);
+    const data = getSubmission(value);
+    console.log(data);
+    data.forEach((key, value) => {
+        const curr = document.getElementById(key);
+        curr.value = value;
+    });
 }
 
 submissionSelect.addEventListener("change", (event) => {
