@@ -49,3 +49,7 @@ export async function getSubmission(id) {
         console.error(error);
     }
 }
+
+export async function submitEdittedQuiz(data) {
+    
+}
