@@ -19,7 +19,6 @@ form.addEventListener("submit", async (event) => {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
     data["name"] = document.getElementById("name").value;
-    console.log(data);
     submitQuizForm(data);
 });
 
