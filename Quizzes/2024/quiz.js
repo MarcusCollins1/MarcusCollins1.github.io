@@ -74,7 +74,6 @@ r2q9Container.addEventListener("dragend", (event) => {
 r2q9Container.addEventListener("dragover", (event) => {
     event.preventDefault();
     const draggingOverElement = getDragAfterElement(r2q9Container, event.clientY);
-    console.log(draggingOverElement);
     if (draggingOverElement == null) {
         r2q9Container.appendChild(draggingElement);
     } else {
