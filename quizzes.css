@@ -24,3 +24,34 @@ button:hover {
     background-color: hotpink;
     color: lightblue;
 }
+
+.button-group {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.main-button {
+    z-index: 2;
+}
+.extra-buttons {
+    display: flex;
+    gap: 8px;
+    margin-left: 8px;
+
+    opacity: 0;
+    transform: translateX(-20px);
+    pointer-events: none;
+
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.button-group:hover .extra-buttons {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+.extra-buttons button {
+    transition: transform 0.2s ease;
+}
+.extra-buttons button:hover {
+    transform: scale(1.05);
+}
