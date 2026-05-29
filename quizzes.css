@@ -42,15 +42,14 @@ button:hover {
     transform: translateX(-20px);
     pointer-events: none;
 
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: all 0.3s ease;
 }
-.button-group:hover .extra-buttons {
+.button-group.open .extra-buttons {
     opacity: 1;
     transform: translateX(0);
     pointer-events: auto;
 }
-.main-button:hover + .extra-buttons,
-.button-group:hover .extra-buttons {
+.extra-buttons button {
     background-color: lightblue;
     color: rgb(174, 20, 174);
     transition: transform 0.2s ease;
