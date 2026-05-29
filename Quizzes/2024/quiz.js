@@ -1,4 +1,4 @@
-import { submitQuizForm } from "./quizFireBase";
+import { submitQuizForm } from "./quizFireBase.js";
 
 const form = document.getElementById("quizForm");
 const draggables = document.querySelectorAll(".draggable");
