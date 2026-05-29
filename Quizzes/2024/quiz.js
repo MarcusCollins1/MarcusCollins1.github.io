@@ -27,6 +27,7 @@ draggables.forEach(draggable => {
     });
 
     draggable.addEventListener("click", event => {
+        console.log(event.target);
         if (event.target.parentElement.classlist.contains("droppable")) {
             const originalParent = document.getElementById(draggable.dataset.originalParent);
             if (originalParent) originalParent.append(draggable);
@@ -64,10 +65,12 @@ droppables.forEach(droppable => {
 });
 
 r2q9Container.addEventListener("dragstart", (event) => {
+    console.log(event.target);
     draggingElement = event.target;
     event.target.classList.add("dragging");
 });
 r2q9Container.addEventListener("dragend", (event) => {
+    console.log(event.target);
     event.target.classList.remove("dragging");
     updater2q9Order();
 });
