@@ -17,7 +17,7 @@ async function populateSubmissionSelect() {
 }
 
 async function submissionSelectChange(value) {
-    const data = getSubmission(value);
+    const data = await getSubmission(value);
     console.log(data);
     data.forEach((key, value) => {
         const curr = document.getElementById(key);
