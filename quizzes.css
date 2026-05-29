@@ -50,8 +50,21 @@ button:hover {
     pointer-events: auto;
 }
 .extra-buttons button {
+    background-color: lightblue;
+    color: rgb(174, 20, 174);
     transition: transform 0.2s ease;
 }
 .extra-buttons button:hover {
+    background-color: rgb(174, 20, 174);
+    color: lightblue;
     transform: scale(1.05);
+}
+
+#delete-button {
+    background-color: black;
+    color: red;
+}
+#delete-button:hover {
+    background-color: red;
+    color: black;
 }
