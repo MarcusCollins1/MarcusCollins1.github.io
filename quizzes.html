@@ -19,5 +19,17 @@
             <button id="deleteBtn">Delete</button>
         </div>
     </div>
+
+    <script>
+        const group = document.querySelector(".button-group");
+        const mainBtn = group.querySelector(".main-button");
+
+        mainBtn.addEventListener("mouseenter", () => {
+            group.classList.add("open");
+        });
+        group.addEventListener("mouseleave", () => {
+            group.classList.remove("open");
+        });
+    </script>
 </body>
 </html>
