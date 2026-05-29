@@ -4,7 +4,7 @@ const submissionSelect = document.getElementById("submissionSelect");
 
 
 async function populateSubmissionSelect() {
-    options = await getSubmissionIds();
+    const options = await getSubmissionIds();
     options.forEach(option => {
         const opt = document.createElement("option");
         opt.value = option;
