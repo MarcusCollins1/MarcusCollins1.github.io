@@ -3,6 +3,7 @@ import {
     getFirestore,
     collection,
     getDocs,
+    getDoc,
     setDoc,
     updateDoc,
     serverTimestamp,
@@ -32,6 +33,18 @@ export async function getSubmissionIds() {
             ...docSnap.data()
         }));
         return Object.values(submissions).map(item => item.id);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export async function getSubmission(id) {
+    try {
+        const submissionRef = doc(db, "quizzes", "2024", "submissions", id);
+        const snapshot = await getDoc(submissionRef);
+        if (snapshot.exists()) {
+            return snapshot.data();
+        }
     } catch (error) {
         console.error(error);
     }
