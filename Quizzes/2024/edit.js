@@ -19,10 +19,10 @@ async function populateSubmissionSelect() {
 async function submissionSelectChange(value) {
     const data = await getSubmission(value);
     console.log(data);
-    data.forEach((key, value) => {
+    for (const [key, value] of Object.entries(data)) {
         const curr = document.getElementById(key);
         curr.value = value;
-    });
+    }
 }
 
 submissionSelect.addEventListener("change", (event) => {
