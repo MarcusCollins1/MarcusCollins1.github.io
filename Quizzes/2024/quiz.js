@@ -1,3 +1,5 @@
+import { submitQuizForm } from "./quizFireBase";
+
 const form = document.getElementById("quizForm");
 const draggables = document.querySelectorAll(".draggable");
 const droppables = document.querySelectorAll(".droppable");
@@ -18,6 +20,7 @@ form.addEventListener("submit", async (event) => {
     const data = Object.fromEntries(formData.entries());
     data["name"] = document.getElementById("name").value;
     console.log(data);
+    submitQuizForm(data);
 });
 
 draggables.forEach(draggable => {
