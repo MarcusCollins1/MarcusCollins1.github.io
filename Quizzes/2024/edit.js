@@ -23,7 +23,9 @@ async function submissionSelectChange(value) {
         const curr = document.getElementById(key);
         console.log(key, value);
         console.log(curr);
-        curr.value = value;
+        if (curr) {
+            curr.value = value;
+        }
     }
 }
 
