@@ -21,16 +21,39 @@ async function submissionSelectChange(value) {
     console.log(data);
     for (const [key, value] of Object.entries(data)) {
         const curr = document.getElementById(key);
-        console.log(key, value);
-        console.log(curr);
         if (curr) {
             curr.value = value;
         }
     }
+    updater2q6Container();
+    updater2q9Container();
 }
 
 submissionSelect.addEventListener("change", (event) => {
     submissionSelectChange(event.target.value);
 });
 
-populateSubmissionSelect();
+
+
+
+
+const form = document.getElementById("quizForm");
+const draggables = document.querySelectorAll(".draggable");
+const droppables = document.querySelectorAll(".droppable");
+const r2q9Container = document.getElementById("r2q9Container");
+const sortedOrderInput = document.getElementById("r2q9");
+
+function updater2q6Container() {
+    const order = document.getElementById("r2q6").value.split(",");
+    document.getElementById("polymerType1").appendChild([...document.querySelectorAll("p")].find(el => el.textContent.trim() === order[0]));
+    document.getElementById("polymerType2").appendChild([...document.querySelectorAll("p")].find(el => el.textContent.trim() === order[1]));
+    document.getElementById("polymerType3").appendChild([...document.querySelectorAll("p")].find(el => el.textContent.trim() === order[2]));
+}
+
+function updater2q9Container() {
+
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    populateSubmissionSelect();
+});
