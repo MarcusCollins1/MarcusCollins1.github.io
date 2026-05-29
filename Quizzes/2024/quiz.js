@@ -65,10 +65,10 @@ droppables.forEach(droppable => {
 
 r2q9Container.addEventListener("dragstart", (event) => {
     draggingElement = event.target;
-    event.target.classlist.add("dragging");
+    event.target.classList.add("dragging");
 });
 r2q9Container.addEventListener("dragend", (event) => {
-    event.target.classlist.remove("dragging");
+    event.target.classList.remove("dragging");
     updater2q9Order();
 });
 r2q9Container.addEventListener("dragover", (event) => {
