@@ -18,7 +18,6 @@ async function populateSubmissionSelect() {
 
 async function submissionSelectChange(value) {
     const data = await getSubmission(value);
-    console.log(data);
     for (const [key, value] of Object.entries(data)) {
         const curr = document.getElementById(key);
         if (curr) {
@@ -51,7 +50,10 @@ function updater2q6Container() {
 }
 
 function updater2q9Container() {
-
+    const order = document.getElementById("r2q9").value.split(",");
+    order.forEach(val => {
+        r2q9Container.appendChild([...document.querySelectorAll("div")].find(el => el.textContent.trim() === val));
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
