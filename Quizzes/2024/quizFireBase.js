@@ -29,7 +29,7 @@ export async function submitQuizForm(data) {
             ...docSnap.data()
         }));
         
-        if (Object.values(submissions).map(item => item.id).contains(name)) {
+        if (Object.values(submissions).some(item => item.id === name)) {
             alert("Name already taken");
             return;
         }
