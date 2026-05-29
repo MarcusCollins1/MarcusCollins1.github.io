@@ -1,4 +1,4 @@
-const form = document.getElementById("form");
+const form = document.getElementById("quizForm");
 const draggables = document.querySelectorAll(".draggable");
 const droppables = document.querySelectorAll(".droppable");
 const r2q9Container = document.getElementById("r2q9Container");
