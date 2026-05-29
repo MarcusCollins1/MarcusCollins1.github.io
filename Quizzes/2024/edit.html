@@ -1,59 +1,153 @@
-import {
-    getSubmissionIds,
-    getSubmission,
-} from "./editFireBase.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Quiz</title>
+    <link rel="stylesheet" href="edit.css">
+</head>
+<body>
+    <button id="returnBtn" class="return-button" onclick="location.href='../../quizzes.html'">← Return</button>
+    <h1>Edit - Christmas Quiz</h1>
 
-const submissionSelect = document.getElementById("submissionSelect");
+    <select id="submissionSelect">
+        <option value="" selected disabled>Choose one...</option>
+    </select>
 
+    <br>
+    <br>
 
-async function populateSubmissionSelect() {
-    const options = await getSubmissionIds();
-    options.forEach(option => {
-        const opt = document.createElement("option");
-        opt.value = option;
-        opt.textContent = option;
-        submissionSelect.appendChild(opt);
-    });
-}
+    <form id="quizForm">
+        <label for="name">Enter Name:</label>
+        <input type="text" id="name" required readonly autocomplete="off">
+        <br>
+        <br>
+        <p class="round-label">Round 1: General Knowledge</p>
+        <div id="round1Container">
+            <label class="question-label" for="r1q1">Question 1: A human has 206 bones (~300 at birth). Which is the longest?</label>
+            <br>
+            <input class="question-input" name="r1q1" id="r1q1" type="text" autocomplete="off">
+            <br>
 
-async function submissionSelectChange(value) {
-    const data = await getSubmission(value);
-    console.log(data);
-    for (const [key, value] of Object.entries(data)) {
-        const curr = document.getElementById(key);
-        if (curr) {
-            curr.value = value;
-        }
-    }
-    updater2q6Container();
-    updater2q9Container();
-}
+            <label class="question-label" for="r1q2">Question 2: Lakes are large standing bodies of water. Which country is known as the "Land of a Thousand Lakes"?</label>
+            <br>
+            <input class="question-input" name="r1q2" id="r1q2" type="text" autocomplete="off">
+            <br>
+            
+            <label class="question-label" for="r1q3">Question 3: There are 8 planets in the solar system, forever orbiting the sun. Which planet has the shortest day?</label>
+            <br>
+            <input class="question-input" name="r1q3" id="r1q3" type="text" autocomplete="off">
+            <br>
+            
+            <label class="question-label" for="r1q4">Question 4: The Berlin wall was constructed after the 2nd World War to divide East from West. In which year was it torn down?</label>
+            <br>
+            <input class="question-input" name="r1q4" id="r1q4" type="text" autocomplete="off">
+            <br>
+            
+            <label class="question-label" for="r1q5">Question 5: Shakespeare wrote many a play and created new words as he went along. These days he continues to torment school children with never-ending monologues and speeches. Which of his plays features the characters Rosencrantz and Guildenstern?</label>
+            <br>
+            <input class="question-input" name="r1q5" id="r1q5" type="text" autocomplete="off">
+            <br>
+            
+            <label class="question-label" for="r1q6">Question 6: There are 1223 UNESCO world heritage sites around the world. Which country has the most (60)?</label>
+            <br>
+            <input class="question-input" name="r1q6" id="r1q6" type="text" autocomplete="off">
+            <br>
+            
+            <label class="question-label" for="r1q7">Question 7: The Tsars ruled over Russia from 1547 to 1917. Who was the last Tsar of Russia?</label>
+            <br>
+            <input class="question-input" name="r1q7" id="r1q7" type="text" autocomplete="off">
+            <br>
+            
+            <label class="question-label" for="r1q8">Question 8: The golden ratio appears everywhere in nature and maths, most famously in the Fibonacci sequence. What is the symbol for the golden ratio?</label>
+            <br>
+            <input class="question-input" name="r1q8" id="r1q8" type="text" autocomplete="off">
+            <br>
+            
+            <label class="question-label" for="r1q9">Question 9: Languages are used to communicate between people. Languages can be written or spoken. Which language is written in the Devanagari script?</label>
+            <br>
+            <input class="question-input" name="r1q9" id="r1q9" type="text" autocomplete="off">
+            <br>
+            
+            <label class="question-label" for="r1q10">Question 10: “Philosophy is basically thinking about thinking, which sounds like a waste of time because it is” - Philomena Cunk.
+                <br>
+                Which ancient philosopher is credited with the phrase "I think, therefore I am"?</label>
+            <br>
+            <input class="question-input" name="r1q10" id="r1q10" type="text" autocomplete="off">
+            <br>
+        </div>
 
-submissionSelect.addEventListener("change", (event) => {
-    submissionSelectChange(event.target.value);
-});
+        <p class="round-label">Round 2: Science and Geography</p>
+        <div id="round2Container">
+            <label class="question-label" for="r2q1">Question 1: La Paz is the highest capital city in the world at an altitude over 3,600m. Which country is it in?</label>
+            <br>
+            <input class="question-input" name="r2q1" id="r2q1" type="text" autocomplete="off">
+            <br>
 
+            <label class="question-label" for="r2q2">Question 2: There are 92 naturally occurring elements (and some others), each has a 1/2 letter symbol. Spell Frankincense with chemical symbols (give the element's full name, you can use an element max twice).</label>
+            <br>
+            <textarea class="question-input-long" name="r2q2" id="r2q2" rows="3" cols="75" autocomplete="off"></textarea>
+            <br>
 
+            <label class="question-label" for="r2q3">Question 3: Beneath the oceans there are vast mountain ranges. Which is the longest?</label>
+            <br>
+            <input class="question-input" name="r2q3" id="r2q3" type="text" autocomplete="off">
+            <br>
 
+            <label class="question-label" for="r2q4">Question 4: Hydrogen bonds are the strongest of the IMFs. For hydrogen bonding to occur, the H must be bonded to one of 3 elements. What are these 3 elements?</label>
+            <br>
+            <input class="question-input" name="r2q4" id="r2q4" type="text" autocomplete="off">
+            <br>
 
+            <label class="question-label" for="r2q5">Question 5: Desserts are (often) sweet treats enjoyed after a meal. Which is the largest desert?</label>
+            <br>
+            <input class="question-input" name="r2q5" id="r2q5" type="text" autocomplete="off">
+            <br>
 
-const form = document.getElementById("quizForm");
-const draggables = document.querySelectorAll(".draggable");
-const droppables = document.querySelectorAll(".droppable");
-const r2q9Container = document.getElementById("r2q9Container");
-const sortedOrderInput = document.getElementById("r2q9");
+            <p class="question-label">Question 6: Polymers are long chains of the repeating units, often forming plastics. Match the following polymers to types of polymers.</p>
+            <div id="matchContainer">
+                <div class="polymer-types">
+                    <div class="droppable" id="polymerType1">
+                        <span>Thermoplastic</span>
+                    </div>
+                    <div class="droppable" id="polymerType2">
+                        <span>Polyamide</span>
+                    </div>
+                    <div class="droppable" id="polymerType3">
+                        <span>Elastomer</span>
+                    </div>
+                </div>
+                <div class="polymers" id="polymers">
+                    <p class="draggable", draggable="true" id="polymer1" data-original-parent="polymers">Nylon</p>
+                    <p class="draggable", draggable="true" id="polymer2" data-original-parent="polymers">Polyurethane</p>
+                    <p class="draggable", draggable="true" id="polymer3" data-original-parent="polymers">Polyvinylchloride (PVC)</p>
+                </div>
+            </div>
+            <input type="hidden" name="r2q6" id="r2q6" value=",,">
+            
+            <label class="question-label" for="r2q7">Question 7: The Indian subcontinent is hit by seasonal winds that brings heavy rain. What is the name for this?</label>
+            <br>
+            <input class="question-input" name="r2q7" id="r2q7" type="text" autocomplete="off">
+            
+            <label class="question-label" for="r2q8">Question 8: Nuclear fission is currently our most energy dense fuel. This works by splitting heavy nuclides into smaller nuclides. What is the name of the radiation which causes the pools in which the waste is stored to glow blue?</label>
+            <br>
+            <input class="question-input" name="r2q8" id="r2q8" type="text" autocomplete="off">
 
-function updater2q6Container() {
-    const order = document.getElementById("r2q6").value.split(",");
-    document.getElementById("polymerType1").appendChild([...document.querySelectorAll("p")].find(el => el.textContent.trim() === order[0]));
-    document.getElementById("polymerType2").appendChild([...document.querySelectorAll("p")].find(el => el.textContent.trim() === order[1]));
-    document.getElementById("polymerType3").appendChild([...document.querySelectorAll("p")].find(el => el.textContent.trim() === order[2]));
-}
+            <p class="question-label">Question 9: Geographical eras describe points in the past when major geographical changes were happening. Put these in chronological order:</p>
+            <div id="r2q9Container" class="sortable-container">
+                <div class="sortable-item" draggable="true" data-value="1">Precambrian Time</div>
+                <div class="sortable-item" draggable="true" data-value="2">Mesozoic Era</div>
+                <div class="sortable-item" draggable="true" data-value="3">Paleozoic Era</div>
+            </div>
+            <input type="hidden" name="r2q9" id="r2q9" value="Precambrian Time,Mesozoic Era,Paleozoic Era">
 
-function updater2q9Container() {
-
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    populateSubmissionSelect();
-});
+            <label class="question-label" for="r2q10">Question 10: Many animals from all walks of life seem to have 5 digits on each limb (even if it doesn’t seem advantageous). What is the name for a limb with 5 digits?</label>
+            <br>
+            <input class="question-input" name="r2q10" id="r2q10" type="text" autocomplete="off">
+            <br>
+        </div>
+        <button id="submitBtn" type="submit">Submit</button>
+    </form>
+    <script src="edit.js" type="module"></script>
+</body>
+</html>
