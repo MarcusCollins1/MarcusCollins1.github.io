@@ -1,0 +1,168 @@
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #ff5555, #99ff99);
+}
+h1 {
+    font-size: 48px;
+    background-image: linear-gradient(to right, red, green, blue);
+    background-clip: text;
+    color: transparent;
+}
+button {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 5px 10px;
+    margin: 4px;
+    font-size: large;
+    cursor: pointer;
+}
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    padding: 10px 40px 10px 14px;
+    font-size: 16px;
+    font-family: inherit;
+
+    border: 2px solid #d0d7de;
+    border-radius: 10px;
+
+    background-color: white;
+    color: #222;
+
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    /* Custom arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%23666' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px;
+}
+select:hover {
+    border-color: #3b82f6;
+}
+select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.return-button {
+    background-color: cadetblue;
+    color: darkorchid;
+    font-weight: bold;
+}
+.return-button:hover {
+    background-color: darkorchid;
+    color: cadetblue;
+}
+
+.round-label {
+    font-size: x-large;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.question-label {
+    font-size: large;
+    color: purple;
+}
+.question-input {
+    font-size: large;
+    color: blue;
+    background-color: lightblue;
+    caret-color: white;
+    width: 500px;
+    max-width: 75vw;
+}
+.question-input-long {
+    font-size: large;
+    color: blue;
+    background-color: lightblue;
+    caret-color: white;
+    width: 100vw;
+    max-width: 800px;
+    resize: none;
+}
+.polymer-types, .polymers {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+.draggable {
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    cursor: grab;
+    text-align: center;
+    word-wrap: break-word;
+}
+.droppable {
+    background-color: #e8f5e9;
+    border: 2px dashed #4caf50;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    word-wrap: break-word;
+    padding: 5px;
+    box-sizing: border-box;
+    text-align: center;
+    min-height: 100px;
+    min-width: 200px;
+}
+.droppable span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0.8em;
+    pointer-events: none;
+    text-align: center;
+    width: 100%;
+    color: #4caf50;
+}
+.droppable:hover {
+    background-color: #c8e6c9;
+}
+.sortable-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 300px;
+    background-color: transparent;
+}
+.sortable-item {
+    padding: 10px;
+    background-color: #e0f7fa;
+    opacity: 1;
+    border: 1px solid #00796b;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+}
+.sortable-item.dragging {
+    opacity: 0.5;
+    background-color: #80deea;
+}
+
+#submitBtn {
+    font-size: x-large;
+    font-weight: bold;
+    background-color: blueviolet;
+    color: aquamarine;
+}
+#submitBtn:hover {
+    background-color: aquamarine;
+    color: blueviolet;
+}
+#matchContainer {
+    display: flex;
+    justify-content: start;
+    padding: 20px;
+}
