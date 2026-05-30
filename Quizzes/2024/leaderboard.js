@@ -26,7 +26,8 @@ function getScore(submission) {
 }
 
 async function populateLeaderboard() {
-    const submissions = getMarkedSubmissions().map(submission => ({
+    const s = await getMarkedSubmissions();
+    const submissions = s.map(submission => ({
         score: getScore(submission),
         name: submission.name
     }));
