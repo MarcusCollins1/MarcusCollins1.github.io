@@ -6,6 +6,7 @@ const nameList = document.getElementById("nameList");
 
 async function populateNameList() {
     const names = await getNames();
+    nameList.innerHTML = "";
     names.forEach(name => {
         const li = document.createElement("li");
         li.className = "name-item";
