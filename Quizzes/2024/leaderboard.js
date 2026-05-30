@@ -7,9 +7,9 @@ function addEntry(rank, name, score) {
     row.className = "leaderboard-row";
 
     row.innerHTML = `
-        <span>${rank}</span>
-        <span>${name}</span>
-        <span>${score}</span>
+        <span class="rank">${rank}</span>
+        <span class="name">${name}</span>
+        <span class="score">${score}</span>
     `;
 
     leaderboardEntries.appendChild(row);
