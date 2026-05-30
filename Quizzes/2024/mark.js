@@ -52,6 +52,14 @@ function updater2q9Container() {
     });
 }
 
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    data["name"] = document.getElementById("name").value;
+    data["marked"] = true;
+    console.log(data);
+});
 
 
 document.addEventListener("DOMContentLoaded", () => {
