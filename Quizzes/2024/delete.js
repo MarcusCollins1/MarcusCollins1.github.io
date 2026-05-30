@@ -19,6 +19,7 @@ async function populateNameList() {
         btn.textContent = "Delete";
         btn.onclick = function () {
             deleteSubmission(name);
+            populateNameList();
         };
         li.appendChild(btn);
 
