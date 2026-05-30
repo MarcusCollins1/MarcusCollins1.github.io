@@ -8,7 +8,7 @@ import {
     updateDoc,
     serverTimestamp,
     doc,
-    deletedoc,
+    deleteDoc,
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -43,7 +43,7 @@ export async function deleteSubmission(name) {
         const submissionRef = doc(db, "quizzes", "2024", "submissions", name);
         const snapshot = await getDoc(submissionRef);
         if (snapshot.exisits()) {
-            deletedoc(submissionRef);
+            deleteDoc(submissionRef);
         } else {
             alert("Name no longer exists");
         }
