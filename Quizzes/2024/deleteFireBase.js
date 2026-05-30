@@ -42,7 +42,7 @@ export async function deleteSubmission(name) {
     try {
         const submissionRef = doc(db, "quizzes", "2024", "submissions", name);
         const snapshot = await getDoc(submissionRef);
-        if (snapshot.exisits()) {
+        if (snapshot.exists()) {
             deleteDoc(submissionRef);
         } else {
             alert("Name no longer exists");
