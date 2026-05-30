@@ -1,0 +1,127 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+}
+button {
+    height: 46px;
+    border: none;
+    border-radius: 10px;
+    background: #38bdf8;
+    color: #082f49;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+}
+button:hover {
+    filter: brightness(1.05);
+}
+h1 {
+    margin: 0 0 20px;
+    text-align: center;
+    font-size: clamp(2rem, 4vw, 3rem);
+}
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #475569;
+    background: #0b1220;
+    color: #e2e8f0;
+    font-size: 16px;
+    outline: none;
+}
+input:focus {
+    border-color: #38bdf8;
+}
+
+.container {
+    width: min(1200px, 100%);
+    margin: 0 auto;
+    padding: 24px;
+}
+.panel {
+    background: #111827;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+.hint {
+    margin: 0 0 16px;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+.hint code {
+    background: #0b1220;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+}
+.controls {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    align-items: end;
+}
+.controls label {
+    margin: 0;
+    font-size: 0.95rem;
+}
+.controls input {
+    margin-top: 8px;
+}
+.error {
+    margin-top: 14px;
+    color: #fda4af;
+    min-height: 1.25em;
+    font-weight: 700;
+}
+.plots {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+}
+.plot {
+    width: 100%;
+    min-height: 420px;
+    background: #111827;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+#tfInput {
+    margin-bottom: 12px;
+}
+
+@media (max-width: 900px) {
+    .controls {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 14px;
+    }
+
+    .controls {
+        grid-template-columns: 1fr;
+    }
+
+    .plot {
+        min-height: 360px;
+    }
+}
