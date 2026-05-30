@@ -1,5 +1,6 @@
 import {
     getNames,
+    deleteSubmission,
 } from "./deleteFireBase.js"
 const nameList = document.getElementById("nameList");
 
@@ -17,7 +18,7 @@ async function populateNameList() {
         btn.className = "delete-button";
         btn.textContent = "Delete";
         btn.onclick = function () {
-
+            deleteSubmission(name);
         };
         li.appendChild(btn);
 
