@@ -18,8 +18,8 @@ async function populateNameList() {
         const btn = document.createElement("button");
         btn.className = "delete-button";
         btn.textContent = "Delete";
-        btn.onclick = function () {
-            deleteSubmission(name);
+        btn.onclick = async function () {
+            await deleteSubmission(name);
             populateNameList();
         };
         li.appendChild(btn);
