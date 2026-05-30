@@ -35,7 +35,7 @@ async function populateLeaderboard() {
     submissions
         .sort((a, b) => b.score - a.score)
         .forEach((submission, i) => {
-            addRow(i, submission.name, submission.score);
+            addEntry(i, submission.name, submission.score);
     });
 }
 
