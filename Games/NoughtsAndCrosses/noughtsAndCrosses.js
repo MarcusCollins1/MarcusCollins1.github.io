@@ -125,7 +125,7 @@ document.querySelectorAll(".cell").forEach(cell => {
             board[index] = mySymbol;
             const winner = getWinner(board);
             
-            transaction.updateDoc(gameRef, {
+            transaction.update(gameRef, {
                 board,
                 turn:
                     mySymbol === "X"
