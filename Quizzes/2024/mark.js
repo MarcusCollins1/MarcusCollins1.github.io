@@ -57,3 +57,9 @@ function updater2q9Container() {
         r2q9Container.appendChild([...document.querySelectorAll("div")].find(el => el.textContent.trim() === val));
     });
 }
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    populateSubmissionSelect();
+});
