@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer noughts and crosses</title>
+    <link rel="stylesheet" href="noughtsAndCrosses.css">
+</head>
+<body>
+    <h1>Multiplayer Noughts and Crosses</h1>
+
+    <div class="room-controls">
+        <input id="roomInput" placeholder="Room ID">
+        <button id="joinBtn">Join Room</button>
+    </div>
+
+    <h2 id="status">Join a room</h2>
+
+    <div id="board" class="board">
+        <button class="cell" data-index="0"></button>
+        <button class="cell" data-index="1"></button>
+        <button class="cell" data-index="2"></button>
+
+        <button class="cell" data-index="3"></button>
+        <button class="cell" data-index="4"></button>
+        <button class="cell" data-index="5"></button>
+
+        <button class="cell" data-index="6"></button>
+        <button class="cell" data-index="7"></button>
+        <button class="cell" data-index="8"></button>
+    </div>
+
+    <script src="noughtsAndCrosses.js" type="module"></script>
+</body>
+</html>
