@@ -1,6 +1,7 @@
 import {
     getSubmissionIds,
-    getSubmission
+    getSubmission,
+    submitMarkedQuiz
 } from "./markFireBase.js";
 
 const submissionSelect = document.getElementById("submissionSelect");
@@ -67,7 +68,8 @@ form.addEventListener("submit", async (event) => {
             }
         }
     }
-    console.log(data);
+    
+    submitMarkedQuiz(data);
 });
 
 
