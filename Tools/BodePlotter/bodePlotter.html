@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bode Plotter</title>
+    <link rel="stylesheet" href="bodePlotter.css" />
+
+    <!-- Math.js for complex evaluation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.js"></script>
+
+    <!-- Plotly for plotting -->
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Bode Plotter</h1>
+
+        <div class="panel">
+            <label for="tfInput">Transfer function G(s)</label>
+            <input
+                id="tfInput"
+                type="text"
+                value="1 / (s * (s + 1))"
+                placeholder="Example: 1 / (s * (s + 1))"
+            />
+
+            <p class="hint">
+                Use <code>s</code> for the Laplace variable.
+                Example: <code>10 / (s^2 + 3*s + 10)</code>
+            </p>
+
+            <div class="controls">
+                <label>
+                    Start frequency
+                    <input id="wMin" type="number" value="0.01" step="0.01" min="0.000001" />
+                </label>
+
+                <label>
+                    End frequency
+                    <input id="wMax" type="number" value="1000" step="1" min="0.000001" />
+                </label>
+
+                <label>
+                    Points
+                    <input id="points" type="number" value="500" step="50" min="10" max="5000" />
+                </label>
+
+                <button id="plotBtn">Plot Bode</button>
+            </div>
+
+            <div id="error" class="error"></div>
+        </div>
+
+        <div class="plots">
+            <div id="magnitudePlot" class="plot"></div>
+            <div id="phasePlot" class="plot"></div>
+        </div>
+    </div>
+
+    <script src="bodePlotter.js"></script>
+</body>
+</html>
