@@ -33,6 +33,10 @@ button {
     margin-bottom: 8px;
     border: 1px solid #ddd;
     border-radius: 6px;
+    gap: 12px;
+}
+.name-item span {
+    width: fit-content;
 }
 .delete-button {
     padding: 6px 12px;
