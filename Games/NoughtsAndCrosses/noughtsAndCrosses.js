@@ -9,6 +9,7 @@ import {
     getDoc,
     setDoc,
     updateDoc,
+    deleteDoc,
     runTransaction,
     onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -80,11 +81,38 @@ async function joinRoom() {
     listenToGame();
 }
 
+async function leaveGame() {
+    if (!currentRoom || !auth.currentUser) return;
+
+    const gameRef = doc(db, "games", currentRoom);
+
+    await runTransaction(db, async (transaction) => {
+        const snapshot = await transaction.get(gameRef);
+
+        if (!snapshot.exists()) return;
+
+        const game = snapshot.data();
+        const uid = auth.currentUser.uid;
+        if (game.playerX !== uid && game.playerO !== uid) return;
+
+        transaction.delete(gameRef);
+    });
+
+    currentRoom = null;
+    mySymbol = null;
+    statusEl.textContent = "Game Deleted";
+    renderBoard(["", "", "", "", "", "", "", "", ""]);
+}
+
 function listenToGame() {
     const gameRef = doc(db, "games", currentRoom);
 
     onSnapshot(gameRef, snapshot => {
-        if (!snapshot.exists) return;
+        if (!snapshot.exists) {
+            statusEl.textContent = "The other player left. Game deleted.";
+            renderBoard(["", "", "", "", "", "", "", "", ""]);
+            return;
+        }
 
         const game = snapshot.data();
 
@@ -162,3 +190,7 @@ function getWinner(board) {
     }
     return null;
 }
+
+window.addEventListener("pagehide", () => {
+    if (currentRoom) leaveGame();
+});
