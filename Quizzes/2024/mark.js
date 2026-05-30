@@ -58,6 +58,15 @@ form.addEventListener("submit", async (event) => {
     const data = Object.fromEntries(formData.entries());
     data["name"] = document.getElementById("name").value;
     data["marked"] = true;
+    for (let round = 1; round <= 2; round++) {
+        for (let question = 1; question <= 10; question++) {
+            if (Object.hasOwn(data, `r${round}q${question}Checkbox`)) {
+                data[`r${round}q${question}Checkbox`] = true;
+            } else {
+                data[`r${round}q${question}Checkbox`] = false;
+            }
+        }
+    }
     console.log(data);
 });
 
