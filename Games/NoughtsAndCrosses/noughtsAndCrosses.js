@@ -191,6 +191,11 @@ function getWinner(board) {
     return null;
 }
 
+document.getElementById("returnBtn").onclick = async function() {
+    await leaveGame();
+    location.href='../../games.html';
+}
+
 window.addEventListener("pagehide", () => {
     if (currentRoom) leaveGame();
 });
