@@ -24,5 +24,16 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 export async function getMarkedSubmissions() {
-    
+    try {
+        const submissionsRef = collection(db, "quizzes", "2024", "submissions");
+        const snapshot = await getDocs(submissionsRef);
+        const submissions = snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...docSnap.data()
+        }));
+        return submissions
+            .filter(submission => submission.marked);
+    } catch (error) {
+        console.error(error);
+    }
 }
