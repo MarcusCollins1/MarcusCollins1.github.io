@@ -50,3 +50,33 @@ export async function getSubmission(id) {
         console.error(error);
     }
 }
+
+export async function submitMarkedQuiz(data) {
+    try {
+        const name = data.name;
+        const submissionsRef = collection(db, "quizzes", "2024", "submissions");
+        const snapshot = await getDocs(submissionsRef);
+        const submissions = snapshot.docs.map((docSnap) => ({
+            id: docSnap.id,
+            ...docSnap.data()
+        }));
+        if (!Object.values(submissions).some(item => item.id === name)) {
+            alert("Name does not exist");
+            return;
+        }
+
+        const submissionRef = doc(db, "quizzes", "2024", "submissions", name);
+
+        await setDoc(submissionRef, {
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        await updateDoc(submissionRef, {
+            ...data
+        });
+
+        alert("Successfully submitted marking");
+    } catch (error) {
+        console.error(error);
+    }
+}
