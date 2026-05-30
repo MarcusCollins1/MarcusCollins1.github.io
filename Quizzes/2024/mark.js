@@ -35,12 +35,8 @@ submissionSelect.addEventListener("change", (event) => {
 
 
 const form = document.getElementById("quizForm");
-const draggables = document.querySelectorAll(".draggable");
-const droppables = document.querySelectorAll(".droppable");
 const r2q9Container = document.getElementById("r2q9Container");
 const sortedOrderInput = document.getElementById("r2q9");
-
-let draggingElement = null;
 
 function updater2q6Container() {
     const order = document.getElementById("r2q6").value.split(",");
