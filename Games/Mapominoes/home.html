@@ -11,7 +11,6 @@
     <h1>Mapominoes</h1>
     
     <form id="packsForm"></form>
-    <button id="createGameBtn">Create Game</button>
 
     <ul id="gamePinsList"></ul>
 
@@ -43,6 +42,13 @@
 
         let nameInput = null;
         let packNames = [];
+
+        async function getGames() {
+            const gamesRef = doc(db, "Mapominoes", "Games");
+            const snapshot = await getDoc(gamesRef);
+            const games = snapshot.data();
+            console.log(games);
+        }
 
         document.addEventListener("DOMContentLoaded", async function() {
             const packsRef = doc(db, "Mapominoes", "Packs");
@@ -112,7 +118,7 @@
             });
             const submitBtn = document.createElement("button");
             submitBtn.id = "submitBtn";
-            submitBtn.textContent = "Submit";
+            submitBtn.textContent = "Create Game";
             packsForm.appendChild(submitBtn);
         }
         
