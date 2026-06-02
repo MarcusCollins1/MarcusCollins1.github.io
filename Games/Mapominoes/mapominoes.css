@@ -1,0 +1,257 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: block;
+    background-color: lightslategray;
+    overflow-y: scroll;
+}
+h1 {
+    font-size: 50px;
+    color: blueviolet;
+}
+button {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 5px 10px;
+    margin: 4px;
+    cursor: pointer;
+}
+button:hover {
+    background-color: lightcoral;
+}
+.return-button {
+    background-color: lightblue;
+    color: hotpink;
+    font-size: large;
+    font-weight: bold;
+}
+.return-button:hover {
+    background-color: hotpink;
+    color: lightblue;
+}
+
+.card-on-board {
+    width: 80px;
+    height: 128px;
+    position: absolute;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 2px solid #fff;
+    border-radius: 5px;
+}
+.transit-on-board {
+    filter: opacity(0.75);
+}
+.possible {
+    width: 80px;
+    height: 128px;
+    position: absolute;
+    background-color: rgba(150, 150, 150, 0.7);
+    border: 2px solid black;
+    border-radius: 5px;
+}
+.card-in-hand {
+    flex-shrink: 0;
+    cursor: grab;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    z-index: 1;
+    transition: transform 0.2s, z-index 0.2s;
+    height: 90%;
+    aspect-ratio: 5 / 8;
+}
+.card-in-hand:hover {
+    transform: scale(1.3);
+    z-index: 10;
+}
+.card-in-hand:active {
+    cursor: grabbing;
+}
+.transit-in-hand {
+    flex-shrink: 0;
+    cursor: grab;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url("Cards/Transit.jpg");
+    border: 2px solid #fff;
+    border-radius: 5px;
+    z-index: 1;
+    transition: transform 0.2s, z-index 0.2s;
+    height: 90%;
+    aspect-ratio: 5 / 8;
+}
+.transit-in-hand:hover {
+    transform: scale(1.3);
+    z-index: 10;
+}
+.transit-in-hand:active {
+    cursor: grabbing;
+}
+.disabled {
+    filter: grayscale(100%);
+}
+.blurred {
+    filter: blur(2px);
+    background-color: lightgreen;
+}
+#infoContainer {
+    height: 20vh;
+    width: 50vw;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    border: 1px solid black;
+}
+#startBtn {
+    display: none;
+    font-size: large;
+    background-color: green;
+    color: white;
+}
+#startBtn:hover {
+    background-color: white;
+    color: green;
+}
+#startBtn:disabled {
+    background-color: gray;
+}
+#boardContainer {
+    display: none;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid black;
+    background-color: #f0f0f0;
+    width: 90%;
+    height: 70vh;
+    overflow: hidden;
+    position: relative;
+}
+#board {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 80px);
+    grid-template-rows: repeat(auto-fill, 128px);
+    transform-origin: center;
+    cursor: grab;
+    background-color: lightblue;
+}
+#centerBtn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 50px;
+    height: 50px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url(Images/center.png);
+}
+#playerHand {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 20vh;
+    width: 100%;
+    display: none;
+    align-items: flex-end;
+    overflow-x: auto;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-top: 2px solid #ccc;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+#playerHand::-webkit-scrollbar {
+    display: none;
+}
+#skipTurnBtn {
+    display: none;
+    margin: 0 auto;
+    font-size: large;
+    background-color: saddlebrown;
+    color: whitesmoke;
+}
+#skipTurnBtn:hover {
+    background-color: white;
+    color: saddlebrown;
+}
+#skipTurnBtn:disabled {
+    background-color: grey;
+    color: whitesmoke;
+}
+#highlightCards {
+    display: none;
+    margin: 0 auto;
+    font-size: large;
+    background-color: pink;
+    color: black;
+}
+#highlightCards:hover {
+    background-color: black;
+    color: pink;
+}
+#highlightCards:disabled {
+    background-color: grey;
+    color: whitesmoke;
+}
+#unhighlightCards {
+    display: none;
+    margin: 0 auto;
+    font-size: large;
+    background-color: aqua;
+    color: darkred;
+}
+#unhighlightCards:hover {
+    background-color: darkred;
+    color: aqua;
+}
+#unhighlightCards:disabled {
+    background-color: grey;
+    color: whitesmoke;
+}
+#playerHandWhiteSpace {
+    height: 25vh;
+    display: none;
+}
+#getTransitCardDiv {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: gray;
+    border: 2px solid black;
+    z-index: 10;
+}
+#gameEndDiv {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: gray;
+    border: 2px solid black;
+    z-index: 10;
+    padding: 20px;
+}
+#returnHomeBtn {
+    font-size: large;
+    background-color: blue;
+    color: white;
+}
+#returnHomeBtn:hover {
+    background-color: white;
+    color: blue;
+}
