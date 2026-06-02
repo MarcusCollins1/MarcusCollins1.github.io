@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>"
+</head>
+<body>
+    <h1>Mapominoes</h1>
+    
+    <form id="packsForm"></form>
+    <button id="createGameBtn">Create Game</button>
+
+    <ul id="gamePinsList"></ul>
+
+    <button onclick="getGames()">Reload</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+        import {
+            doc,
+            getDoc,
+        } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_CXSZVz6meJgcJyktktWNmPtLmeFNXn0",
+            authDomain: "marcus-collins-github-website.firebaseapp.com",
+            projectId: "marcus-collins-github-website",
+            storageBucket: "marcus-collins-github-website.firebasestorage.app",
+            messagingSenderId: "328004594228",
+            appId: "1:328004594228:web:47074e07c446a328bbf861",
+            measurementId: "G-6M9HBX4E3Z"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+
+        const packsForm = document.getElementById("packsForm");
+
+        let nameInput = null;
+        let packNames = [];
+
+        document.addEventListener("DOMContentLoaded", async function() {
+            const packsRef = doc(db, "Mapominoes", "Packs");
+            const snapshot = await getDoc(packsRef);
+            console.log(snapshot.data());
+
+            populatePacksForm();
+        });
+
+        packsForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            let formData = {};
+            packsForm.querySelectorAll("input[type='checkbox']").forEach(checkBox => {
+                formData[checkBox.name] = checkBox.checked ? true : false;
+            });
+            if (!Object.values(formData).some(value => value)) {
+                alert("You must select at least 1 pack");
+                return;
+            }
+            formData["name"] = nameInput.value;
+
+            let gamePin;
+            while (true) {
+                gamePin = generateGamePin();
+                const gameRef = doc(db, "Mapominoes", "Games", gamePin);
+                const snapshot = await getDoc(gameRef);
+                if (!snapshot.exists()) break;
+            }
+            await setDoc(gameRef, {
+                ...formData
+            });
+
+            window.localStorage.setItem("gamePin", gamePin);
+            window.localStorage.setItem("host", true);
+            window.localStorage.setItem("name", nameInput.value);
+            window.location.href = "./mapominoes.html";
+        });
+
+        function populatePacksForm() {
+            packsForm.innerHTML = "";
+            const nameH2 = document.createElement("h2");
+            nameH2.textContent = "Name:";
+            packsForm.appendChild(nameH2);
+            nameInput = document.createElement("input");
+            nameInput.type = "text";
+            nameInput.id = "nameInput";
+            nameInput.required = true;
+            packsForm.appendChild(nameInput);
+            packsForm.appendChild(document.createElement("br"));
+            packsForm.appendChild(document.createElement("br"));
+            const packsH2 = document.createElement("h2");
+            packsH2.textContent = "Packs:";
+            packsForm.appendChild(packsH2);
+            packNames.forEach(packName => {
+                const packCheckBox = document.createElement("input");
+                packCheckBox.id = `${packName}-checkbox`;
+                packCheckBox.type = "checkbox";
+                packCheckBox.name = packName;
+                packsForm.appendChild(packCheckBox);
+                const packLabel = document.createElement("label");
+                packLabel.htmlFor = `${packName}-checkbox`;
+                packLabel.textContent = packName;
+                packsForm.appendChild(packLabel);
+                packsForm.appendChild(document.createElement("br"));
+            });
+            const submitBtn = document.createElement("button");
+            submitBtn.id = "submitBtn";
+            submitBtn.textContent = "Submit";
+            packsForm.appendChild(submitBtn);
+        }
+        
+        function generateGamePin() {
+            return Math.floor(1000 + Math.random() * 9000);
+        }
+    </script>
+</body>
+</html>
