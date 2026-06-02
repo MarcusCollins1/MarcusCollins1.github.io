@@ -1,6 +1,6 @@
 import {
     boardState,
-    board,
+    el,
     player,
 } from "./mapominoes.js"
 
@@ -30,7 +30,7 @@ export function bordersTransit(row, col) {
 }
 
 export function getElementByRowCol(row, col) {
-    for (const child of board.children) {
+    for (const child of el.board.children) {
         if (parseInt(child.style.gridRow) === row && parseInt(child.style.gridColumn) === col) {
             return child;
         }
