@@ -9,7 +9,12 @@
 <body>
     <button class="return-button" id="returnBtn" onclick="window.location.href='../games.html'">← Return</button>
     <h1>Mapominoes</h1>
+
+    <h2>Name:</h2>
+    <input type="text" id="nameInput" placeholder="Enter your name">
     
+    <br>
+
     <form id="packsForm"></form>
 
     <ul id="gamePinsList"></ul>
@@ -40,7 +45,7 @@
 
         const packsForm = document.getElementById("packsForm");
 
-        let nameInput = null;
+        let nameInput = document.getElementById("nameInput");
         let packNames = [];
 
         async function getGames() {
@@ -91,16 +96,6 @@
 
         function populatePacksForm() {
             packsForm.innerHTML = "";
-            const nameH2 = document.createElement("h2");
-            nameH2.textContent = "Name:";
-            packsForm.appendChild(nameH2);
-            nameInput = document.createElement("input");
-            nameInput.type = "text";
-            nameInput.id = "nameInput";
-            nameInput.required = true;
-            packsForm.appendChild(nameInput);
-            packsForm.appendChild(document.createElement("br"));
-            packsForm.appendChild(document.createElement("br"));
             const packsH2 = document.createElement("h2");
             packsH2.textContent = "Packs:";
             packsForm.appendChild(packsH2);
