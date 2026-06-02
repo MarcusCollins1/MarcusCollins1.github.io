@@ -85,7 +85,7 @@
             let gamePin;
             const gameRef = doc(db, "Mapominoes", "Games");
             const snapshot = await getDoc(gameRef);
-            gamePins = snapshot.data();
+            const gamePins = snapshot.data();
             console.log(gamePins);
             while (true) {
                 gamePin = generateGamePin();
