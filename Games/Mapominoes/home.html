@@ -67,6 +67,11 @@
         packsForm.addEventListener("submit", async (event) => {
             event.preventDefault();
 
+            if (nameInput.value.trim() === "") {
+                alert("Please enter your name");
+                return;
+            }
+
             let formData = {};
             packsForm.querySelectorAll("input[type='checkbox']").forEach(checkBox => {
                 formData[checkBox.name] = checkBox.checked ? true : false;
@@ -75,7 +80,7 @@
                 alert("You must select at least 1 pack");
                 return;
             }
-            formData["name"] = nameInput.value;
+            formData["name"] = nameInput.value.trim();
 
             let gamePin;
             while (true) {
