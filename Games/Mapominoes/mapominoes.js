@@ -1,4 +1,4 @@
-import { bordersTransit, getAllowedCountriesAt, getAllowedSeasAt, getElementByRowCol } from "./functions";
+import { bordersTransit, getAllowedCountriesAt, getAllowedSeasAt, getElementByRowCol } from "./functions.js";
 
 const el = {
     returnBtn: document.getElementById("returnBtn"),
