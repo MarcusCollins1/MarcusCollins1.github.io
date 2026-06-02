@@ -87,18 +87,17 @@
             const gameRef = doc(db, "Mapominoes", "Games");
             const snapshot = await getDoc(gameRef);
             const gamePins = Object.values(snapshot.data());
-            console.log(gamePins);
             while (true) {
                 gamePin = generateGamePin();
                 if (!gamePins.includes(gamePin)) break;
             }
             
             await updateDoc(gameRef, {
-                gamePin: {
+                [gamePin]: {
                     players: [formData.name],
                     packs: Object.keys(formData).filter(key => key !== "name" && formData[key]),
                 }
-            })
+            });
 
             window.localStorage.setItem("gamePin", gamePin);
             window.localStorage.setItem("host", true);
