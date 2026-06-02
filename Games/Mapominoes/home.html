@@ -45,7 +45,8 @@
         document.addEventListener("DOMContentLoaded", async function() {
             const packsRef = doc(db, "Mapominoes", "Packs");
             const snapshot = await getDoc(packsRef);
-            console.log(snapshot.data());
+            
+            packNames = snapshot.data().packs;
 
             populatePacksForm();
         });
