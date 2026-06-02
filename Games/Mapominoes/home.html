@@ -27,6 +27,7 @@
             getFirestore,
             doc,
             getDoc,
+            updateDoc,
         } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -85,13 +86,19 @@
             let gamePin;
             const gameRef = doc(db, "Mapominoes", "Games");
             const snapshot = await getDoc(gameRef);
-            const gamePins = snapshot.data();
+            const gamePins = Object.values(snapshot.data());
             console.log(gamePins);
             while (true) {
                 gamePin = generateGamePin();
-                break;
+                if (!gamePins.includes(gamePin)) break;
             }
-            console.log(formData);
+            
+            await updateDoc(gameRef, {
+                gamePin: {
+                    players: [formData.name],
+                    packs: Object.keys(formData).filter(key => key !== "name" && formData[key]),
+                }
+            })
 
             window.localStorage.setItem("gamePin", gamePin);
             window.localStorage.setItem("host", true);
