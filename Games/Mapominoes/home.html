@@ -85,13 +85,11 @@
             let gamePin;
             while (true) {
                 gamePin = generateGamePin();
-                const gameRef = doc(db, "Mapominoes", "Games", gamePin);
+                const gameRef = doc(db, "Mapominoes", "Games");
                 const snapshot = await getDoc(gameRef);
-                if (!snapshot.exists()) break;
+                
             }
-            await setDoc(gameRef, {
-                ...formData
-            });
+            console.log(formData);
 
             window.localStorage.setItem("gamePin", gamePin);
             window.localStorage.setItem("host", true);
