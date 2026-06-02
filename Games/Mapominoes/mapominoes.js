@@ -30,6 +30,10 @@ export const el = {
     returnHomeBtn: document.getElementById("returnHomeBtn"),
 };
 
+const host = window.localStorage.getItem("host") == "true";
+const gamePin = parseInt(window.localStorage.getItem("gamePin"));
+const name = window.localStorage.getItem("name");
+
 const cardWidth = 80;
 const cardHeight = 128;
 const boardCols = 101;
