@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapominoes</title>
+    <link rel="stylesheet" href="mapominoes.css">
+</head>
+<body>
+    <button id="returnBtn" class="return-button">← Return</button>
+
+    <h1>Mapominoes</h1>
+
+    <div id="infoContainer" style="display: none;">
+        <div id="gamePinP"></div>
+        <div id="packsP"></div>
+        <div>Players:</div>
+        <ul id="playersList"></ul>
+    </div>
+    <button id="startBtn" onclick="startGame()" disabled>Start</button>
+    <p id="waitingForGameToStartP" style="display: none; color: purple;">Waiting for game to start</p>
+
+    <br>
+
+    <div id="boardContainer">
+        <div id="board"></div>
+        <button id="centerBtn"></button>
+    </div>
+
+    <button id="skipTurnBtn" onclick="skipTurn()" disabled>Skip Turn</button>
+    <button id="highlightCardsBtn" onclick="highlightCards()" disabled>Highlight Cards</button>
+    <button id="unhighlightCardsBtn" onclick="unhighlightCards()" disabled>Unhighlight Cards</button>
+
+    <div id="playerHandWhiteSpace"></div>
+
+    <div id="playerHand"></div>
+
+    <div id="getTransitCardDiv">
+        <h2>Countries</h2>
+        <ul id="getTransitCardCountriesUl"></ul>
+        <h2>Seas:</h2>
+        <ul id="getTransitCardSeasUl"></ul>
+    </div>
+
+    <div id="gameEndDiv">
+        <h1>Game Over</h1>
+        <h2>Finished Order:</h2>
+        <ol id="finishedOrderOl"></ol>
+        <button id="returnHomeBtn">Return Home</button>
+    </div>
+
+    <script src="./mapominoes.js"></script>
+</body>
+</html>
