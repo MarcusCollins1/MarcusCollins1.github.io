@@ -1,6 +1,6 @@
 import { bordersTransit, getAllowedCountriesAt, getAllowedSeasAt, getElementByRowCol } from "./functions.js";
 
-const el = {
+export const el = {
     returnBtn: document.getElementById("returnBtn"),
 
     infoContainer: document.getElementById("infoContainer"),
