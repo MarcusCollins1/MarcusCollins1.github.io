@@ -35,17 +35,21 @@
             <div class="control-group custom-function-group">
                 <label for="functionInput">Function f(x)</label>
                 <textarea id="functionInput" rows="3" spellcheck="false">sin(2*pi*x) + 0.5*cos(5*pi*x)</textarea>
-                <small class="helper-text">Use x, pi, e, sin, cos, tan, abs, sqrt, log, exp, pow, and parentheses.</small>
+                <small class="helper-text">
+                    Use x, pi, e, sin, cos, tan, abs, sqrt, log, exp, pow, and parentheses.
+                    Bounds may also be expressions such as -pi, pi, 2*pi, sqrt(2), etc.
+                </small>
             </div>
 
             <div class="bounds-grid">
                 <div class="control-group">
                     <label for="lowerBound">Lower bound L</label>
-                    <input id="lowerBound" type="number" value="0" step="0.1" />
+                    <input id="lowerBound" type="text" value="-pi" />
                 </div>
+
                 <div class="control-group">
                     <label for="upperBound">Upper bound U</label>
-                    <input id="upperBound" type="number" value="1" step="0.1" />
+                    <input id="upperBound" type="text" value="pi" />
                 </div>
             </div>
 
