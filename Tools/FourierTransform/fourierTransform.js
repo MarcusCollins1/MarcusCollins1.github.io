@@ -24,20 +24,19 @@ const PRESET_EXPRESSIONS = {
   composite: '0.8*sin(2*pi*x) + 0.35*sin(5*pi*x + 0.7) + 0.2*cos(9*pi*x)'
 };
 
+let lastCustomExpression = functionInput.value.trim();
+
 function formatNumber(value, digits = 6) {
   if (!Number.isFinite(value)) return 'NaN';
-  const abs = Math.abs(value);
-  if (abs === 0) return '0';
-  if (abs >= 1e5 || abs < 1e-4) return value.toExponential(3);
+  if (Math.abs(value) < 1e-12) return '0';
+  if (Math.abs(value) >= 1e5 || Math.abs(value) < 1e-4) {
+    return value.toExponential(3);
+  }
   return Number(value.toFixed(digits)).toString();
 }
 
-function formatSigned(value) {
-  return value >= 0 ? `+ ${formatNumber(value)}` : `- ${formatNumber(Math.abs(value))}`;
-}
-
 function escapeHtml(text) {
-  return text
+  return String(text)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
@@ -45,13 +44,26 @@ function escapeHtml(text) {
     .replaceAll("'", '&#39;');
 }
 
-function buildFunctionEvaluator(expression) {
-  const normalized = expression
+function getExpressionFromUI() {
+  if (signalSelect.value === 'custom') {
+    return functionInput.value.trim();
+  }
+  return PRESET_EXPRESSIONS[signalSelect.value] || functionInput.value.trim();
+}
+
+function setExpressionForPreset(preset) {
+  if (preset in PRESET_EXPRESSIONS) {
+    functionInput.value = PRESET_EXPRESSIONS[preset];
+  }
+}
+
+function buildMathEvaluator(expression, variableName = 'x') {
+  const normalized = String(expression)
     .replaceAll('^', '**')
     .replace(/\bpi\b/gi, 'Math.PI')
     .replace(/\be\b/gi, 'Math.E');
 
-  const allowed = {
+  const replacements = {
     sin: 'Math.sin',
     cos: 'Math.cos',
     tan: 'Math.tan',
@@ -78,83 +90,78 @@ function buildFunctionEvaluator(expression) {
   };
 
   let safe = normalized;
-  for (const [name, replacement] of Object.entries(allowed)) {
+  for (const [name, replacement] of Object.entries(replacements)) {
     safe = safe.replace(new RegExp(`\\b${name}\\b`, 'g'), replacement);
   }
 
   // eslint-disable-next-line no-new-func
-  return new Function('x', `const pi = Math.PI; const e = Math.E; return (${safe});`);
+  return new Function(variableName, `const pi = Math.PI; const e = Math.E; return (${safe});`);
 }
 
-function getActiveExpression() {
-  const preset = signalSelect.value;
-  if (preset !== 'custom') {
-    return PRESET_EXPRESSIONS[preset];
+function parseBoundExpression(raw) {
+  const text = String(raw).trim();
+  if (!text) {
+    throw new Error('Bounds cannot be empty.');
   }
-  return functionInput.value.trim();
-}
 
-function setPresetExpression(preset) {
-  if (preset in PRESET_EXPRESSIONS) {
-    functionInput.value = PRESET_EXPRESSIONS[preset];
-  }
-}
-
-function evaluateFunctionAt(x, expression) {
-  const fn = buildFunctionEvaluator(expression);
-  const value = fn(x);
+  const fn = buildMathEvaluator(text, '_');
+  const value = fn(0);
   if (!Number.isFinite(value)) {
-    throw new Error('Function returned a non-finite value.');
+    throw new Error(`Could not evaluate bound: ${text}`);
   }
   return value;
 }
 
-function computeFourierCoefficients(expression, lower, upper, harmonics, integrationSamples = 4096) {
+function trapezoidFourierCoefficients(expression, lower, upper, harmonics, integrationSamples = 4096) {
   const T = upper - lower;
   const dx = T / integrationSamples;
-  const anAccum = new Array(harmonics).fill(0);
-  const bnAccum = new Array(harmonics).fill(0);
-  const fn = buildFunctionEvaluator(expression);
+  const fn = buildMathEvaluator(expression, 'x');
 
-  let a0Sum = 0;
+  const an = new Array(harmonics).fill(0);
+  const bn = new Array(harmonics).fill(0);
+  let a0Integral = 0;
+
   for (let i = 0; i <= integrationSamples; i++) {
     const x = lower + i * dx;
     const weight = i === 0 || i === integrationSamples ? 0.5 : 1;
     const y = fn(x);
+
     if (!Number.isFinite(y)) {
       throw new Error(`Function returned a non-finite value at x = ${formatNumber(x, 4)}.`);
     }
 
-    a0Sum += weight * y;
+    a0Integral += weight * y;
+
     for (let n = 1; n <= harmonics; n++) {
       const angle = (2 * Math.PI * n * (x - lower)) / T;
-      anAccum[n - 1] += weight * y * Math.cos(angle);
-      bnAccum[n - 1] += weight * y * Math.sin(angle);
+      an[n - 1] += weight * y * Math.cos(angle);
+      bn[n - 1] += weight * y * Math.sin(angle);
     }
   }
 
   const scale = (2 / T) * dx;
-  const a0 = a0Sum * scale;
-  const an = anAccum.map((value) => value * scale);
-  const bn = bnAccum.map((value) => value * scale);
-
-  return { a0, an, bn, T };
+  return {
+    a0: a0Integral * scale,
+    an: an.map((value) => value * scale),
+    bn: bn.map((value) => value * scale),
+    T
+  };
 }
 
-function evaluateSeries(x, lower, coefficients, harmonics) {
+function evaluateFourierSeries(x, lower, coefficients, harmonics) {
   const { a0, an, bn, T } = coefficients;
-  let total = a0 / 2;
-  const shiftedX = x - lower;
+  let result = a0 / 2;
 
   for (let n = 1; n <= harmonics; n++) {
-    const angle = (2 * Math.PI * n * shiftedX) / T;
-    total += an[n - 1] * Math.cos(angle) + bn[n - 1] * Math.sin(angle);
+    const angle = (2 * Math.PI * n * (x - lower)) / T;
+    result += an[n - 1] * Math.cos(angle) + bn[n - 1] * Math.sin(angle);
   }
 
-  return total;
+  return result;
 }
 
 function rootMeanSquareError(a, b) {
+  if (!a.length || a.length !== b.length) return NaN;
   let total = 0;
   for (let i = 0; i < a.length; i++) {
     const diff = a[i] - b[i];
@@ -164,6 +171,7 @@ function rootMeanSquareError(a, b) {
 }
 
 function meanAbsoluteError(a, b) {
+  if (!a.length || a.length !== b.length) return NaN;
   let total = 0;
   for (let i = 0; i < a.length; i++) {
     total += Math.abs(a[i] - b[i]);
@@ -171,15 +179,23 @@ function meanAbsoluteError(a, b) {
   return total / a.length;
 }
 
-function drawCartesianAxes(ctx, width, height, padding, xMin, xMax, yMin, yMax, xLabel, yLabel) {
+function drawAxes(ctx, width, height, padding, xMin, xMax, yMin, yMax, xLabel, yLabel) {
   const plotWidth = width - 2 * padding;
   const plotHeight = height - 2 * padding;
-  const xAxisY = yMin <= 0 && yMax >= 0 ? height - padding - ((0 - yMin) / (yMax - yMin)) * plotHeight : height - padding;
-  const yAxisX = xMin <= 0 && xMax >= 0 ? padding + ((0 - xMin) / (xMax - xMin)) * plotWidth : padding;
+  const xZero = (0 - xMin) / (xMax - xMin);
+  const yZero = (0 - yMin) / (yMax - yMin);
+
+  const xAxisY = Number.isFinite(yZero) && yZero >= 0 && yZero <= 1
+    ? height - padding - yZero * plotHeight
+    : height - padding;
+
+  const yAxisX = Number.isFinite(xZero) && xZero >= 0 && xZero <= 1
+    ? padding + xZero * plotWidth
+    : padding;
 
   ctx.save();
   ctx.strokeStyle = 'rgba(255,255,255,0.18)';
-  ctx.fillStyle = 'rgba(237,241,255,0.7)';
+  ctx.fillStyle = 'rgba(237,241,255,0.78)';
   ctx.lineWidth = 1;
   ctx.font = '12px sans-serif';
 
@@ -193,27 +209,27 @@ function drawCartesianAxes(ctx, width, height, padding, xMin, xMax, yMin, yMax, 
   const tickCount = 5;
   for (let i = 0; i <= tickCount; i++) {
     const x = padding + (i / tickCount) * plotWidth;
-    const xValue = xMin + (i / tickCount) * (xMax - xMin);
+    const value = xMin + (i / tickCount) * (xMax - xMin);
     ctx.beginPath();
     ctx.moveTo(x, xAxisY - 5);
     ctx.lineTo(x, xAxisY + 5);
     ctx.stroke();
-    const label = formatNumber(xValue, 3);
-    ctx.fillText(label, x - ctx.measureText(label).width / 2, xAxisY + 20);
+    const label = formatNumber(value, 3);
+    ctx.fillText(label, x - ctx.measureText(label).width / 2, xAxisY + 18);
   }
 
   for (let i = 0; i <= tickCount; i++) {
     const y = height - padding - (i / tickCount) * plotHeight;
-    const yValue = yMin + (i / tickCount) * (yMax - yMin);
+    const value = yMin + (i / tickCount) * (yMax - yMin);
     ctx.beginPath();
     ctx.moveTo(yAxisX - 5, y);
     ctx.lineTo(yAxisX + 5, y);
     ctx.stroke();
-    const label = formatNumber(yValue, 3);
+    const label = formatNumber(value, 3);
     ctx.fillText(label, yAxisX - 10 - ctx.measureText(label).width, y + 4);
   }
 
-  ctx.fillText(xLabel, width - padding - 20, xAxisY - 8);
+  ctx.fillText(xLabel, width - padding - 20, xAxisY - 10);
   ctx.fillText(yLabel, yAxisX + 10, padding + 14);
   ctx.restore();
 }
@@ -222,218 +238,259 @@ function drawSignalPlot(original, reconstruction, lower, upper) {
   const ctx = signalCtx;
   const width = signalCanvas.width;
   const height = signalCanvas.height;
-  const padding = 46;
+  const padding = 48;
 
   ctx.clearRect(0, 0, width, height);
 
-  const allValues = original.concat(reconstruction, [0]);
-  const min = Math.min(...allValues);
-  const max = Math.max(...allValues);
-  const pad = (max - min) * 0.1 || 1;
-  const yMin = min - pad;
-  const yMax = max + pad;
+  const values = original.concat(reconstruction, [0]);
+  let yMin = Math.min(...values);
+  let yMax = Math.max(...values);
+  if (yMin === yMax) {
+    yMin -= 1;
+    yMax += 1;
+  } else {
+    const margin = (yMax - yMin) * 0.12;
+    yMin -= margin;
+    yMax += margin;
+  }
 
-  drawCartesianAxes(ctx, width, height, padding, lower, upper, yMin, yMax, 'x', 'f(x)');
+  drawAxes(ctx, width, height, padding, lower, upper, yMin, yMax, 'x', 'f(x)');
 
   const plotWidth = width - 2 * padding;
   const plotHeight = height - 2 * padding;
   const toX = (i) => padding + (i / (original.length - 1)) * plotWidth;
-  const toY = (v) => height - padding - ((v - yMin) / (yMax - yMin)) * plotHeight;
+  const toY = (value) => height - padding - ((value - yMin) / (yMax - yMin)) * plotHeight;
 
   ctx.lineWidth = 2.5;
-
   ctx.strokeStyle = '#7aa2ff';
   ctx.beginPath();
-  original.forEach((v, i) => {
-    const x = toX(i);
-    const y = toY(v);
-    if (i === 0) ctx.moveTo(x, y);
+  original.forEach((value, index) => {
+    const x = toX(index);
+    const y = toY(value);
+    if (index === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   });
   ctx.stroke();
 
   ctx.strokeStyle = '#7df0c7';
   ctx.beginPath();
-  reconstruction.forEach((v, i) => {
-    const x = toX(i);
-    const y = toY(v);
-    if (i === 0) ctx.moveTo(x, y);
+  reconstruction.forEach((value, index) => {
+    const x = toX(index);
+    const y = toY(value);
+    if (index === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   });
   ctx.stroke();
 
   ctx.fillStyle = '#7aa2ff';
-  ctx.fillRect(width - 250, 20, 12, 12);
+  ctx.fillRect(width - 248, 18, 12, 12);
   ctx.fillStyle = '#edf1ff';
   ctx.font = '14px sans-serif';
-  ctx.fillText('Original', width - 230, 30);
+  ctx.fillText('Original', width - 228, 29);
 
   ctx.fillStyle = '#7df0c7';
-  ctx.fillRect(width - 160, 20, 12, 12);
+  ctx.fillRect(width - 158, 18, 12, 12);
   ctx.fillStyle = '#edf1ff';
-  ctx.fillText('Reconstruction', width - 140, 30);
+  ctx.fillText('Reconstruction', width - 138, 29);
 }
 
-function drawSpectrum(coeffs, harmonics) {
+function drawSpectrum(coefficients, keptHarmonics) {
   const ctx = spectrumCtx;
   const width = spectrumCanvas.width;
   const height = spectrumCanvas.height;
-  const padding = 46;
+  const padding = 48;
 
   ctx.clearRect(0, 0, width, height);
-  const bars = [
-    { n: 0, mag: Math.abs(coeffs.a0 / 2) },
-    ...coeffs.an.map((value, index) => ({ n: index + 1, mag: Math.hypot(value, coeffs.bn[index]) }))
-  ];
-  const yMin = 0;
-  const yMax = Math.max(...bars.map((c) => c.mag), 1);
+
+  const bars = [{ n: 0, mag: Math.abs(coefficients.a0 / 2) }];
+  for (let n = 1; n <= coefficients.an.length; n++) {
+    bars.push({ n, mag: Math.hypot(coefficients.an[n - 1], coefficients.bn[n - 1]) });
+  }
+
+  let yMax = Math.max(...bars.map((bar) => bar.mag), 1);
+  if (yMax === 0) yMax = 1;
+
   const xMin = 0;
   const xMax = Math.max(bars.length - 1, 1);
 
-  drawCartesianAxes(ctx, width, height, padding, xMin, xMax, yMin, yMax, 'harmonic n', '|c_n|');
+  drawAxes(ctx, width, height, padding, xMin, xMax, 0, yMax, 'harmonic n', '|c_n|');
 
   const plotWidth = width - 2 * padding;
   const plotHeight = height - 2 * padding;
   const barWidth = plotWidth / bars.length;
 
-  bars.forEach((c, i) => {
-    const barHeight = (c.mag / yMax) * plotHeight;
-    const x = padding + i * barWidth;
+  bars.forEach((bar, index) => {
+    const barHeight = (bar.mag / yMax) * plotHeight;
+    const x = padding + index * barWidth;
     const y = height - padding - barHeight;
-    const kept = c.n <= harmonics;
+    const isKept = bar.n <= keptHarmonics;
 
-    ctx.fillStyle = kept ? 'rgba(125, 240, 199, 0.9)' : 'rgba(122, 162, 255, 0.35)';
-    ctx.fillRect(x + 1, y, Math.max(1, barWidth - 2), barHeight);
+    ctx.fillStyle = isKept ? 'rgba(125, 240, 199, 0.9)' : 'rgba(122, 162, 255, 0.35)';
+    ctx.fillRect(x + 2, y, Math.max(1, barWidth - 4), barHeight);
   });
 
   ctx.save();
   ctx.fillStyle = '#edf1ff';
   ctx.font = '14px sans-serif';
-  ctx.fillText('Kept harmonics are highlighted in green', padding, 24);
+  ctx.fillText('Green bars are included in the reconstruction', padding, 24);
   ctx.restore();
 }
 
 function renderFormula(coefficients, harmonics, lower, upper) {
   const { a0, an, bn, T } = coefficients;
-  const keptTerms = Math.min(harmonics, an.length);
-  const shifted = `x - ${formatNumber(lower, 4)}`;
+  const count = Math.min(harmonics, an.length);
+  const pieces = [];
 
-  const seriesPieces = [];
-  for (let n = 1; n <= keptTerms; n++) {
-    const cosine = `${formatSigned(an[n - 1])} cos(2π·${n}(${shifted})/${formatNumber(T, 4)})`;
-    const sine = `${formatSigned(bn[n - 1])} sin(2π·${n}(${shifted})/${formatNumber(T, 4)})`;
-    seriesPieces.push(`${cosine} ${sine}`);
+  for (let n = 1; n <= count; n++) {
+    const cosPart = `${formatNumber(an[n - 1])} cos(2π${n}(x - ${formatNumber(lower, 4)})/${formatNumber(T, 4)})`;
+    const sinPart = `${formatNumber(Math.abs(bn[n - 1]))} sin(2π${n}(x - ${formatNumber(lower, 4)})/${formatNumber(T, 4)})`;
+    const sign = bn[n - 1] >= 0 ? '+' : '-';
+    pieces.push(`<div><code>${escapeHtml(cosPart)} ${sign} ${escapeHtml(sinPart)}</code></div>`);
   }
 
   formulaOutput.innerHTML = `
-    <div><code>f(x) ≈ a<sub>0</sub>/2 + Σ<sub>n=1</sub><sup>${keptTerms}</sup> [a<sub>n</sub> cos(2πn(${escapeHtml(shifted)})/T) + b<sub>n</sub> sin(2πn(${escapeHtml(shifted)})/T)]</code></div>
+    <div><code>f(x) = a<sub>0</sub>/2 + Σ<sub>n=1</sub><sup>${count}</sup> [a<sub>n</sub> cos(2πn(x - L)/T) + b<sub>n</sub> sin(2πn(x - L)/T)]</code></div>
     <div class="formula-detail"><code>a<sub>0</sub>/2 = ${formatNumber(a0 / 2)}</code></div>
-    ${seriesPieces.length ? `<div class="formula-detail"><code>${seriesPieces.join('<br>')}</code></div>` : ''}
+    <div class="formula-detail">${pieces.length ? pieces.join('') : '<code>No harmonics selected.</code>'}</div>
   `;
 
-  const coefficientLines = [
+  const lines = [
     `T = ${formatNumber(T)} on [${formatNumber(lower)}, ${formatNumber(upper)}]`,
     `a0 = ${formatNumber(a0)}`,
-    ...an.slice(0, keptTerms).map((value, index) => `a${index + 1} = ${formatNumber(value)}`),
-    ...bn.slice(0, keptTerms).map((value, index) => `b${index + 1} = ${formatNumber(value)}`)
+    ...an.slice(0, count).map((value, index) => `a${index + 1} = ${formatNumber(value)}`),
+    ...bn.slice(0, count).map((value, index) => `b${index + 1} = ${formatNumber(value)}`)
   ];
 
-  coeffOutput.innerHTML = `<code>${escapeHtml(coefficientLines.join('    '))}</code>`;
+  coeffOutput.innerHTML = `<code>${escapeHtml(lines.join('    '))}</code>`;
 }
 
-function updateStats(signal, reconstruction, coeffs, harmonics) {
-  const rmse = rootMeanSquareError(signal, reconstruction).toFixed(6);
-  const mae = meanAbsoluteError(signal, reconstruction).toFixed(6);
-  const kept = Math.min(harmonics, coeffs.an.length);
-  const total = coeffs.an.length;
+function updateStats(original, reconstruction, coefficients, harmonics, lower, upper) {
+  const rmse = rootMeanSquareError(original, reconstruction);
+  const mae = meanAbsoluteError(original, reconstruction);
+  const count = Math.min(harmonics, coefficients.an.length);
 
   statsEl.innerHTML = `
     <div class="stat-card">
       <span class="stat-label">Harmonics kept</span>
-      <div class="stat-value">${kept} / ${total}</div>
+      <div class="stat-value">${count} / ${coefficients.an.length}</div>
     </div>
     <div class="stat-card">
       <span class="stat-label">RMSE</span>
-      <div class="stat-value">${rmse}</div>
+      <div class="stat-value">${formatNumber(rmse, 6)}</div>
     </div>
     <div class="stat-card">
       <span class="stat-label">MAE</span>
-      <div class="stat-value">${mae}</div>
+      <div class="stat-value">${formatNumber(mae, 6)}</div>
     </div>
     <div class="stat-card">
       <span class="stat-label">Interval</span>
-      <div class="stat-value">[${formatNumber(Number(lowerBoundInput.value))}, ${formatNumber(Number(upperBoundInput.value))}]</div>
+      <div class="stat-value">[${formatNumber(lower)}, ${formatNumber(upper)}]</div>
     </div>
   `;
+}
+
+function setStatus(message, isError = false) {
+  seriesStatus.textContent = message;
+  seriesStatus.style.color = isError ? '#ffb4b4' : '#7df0c7';
+}
+
+function readBounds() {
+  const lower = parseBoundExpression(lowerBoundInput.value);
+  const upper = parseBoundExpression(upperBoundInput.value);
+  if (!Number.isFinite(lower) || !Number.isFinite(upper)) {
+    throw new Error('Bounds must evaluate to finite numbers.');
+  }
+  return { lower, upper };
 }
 
 function render() {
   const sampleCount = Number(sampleSlider.value);
   const harmonics = Number(iterSlider.value);
-  const lower = Number(lowerBoundInput.value);
-  const upper = Number(upperBoundInput.value);
-  const expression = getActiveExpression();
+  const expression = getExpressionFromUI();
 
   sampleValue.textContent = String(sampleCount);
   iterValue.textContent = String(harmonics);
 
-  if (!Number.isFinite(lower) || !Number.isFinite(upper) || upper <= lower) {
-    seriesStatus.textContent = 'Upper bound must be greater than lower bound.';
-    return;
-  }
-
-  let signal;
-  let reconstruction;
-  let coeffs;
+  let lower;
+  let upper;
 
   try {
-    coeffs = computeFourierCoefficients(expression, lower, upper, Math.max(harmonics, 1));
-    signal = new Array(sampleCount);
-    reconstruction = new Array(sampleCount);
-
-    const fn = buildFunctionEvaluator(expression);
-    for (let i = 0; i < sampleCount; i++) {
-      const x = lower + (i / (sampleCount - 1)) * (upper - lower);
-      signal[i] = fn(x);
-      reconstruction[i] = evaluateSeries(x, lower, coeffs, harmonics);
-    }
-
-    drawSignalPlot(signal, reconstruction, lower, upper);
-    drawSpectrum(
-      (() => {
-        const spectrum = [];
-        spectrum.push({ freq: 0, mag: Math.abs(coeffs.a0 / 2) });
-        for (let n = 1; n <= coeffs.an.length; n++) {
-          const mag = Math.hypot(coeffs.an[n - 1], coeffs.bn[n - 1]);
-          spectrum.push({ freq: -n, mag });
-          spectrum.push({ freq: n, mag });
-        }
-        spectrum.sort((a, b) => a.freq - b.freq);
-        return spectrum;
-      })(),
-      harmonics
-    );
-    renderFormula(coeffs, harmonics, lower, upper);
-    updateStats(signal, reconstruction, coeffs, harmonics);
-    seriesStatus.textContent = 'Computed successfully.';
+    ({ lower, upper } = readBounds());
   } catch (error) {
-    seriesStatus.textContent = error.message;
+    setStatus(error.message, true);
     statsEl.innerHTML = '';
     formulaOutput.innerHTML = `<code>${escapeHtml(error.message)}</code>`;
     coeffOutput.innerHTML = '';
-    const ctx = signalCtx;
-    ctx.clearRect(0, 0, signalCanvas.width, signalCanvas.height);
-    ctx.fillStyle = '#edf1ff';
-    ctx.font = '16px sans-serif';
-    ctx.fillText('Could not compute the series.', 40, 60);
+    return;
+  }
+
+  if (upper <= lower) {
+    setStatus('Upper bound must be greater than lower bound.', true);
+    statsEl.innerHTML = '';
+    formulaOutput.innerHTML = '<code>Invalid interval.</code>';
+    coeffOutput.innerHTML = '';
+    return;
+  }
+
+  if (!expression) {
+    setStatus('Enter a function to continue.', true);
+    statsEl.innerHTML = '';
+    formulaOutput.innerHTML = '<code>Enter a function.</code>';
+    coeffOutput.innerHTML = '';
+    return;
+  }
+
+  try {
+    const coefficients = trapezoidFourierCoefficients(expression, lower, upper, Math.max(harmonics, 1));
+    const original = new Array(sampleCount);
+    const reconstruction = new Array(sampleCount);
+    const fn = buildMathEvaluator(expression, 'x');
+
+    for (let i = 0; i < sampleCount; i++) {
+      const x = lower + (i / (sampleCount - 1)) * (upper - lower);
+      const y = fn(x);
+      if (!Number.isFinite(y)) {
+        throw new Error(`Function returned a non-finite value at x = ${formatNumber(x, 4)}.`);
+      }
+      original[i] = y;
+      reconstruction[i] = evaluateFourierSeries(x, lower, coefficients, harmonics);
+    }
+
+    drawSignalPlot(original, reconstruction, lower, upper);
+    drawSpectrum(coefficients, harmonics);
+    renderFormula(coefficients, harmonics, lower, upper);
+    updateStats(original, reconstruction, coefficients, harmonics, lower, upper);
+    setStatus('Computed successfully.');
+  } catch (error) {
+    setStatus(error.message || 'Could not compute the series.', true);
+    statsEl.innerHTML = '';
+    formulaOutput.innerHTML = `<code>${escapeHtml(error.message || 'Could not compute the series.')}</code>`;
+    coeffOutput.innerHTML = '';
+
+    signalCtx.clearRect(0, 0, signalCanvas.width, signalCanvas.height);
+    spectrumCtx.clearRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+    signalCtx.fillStyle = '#edf1ff';
+    signalCtx.font = '16px sans-serif';
+    signalCtx.fillText('Could not compute the series.', 40, 60);
   }
 }
 
 signalSelect.addEventListener('change', () => {
-  setPresetExpression(signalSelect.value);
+  if (signalSelect.value === 'custom') {
+    functionInput.value = lastCustomExpression || functionInput.value;
+  } else {
+    setExpressionForPreset(signalSelect.value);
+  }
   render();
 });
-functionInput.addEventListener('input', render);
+
+functionInput.addEventListener('input', () => {
+  if (signalSelect.value === 'custom') {
+    lastCustomExpression = functionInput.value;
+  }
+  render();
+});
+
 lowerBoundInput.addEventListener('input', render);
 upperBoundInput.addEventListener('input', render);
 sampleSlider.addEventListener('input', render);
@@ -441,5 +498,5 @@ iterSlider.addEventListener('input', render);
 recomputeBtn.addEventListener('click', render);
 window.addEventListener('resize', render);
 
-setPresetExpression(signalSelect.value);
+setExpressionForPreset(signalSelect.value);
 render();
