@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fourier Transform Visualizer</title>
+    <title>Fourier Series Visualizer</title>
     <link rel="stylesheet" href="fourierTransform.css" />
 </head>
 <body>
@@ -11,43 +11,70 @@
     <main class="app">
         <header class="hero">
             <div>
-                <p class="eyebrow">Interactive Fourier Transform Visualizer</p>
-                <h1>Compute and plot a Fourier Transform</h1>
+                <p class="eyebrow">Interactive Fourier Series Visualizer</p>
+                <h1>Enter a custom function and plot its Fourier series</h1>
                 <p class="subtitle">
-                    Pick a signal, change the number of Fourier iterations (harmonics kept),
-                    and watch the reconstruction and spectrum update live.
+                    Define <strong>f(x)</strong>, choose the interval <strong>[L, U]</strong>, and keep the number of harmonics you want.
+                    The series is displayed in the form <strong>a<sub>0</sub>/2 + Σ a<sub>n</sub> cos(2πn(x-L)/T) + Σ b<sub>n</sub> sin(2πn(x-L)/T)</strong>.
                 </p>
             </div>
         </header>
 
         <section class="controls">
             <div class="control-group">
-                <label for="signalType">Signal</label>
+                <label for="signalType">Preset function</label>
                 <select id="signalType">
                     <option value="sine">Sine Wave</option>
                     <option value="square">Square Wave</option>
                     <option value="sawtooth">Sawtooth Wave</option>
-                    <option value="composite" selected>Composite Signal</option>
+                    <option value="composite">Composite Signal</option>
+                    <option value="custom" selected>Custom Expression</option>
                 </select>
             </div>
 
-            <div class="control-group slider-group">
-                <label for="sampleCount">Samples</label>
-                <div class="slider-row">
-                    <input id="sampleCount" type="range" min="32" max="256" value="128" step="32" />
-                    <span id="sampleCountValue" class="value-pill">128</span>
+            <div class="control-group custom-function-group">
+                <label for="functionInput">Function f(x)</label>
+                <textarea id="functionInput" rows="3" spellcheck="false">sin(2*pi*x) + 0.5*cos(5*pi*x)</textarea>
+                <small class="helper-text">Use x, pi, e, sin, cos, tan, abs, sqrt, log, exp, pow, and parentheses.</small>
+            </div>
+
+            <div class="bounds-grid">
+                <div class="control-group">
+                    <label for="lowerBound">Lower bound L</label>
+                    <input id="lowerBound" type="number" value="0" step="0.1" />
+                </div>
+                <div class="control-group">
+                    <label for="upperBound">Upper bound U</label>
+                    <input id="upperBound" type="number" value="1" step="0.1" />
                 </div>
             </div>
 
             <div class="control-group slider-group">
-                <label for="iterationCount">Iterations / harmonics kept</label>
+                <label for="sampleCount">Plot samples</label>
                 <div class="slider-row">
-                    <input id="iterationCount" type="range" min="1" max="64" step="1" value="8" />
+                    <input id="sampleCount" type="range" min="64" max="512" value="256" step="32" />
+                    <span id="sampleCountValue" class="value-pill">256</span>
+                </div>
+            </div>
+
+            <div class="control-group slider-group">
+                <label for="iterationCount">Harmonics kept</label>
+                <div class="slider-row">
+                    <input id="iterationCount" type="range" min="1" max="32" step="1" value="8" />
                     <span id="iterationCountValue" class="value-pill">8</span>
                 </div>
             </div>
 
             <button id="recomputeBtn" type="button">Recompute</button>
+        </section>
+
+        <section class="series-panel panel">
+            <div class="series-header">
+                <h2>Fourier series</h2>
+                <span id="seriesStatus" class="series-status">Ready</span>
+            </div>
+            <div id="formulaOutput" class="formula-output"></div>
+            <div id="coeffOutput" class="coeff-output"></div>
         </section>
 
         <section class="stats" id="stats"></section>
@@ -59,7 +86,7 @@
             </article>
 
             <article class="panel">
-                <h2>Fourier magnitude spectrum</h2>
+                <h2>Fourier coefficient magnitude spectrum</h2>
                 <canvas id="spectrumCanvas" width="1100" height="320"></canvas>
             </article>
         </section>
