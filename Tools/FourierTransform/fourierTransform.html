@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fourier Transform Visualizer</title>
+    <link rel="stylesheet" href="fourierTransform.css" />
+</head>
+<body>
+    <main class="app">
+        <header class="hero">
+            <div>
+                <p class="eyebrow">Interactive Fourier Transform Visualizer</p>
+                <h1>Compute and plot a Fourier Transform</h1>
+                <p class="subtitle">
+                    Pick a signal, change the number of Fourier iterations (harmonics kept),
+                    and watch the reconstruction and spectrum update live.
+                </p>
+            </div>
+        </header>
+
+        <section class="controls">
+            <div class="control-group">
+                <label for="signalType">Signal</label>
+                <select id="signalType">
+                    <option value="sine">Sine Wave</option>
+                    <option value="square">Square Wave</option>
+                    <option value="sawtooth">Sawtooth Wave</option>
+                    <option value="composite" selected>Composite Signal</option>
+                </select>
+            </div>
+
+            <div class="control-group slider-group">
+                <label for="sampleCount">Samples</label>
+                <div class="slider-row">
+                    <input id="sampleCount" type="range" min="32" max="256" value="128" step="32" />
+                    <span id="sampleCountValue" class="value-pill">128</span>
+                </div>
+            </div>
+
+            <div class="control-group slider-group">
+                <label for="iterationCount">Iterations / harmonics kept</label>
+                <div class="slider-row">
+                    <input id="iterationCount" type="range" min="1" max="64" step="1" value="8" />
+                    <span id="iterationCountValue" class="value-pill">8</span>
+                </div>
+            </div>
+
+            <button id="recomputeBtn" type="button">Recompute</button>
+        </section>
+
+        <section class="stats" id="stats"></section>
+
+        <section class="charts">
+            <article class="panel">
+                <h2>Original signal vs reconstruction</h2>
+                <canvas id="signalCanvas" width="1100" height="380"></canvas>
+            </article>
+
+            <article class="panel">
+                <h2>Fourier magnitude spectrum</h2>
+                <canvas id="spectrumCanvas" width="1100" height="320"></canvas>
+            </article>
+        </section>
+    </main>
+
+    <script src="fourierTransform.js"></script>
+</body>
+</html>
