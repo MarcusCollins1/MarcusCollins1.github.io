@@ -8,6 +8,7 @@ const iterSlider = document.getElementById('iterationCount');
 const iterValue = document.getElementById('iterationCountValue');
 const recomputeBtn = document.getElementById('recomputeBtn');
 const statsEl = document.getElementById('stats');
+const hideSeriesPanelBtn = document.getElementById('hideSeriesPanelBtn');
 const formulaOutput = document.getElementById('formulaOutput');
 const coeffOutput = document.getElementById('coeffOutput');
 const seriesStatus = document.getElementById('seriesStatus');
@@ -497,6 +498,18 @@ sampleSlider.addEventListener('input', render);
 iterSlider.addEventListener('input', render);
 recomputeBtn.addEventListener('click', render);
 window.addEventListener('resize', render);
+
+hideSeriesPanelBtn.addEventListener('click', () => {
+    if (formulaOutput.style.display !== "none") {
+        formulaOutput.style.display = "none";
+        coeffOutput.style.display = "none";
+        hideSeriesPanelBtn.textContent = "Show";
+    } else {
+        formulaOutput.style.display = "";
+        coeffOutput.style.display = "";
+        hideSeriesPanelBtn.textContent = "Hide";
+    }
+});
 
 setExpressionForPreset(signalSelect.value);
 render();
