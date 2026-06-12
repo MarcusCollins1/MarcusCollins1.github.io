@@ -95,7 +95,7 @@ function listenToGame() {
 
     onSnapshot(gamesRef, snapshot => {
         if (!snapshot.exists()) return;
-        if (!Object.hasOwn(snapshot.data(), gamePin.toString())) {
+        if (!Object.hasOwn(snapshot.data(), gamePin.toString()) && !host) {
             // Game deleted
             alert("Game deleted");
             window.location.href = "./home.html";
