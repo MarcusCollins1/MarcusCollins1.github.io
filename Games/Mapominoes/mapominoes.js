@@ -672,7 +672,7 @@ async function startGame() {
     // Add firebase code
     const gameRef = doc(db, "Mapominoes", "Games");
     await updateDoc(gameRef, {
-        playing: true,
+        [`${gamePin}.playing`]: true,
     });
 }
 
