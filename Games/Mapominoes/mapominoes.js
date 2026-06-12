@@ -1,5 +1,18 @@
 import { bordersTransit, getAllowedCountriesAt, getAllowedSeasAt, getElementByRowCol } from "./functions.js";
 import { Game, Player, Card, Sea, Pack } from "./classes.js";
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    onSnapshot,
+    arrayRemove,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
 export const el = {
     returnBtn: document.getElementById("returnBtn"),
 
@@ -58,7 +71,18 @@ let index = null;
 el.returnBtn.addEventListener("click", returnHome);
 el.returnHomeBtn.addEventListener("click", returnHome);
 
+
+async function leaveGame() {
+    const gamesRef = doc(db, "Mapominoes", "Games");
+    const snapshot = await getDoc(gamesRef);
+    await updateDoc(gamesRef, {
+        [gamePin]: {
+            "players": arrayRemove(name)
+        }
+    });
+}
 async function returnHome() {
+    await leaveGame();
     window.location.href = "./home.html";
 }
 
@@ -537,3 +561,5 @@ function endGame(finishedOrder) {
         el.finishedOrderOl.appendChild(playerNameLi);
     });
 }
+
+window.addEventListener("pagehide", () => leaveGame)
