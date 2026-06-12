@@ -393,6 +393,7 @@ function removeTransitFromHand() {
 }
 
 let allCards;
+let allSeas;
 let isPlayerTurn = false;
 
 function getCardByName(cardName) {
