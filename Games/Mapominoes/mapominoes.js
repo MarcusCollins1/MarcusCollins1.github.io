@@ -85,6 +85,14 @@ let index = null;
 el.returnBtn.addEventListener("click", returnHome);
 el.returnHomeBtn.addEventListener("click", returnHome);
 
+function listenToGame() {
+    const gamesRef = doc(db, "Mapominoes", "Games");
+
+    onSnapshot(gamesRef, snapshot => {
+        if (!snapshot.exists) return;
+        updatePlayersList();
+    });
+}
 
 async function leaveGame() {
     const gamesRef = doc(db, "Mapominoes", "Games");
