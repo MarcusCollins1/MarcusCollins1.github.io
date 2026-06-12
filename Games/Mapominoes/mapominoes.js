@@ -652,7 +652,7 @@ async function gameStarted() {
         const hands = Array.from({ length: numPlayers }, () => []);
         allCards.forEach((card, idx) => {
             if (idx !== startCardIdx) {
-                hands[pNum].push(card);
+                hands[pNum].push(card.toDict());
                 pNum = (pNum + 1)%numPlayers;
             }
         });
