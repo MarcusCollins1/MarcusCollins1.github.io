@@ -66,6 +66,7 @@
             const gamesRef = doc(db, "Mapominoes", "Games");
             const snapshot = await getDoc(gamesRef);
             const games = snapshot.data();
+            gamePinsList.innerHTML = "";
             for (const [gamePin, gameData] of Object.entries(games)) {
                 if (numPlayers === 0) {
                     await updateDoc(gamesRef, {
