@@ -46,6 +46,7 @@
 
         const packsForm = document.getElementById("packsForm");
         const getGamesBtn = document.getElementById("getGamesBtn");
+        const gamePinsList = document.getElementById("gamePinsList");
 
         let nameInput = document.getElementById("nameInput");
         let packNames = [];
@@ -55,6 +56,36 @@
             const snapshot = await getDoc(gamesRef);
             const games = snapshot.data();
             console.log(games);
+            for (const [gamePin, gameData] of Object.entries(games)) {
+                const li = document.createElement("li");
+                const btn = document.createElement("button");
+                btn.textContent = `Join Game ${gamePin} (${gameData.players.length} players)`;
+                btn.addEventListener("click", async () => {
+                    const name = nameInput.value.trim();
+                    if (name === "") {
+                        alert("Please enter your name");
+                        return;
+                    }
+                    if (gameData.players.includes(name)) {
+                        alert("This name is taken in this game. Please choose another name.");
+                        return;
+                    }
+                    // Update firebase with the new player
+                    const gameRef = doc(db, "Mapominoes", "Games");
+                    await updateDoc(gameRef, {
+                        [gamePin]: {
+                            players: [...gameData.players, name]
+                        }
+                    });
+
+                    
+                    // Update the data in local storage and redirect to the game page
+                    window.localStorage.setItem("gamePin", gamePin);
+                    window.localStorage.setItem("host", false);
+                    window.localStorage.setItem("name", name);
+                    window.location.href = "./mapominoes.html";
+                })
+            }
         }
 
         document.addEventListener("DOMContentLoaded", async function() {
