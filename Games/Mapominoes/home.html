@@ -19,7 +19,7 @@
 
     <ul id="gamePinsList"></ul>
 
-    <button onclick="getGames()">Reload</button>
+    <button id="getGamesBtn">Reload</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -45,6 +45,7 @@
 
 
         const packsForm = document.getElementById("packsForm");
+        const getGamesBtn = document.getElementById("getGamesBtn");
 
         let nameInput = document.getElementById("nameInput");
         let packNames = [];
@@ -131,6 +132,8 @@
         function generateGamePin() {
             return Math.floor(1000 + Math.random() * 9000).toString();
         }
+
+        getGamesBtn.onClick = getGames;
     </script>
 </body>
 </html>
