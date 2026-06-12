@@ -610,7 +610,7 @@ async function gameStarted() {
     // Get all cards and seas
     allCards = [];
     allSeas = [];
-    packNames.forEach(packName => {
+    for (const packName of packNames) {
         const countriesRef = doc(db, "Mapominoes", "Packs", packName, "Countries");
         const countriesSnapshot = await getDoc(countriesRef);
         countriesSnapshot.data().forEach(country => {
@@ -622,8 +622,8 @@ async function gameStarted() {
         seasSnapshot.data().forEach(sea => {
             const currSea = new Sea(sea, `./Images/Cards/Seas/${sea}.jpg`);
             allSeas.push(currSea);
-        })
-    });
+        });
+    }
 
     if (host) {
         // Deal cards
