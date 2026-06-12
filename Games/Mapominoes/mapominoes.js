@@ -492,9 +492,20 @@ document.addEventListener("DOMContentLoaded", async function () {
     // Add firebase code
 
     el.gamePinP.textContent = `Game PIN: ${gamePin}`;
-    el.packsP.textContent = `Packs: ${packNames.join(", ")}`;
+    updatePacksList();
     updatePlayersList();
 });
+
+async function updatePacksList() {
+    // Get pack names from firebase
+    const gameRef = doc(db, "Mapominoes", "Games");
+    const snapshot = await getDoc(gameRef);
+    const gameData = snapshot.data()[gamePin];
+    packNames = gameData.packs;
+
+    // Update packsP
+    el.packsP.textContent = `Packs: ${packNames.join(", ")}`;
+}
 
 async function updatePlayersList() {
     // Get player names from firebase
