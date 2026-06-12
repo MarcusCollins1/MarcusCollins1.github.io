@@ -577,7 +577,13 @@ async function updatePlayersList() {
     el.playersList.innerHTML = "";
     playerNames.forEach(playerName => {
         const playerNameLi = document.createElement("li");
-        playerNameLi.textContent = playerName;
+        if (playerName === name) {
+            const strong = document.createElement("strong");
+            strong.textContent = playerName;
+            playerNameLi.appendChild(strong);
+        } else {
+            playerNameLi.textContent = playerName;
+        }
         el.playersList.appendChild(playerNameLi);
     });
     el.startBtn.disabled = playerNames.length < 2;
