@@ -28,6 +28,7 @@
             doc,
             getDoc,
             updateDoc,
+            deleteField,
         } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -58,7 +59,15 @@
             for (const [gamePin, gameData] of Object.entries(games)) {
                 const li = document.createElement("li");
                 const btn = document.createElement("button");
-                btn.textContent = `Join Game ${gamePin} (${gameData.players.length} players)`;
+                const numPlayers = gameData.players.length;
+                if (numPlayers === 0) {
+                    await updateDoc(gamesRef, {
+                        [gamePin]: {
+                            players: deleteField()
+                        }
+                    });
+                }
+                btn.textContent = `Join Game ${gamePin} (${numPlayers} players)`;
                 btn.addEventListener("click", async () => {
                     const name = nameInput.value.trim();
                     if (name === "") {
