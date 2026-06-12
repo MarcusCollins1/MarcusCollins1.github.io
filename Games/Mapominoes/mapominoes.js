@@ -633,9 +633,10 @@ async function gameStarted() {
         const numPlayers = playerNames.length;
         const hands = Array.from({ length: numPlayers }, () => []);
         allCards.forEach((card, idx) => {
-            if (idx === startCardIdx) continue;
-            hands[pNum].push(card);
-            pNum = (pNum + 1)%numPlayers;
+            if (idx !== startCardIdx) {
+                hands[pNum].push(card);
+                pNum = (pNum + 1)%numPlayers;
+            }
         });
 
         // Update on firebase
