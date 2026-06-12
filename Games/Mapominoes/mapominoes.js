@@ -680,6 +680,7 @@ async function startGame() {
     await updateDoc(gameRef, {
         [`${gamePin}.playing`]: true,
     });
+    el.startBtn.disabled = true;
 }
 
 function endGame(finishedOrder) {
