@@ -94,7 +94,11 @@ function listenToGame() {
     const gamesRef = doc(db, "Mapominoes", "Games");
 
     onSnapshot(gamesRef, snapshot => {
-        if (!snapshot.exists) return;
+        if (!snapshot.exists) {
+            // Game deleted
+            alert("Game deleted");
+            window.location.href = "./home.html";
+        }
         const gameData = snapshot.data()[gamePin];
         updatePlayersList();
         if (gameData.playing && !playing) {
