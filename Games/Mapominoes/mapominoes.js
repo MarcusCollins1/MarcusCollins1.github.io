@@ -681,5 +681,7 @@ function endGame(finishedOrder) {
     });
 }
 
+el.startBtn.addEventListener("click", startGame);
+
 window.addEventListener("pagehide", () => leaveGame)
 listenToGame()
