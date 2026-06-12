@@ -676,3 +676,4 @@ function endGame(finishedOrder) {
 }
 
 window.addEventListener("pagehide", () => leaveGame)
+listenToGame()
