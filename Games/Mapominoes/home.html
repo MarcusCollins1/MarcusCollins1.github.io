@@ -29,6 +29,7 @@
             getDoc,
             updateDoc,
             deleteField,
+            onSnapshot,
         } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -51,6 +52,15 @@
 
         let nameInput = document.getElementById("nameInput");
         let packNames = [];
+
+        function listenToGames() {
+            const gamesRef = doc(db, "Mapominoes", "Games");
+
+            onSnapshot(gamesRef, snapshot => {
+                if (!snapshot.exists) return;
+                getGames();
+            });
+        }
 
         async function getGames() {
             const gamesRef = doc(db, "Mapominoes", "Games");
