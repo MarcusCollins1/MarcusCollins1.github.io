@@ -108,7 +108,7 @@ async function leaveGame() {
     const gamesRef = doc(db, "Mapominoes", "Games");
     
     if (host) {
-        await updateDoc(gameRef, {
+        await updateDoc(gamesRef, {
             [gamePin]: deleteField()
         })
     } else {
