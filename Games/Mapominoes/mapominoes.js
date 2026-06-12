@@ -631,16 +631,16 @@ async function gameStarted() {
     for (const packName of packNames) {
         const countriesRef = doc(db, "Mapominoes", "Packs", packName, "Countries");
         const countriesSnapshot = await getDoc(countriesRef);
-        countriesSnapshot.data().forEach(country => {
-            const currCard = new Card(country, country.Borders, country.Seas, `./Images/Cards/${packName}/${country}.jpg`);
+        for (const [countryName, countryData] of Object.entries(countriesSnapshot.data())) {
+            const currCard = new Card(countryName, countryData.Borders, countryData.Seas, `./Images/Cards/${packName}/${countryName}.jpg`);
             allCards.push(currCard);
-        });
+        }
         const seasRef = doc(db, "Mapominoes", "Packs", packName, "Seas");
         const seasSnapshot = await getDoc(seasRef);
-        seasSnapshot.data().forEach(sea => {
-            const currSea = new Sea(sea, `./Images/Cards/Seas/${sea}.jpg`);
+        for (const [seaName, seaData] of Object.entries(seasSnapshot.data())) {
+            const currSea = new Sea(sea, `./Images/Cards/Seas/${seaName}.jpg`);
             allSeas.push(currSea);
-        });
+        }
     }
 
     if (host) {
