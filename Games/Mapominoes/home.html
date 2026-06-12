@@ -72,9 +72,7 @@
                 const numPlayers = gameData.players.length;
                 if (numPlayers === 0) {
                     await updateDoc(gamesRef, {
-                        [gamePin]: {
-                            players: deleteField()
-                        }
+                        [gamePin]: deleteField()
                     });
                 }
                 btn.textContent = `Join Game ${gamePin} (${numPlayers} players)`;
