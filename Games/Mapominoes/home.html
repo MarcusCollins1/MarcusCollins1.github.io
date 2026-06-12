@@ -115,6 +115,7 @@
             packNames = snapshot.data().packs;
 
             populatePacksForm();
+            listenToGames();
         });
 
         packsForm.addEventListener("submit", async (event) => {
