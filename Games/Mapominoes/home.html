@@ -55,7 +55,6 @@
             const gamesRef = doc(db, "Mapominoes", "Games");
             const snapshot = await getDoc(gamesRef);
             const games = snapshot.data();
-            console.log(games);
             for (const [gamePin, gameData] of Object.entries(games)) {
                 const li = document.createElement("li");
                 const btn = document.createElement("button");
