@@ -92,9 +92,7 @@
                         // Update firebase with the new player
                         const gameRef = doc(db, "Mapominoes", "Games");
                         await updateDoc(gameRef, {
-                            [gamePin]: {
-                                players: [...gameData.players, name]
-                            }
+                            [`${gamePin}.players`]: [...gameData.players, name]
                         });
     
                         
