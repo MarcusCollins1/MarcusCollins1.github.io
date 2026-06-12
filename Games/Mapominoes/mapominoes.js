@@ -5,7 +5,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/fireba
 import {
     getFirestore,
     doc,
+    collection,
     getDoc,
+    getDocs,
     setDoc,
     updateDoc,
     deleteDoc,
@@ -82,6 +84,8 @@ const maxBoardScale = 4;
 export let player = null;
 let index = null;
 
+let playing = false;
+
 el.returnBtn.addEventListener("click", returnHome);
 el.returnHomeBtn.addEventListener("click", returnHome);
 
@@ -90,7 +94,12 @@ function listenToGame() {
 
     onSnapshot(gamesRef, snapshot => {
         if (!snapshot.exists) return;
+        const gameData = snapshot.data()[gamePin];
         updatePlayersList();
+        if (gameData.playing && !playing) {
+            gameStarted();
+        }
+        updateHand();
     });
 }
 
@@ -495,7 +504,7 @@ function unhighlightCards() {
 }
 
 async function startTurn() {
-    if (player.card.length === 0) {
+    if (player.cards.length === 0) {
         // Add firebase code
         return;
     }
@@ -569,8 +578,89 @@ async function updatePlayersList() {
     el.startBtn.disabled = playerNames.length < 2;
 }
 
+async function updateHand() {
+    if (player.hand) return;
+    const gamesRef = doc(db, "Mapominoes", "Games");
+    const snapshot = await getDoc(gamesRef);
+    const gameData = snapshot.data()[gamePin];
+    
+    const cards = gameData.hands[index];
+}
+
+function getStartCardIdx() {
+    let i = 0;
+    while (true) {
+        if (allCards[i].borders.length >= 3) return i;
+        i++;
+    }
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    return array;
+}
+
+async function gameStarted() {
+    playing = true;
+    // Get all cards and seas
+    allCards = [];
+    allSeas = [];
+    packNames.forEach(packName => {
+        const countriesRef = doc(db, "Mapominoes", "Packs", packName, "Countries");
+        const countriesSnapshot = await getDoc(countriesRef);
+        countriesSnapshot.data().forEach(country => {
+            const currCard = new Card(country, country.Borders, country.Seas, `./Images/Cards/${packName}/${country}.jpg`);
+            allCards.push(currCard);
+        });
+        const seasRef = doc(db, "Mapominoes", "Packs", packName, "Seas");
+        const seasSnapshot = await getDoc(seasRef);
+        seasSnapshot.data().forEach(sea => {
+            const currSea = new Sea(sea, `./Images/Cards/Seas/${sea}.jpg`);
+            allSeas.push(currSea);
+        })
+    });
+
+    if (host) {
+        // Deal cards
+        shuffle(allCards);
+        const startCardIdx = getStartCardIdx();
+        let pNum = 0;
+        const numPlayers = playerNames.length;
+        const hands = Array.from({ length: numPlayers }, () => []);
+        allCards.forEach((card, idx) => {
+            if (idx === startCardIdx) continue;
+            hands[pNum].push(card);
+            pNum = (pNum + 1)%numPlayers;
+        });
+
+        // Update on firebase
+        const gamesRef = doc(db, "Mapominoes", "Games");
+        await updateDoc(gamesRef, {
+            [gamePin] : {
+                hands: hands
+            }
+        });
+    }
+
+    const gamesRef = doc(db, "Mapominoes", "Games");
+    const snapshot = getDoc(gamesRef);
+    const gameData = snapshot.data()[gamePin];
+    index = gameData.players.indexOf(name);
+
+    player = new Player(name);
+}
+
 async function startGame() {
     // Add firebase code
+    const gameRef = doc(db, "Mapominoes", "Games");
+    await updateDoc(gameRef, {
+        playing: true,
+    });
 }
 
 function endGame(finishedOrder) {
