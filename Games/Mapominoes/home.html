@@ -148,6 +148,7 @@
                 [gamePin]: {
                     players: [formData.name],
                     packs: Object.keys(formData).filter(key => key !== "name" && formData[key]),
+                    hands: [],
                     turn: 0,
                     playing: false,
                 }
