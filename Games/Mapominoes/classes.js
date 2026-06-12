@@ -1,4 +1,4 @@
-class Game {
+export class Game {
     constructor(gamePin, players, packs, joinable) {
         this.gamePin = gamePin;
         this.players = players;
@@ -7,7 +7,7 @@ class Game {
     }
 }
 
-class Player {
+export class Player {
     constructor(name) {
         this.name = name;
         this.cards = [];
@@ -45,7 +45,7 @@ class Player {
     }
 }
 
-class Card {
+export class Card {
     constructor(name, borders, seas, image) {
         this.name = name;
         this.borders = borders;
@@ -54,14 +54,14 @@ class Card {
     }
 }
 
-class Sea {
+export class Sea {
     constructor (name, image) {
         this.name = name;
         this.image = image;
     }
 }
 
-class Pack {
+export class Pack {
     constructor(name, cards, seas) {
         this.name = name;
         this.cards = cards;
