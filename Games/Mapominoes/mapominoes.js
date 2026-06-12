@@ -11,6 +11,7 @@ import {
     setDoc,
     updateDoc,
     deleteDoc,
+    deleteField,
     onSnapshot,
     arrayRemove,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
@@ -105,10 +106,16 @@ function listenToGame() {
 
 async function leaveGame() {
     const gamesRef = doc(db, "Mapominoes", "Games");
-    const snapshot = await getDoc(gamesRef);
-    await updateDoc(gamesRef, {
-        [`${gamePin}.players`]: arrayRemove(name)
-    });
+    
+    if (host) {
+        await updateDoc(gameRef, {
+            [gamePin]: deleteField()
+        })
+    } else {
+        await updateDoc(gamesRef, {
+            [`${gamePin}.players`]: arrayRemove(name)
+        });
+    }
 }
 async function returnHome() {
     await leaveGame();
