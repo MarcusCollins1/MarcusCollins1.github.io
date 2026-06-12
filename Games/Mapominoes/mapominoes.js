@@ -638,7 +638,7 @@ async function gameStarted() {
         const seasRef = doc(db, "Mapominoes", "Packs", packName, "Seas");
         const seasSnapshot = await getDoc(seasRef);
         for (const [seaName, seaData] of Object.entries(seasSnapshot.data())) {
-            const currSea = new Sea(sea, `./Images/Cards/Seas/${seaName}.jpg`);
+            const currSea = new Sea(seaName, `./Images/Cards/Seas/${seaName}.jpg`);
             allSeas.push(currSea);
         }
     }
