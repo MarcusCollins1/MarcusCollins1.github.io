@@ -52,6 +52,14 @@ export class Card {
         this.seas = seas;
         this.image = image;
     }
+    toDict() {
+        return {
+            name: this.name,
+            borders: this.borders,
+            seas: this.seas,
+            image: this.image,
+        };
+    }
 }
 
 export class Sea {
