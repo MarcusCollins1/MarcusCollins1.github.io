@@ -68,6 +68,7 @@
             const games = snapshot.data();
             gamePinsList.innerHTML = "";
             for (const [gamePin, gameData] of Object.entries(games)) {
+                const numPlayers = gameData.players.length;
                 if (numPlayers === 0) {
                     await updateDoc(gamesRef, {
                         [gamePin]: deleteField()
@@ -76,7 +77,6 @@
                 }
                 const li = document.createElement("li");
                 const btn = document.createElement("button");
-                const numPlayers = gameData.players.length;
                 btn.textContent = `Join Game ${gamePin} (${numPlayers} players)`;
                 btn.addEventListener("click", async () => {
                     const name = nameInput.value.trim();
