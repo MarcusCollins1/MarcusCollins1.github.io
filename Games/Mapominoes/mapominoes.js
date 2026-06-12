@@ -107,9 +107,7 @@ async function leaveGame() {
     const gamesRef = doc(db, "Mapominoes", "Games");
     const snapshot = await getDoc(gamesRef);
     await updateDoc(gamesRef, {
-        [gamePin]: {
-            "players": arrayRemove(name)
-        }
+        [`${gamePin}.players`]: arrayRemove(name)
     });
 }
 async function returnHome() {
