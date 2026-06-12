@@ -55,8 +55,8 @@ const maxBoardScale = 4;
 export let player = null;
 let index = null;
 
-el.returnBtn.onclick = returnHome();
-el.returnHomeBtn.onclick = returnHome();
+el.returnBtn.addEventListener("click", returnHome);
+el.returnHomeBtn.addEventListener("click", returnHome);
 
 async function returnHome() {
     window.location.href = "./home.html";
