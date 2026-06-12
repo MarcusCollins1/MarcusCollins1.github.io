@@ -1,5 +1,5 @@
 import { bordersTransit, getAllowedCountriesAt, getAllowedSeasAt, getElementByRowCol } from "./functions.js";
-
+import { Game, Player, Card, Sea, Pack } from "./classes.js";
 export const el = {
     returnBtn: document.getElementById("returnBtn"),
 
@@ -59,7 +59,7 @@ el.returnBtn.onclick = returnHome();
 el.returnHomeBtn.onclick = returnHome();
 
 async function returnHome() {
-
+    window.location.href = "./home.html";
 }
 
 const startBoardDrag = (event) => {
@@ -496,7 +496,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     updatePlayersList();
 });
 
-function updatePlayersList() {
+async function updatePlayersList() {
+    // Get player names from firebase
+    const gameRef = doc(db, "Mapominoes", "Games");
+    const snapshot = await getDoc(gameRef);
+    const gameData = snapshot.data()[gamePin];
+    playerNames = gameData.players;
+    // Update playersList
     el.playersList.innerHTML = "";
     playerNames.forEach(playerName => {
         const playerNameLi = document.createElement("li");
