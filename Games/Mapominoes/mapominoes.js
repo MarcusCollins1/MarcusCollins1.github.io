@@ -75,6 +75,8 @@ const boardHeight = cardHeight * boardRows;
 let packNames = [];
 let playerNames = [];
 
+let startingCardPlaced = false;
+
 let isBoardDragging = false;
 let boardStartX, boardStartY;
 let boardX = 0;
@@ -110,6 +112,12 @@ function listenToGame() {
         updateHand();
         if (snapshot.data()[gamePin].turn === index && !isPlayerTurn) {
             startTurn();
+        }
+        if (snapshot.data()[gamePin].startingCard && !startingCardPlaced) {
+            const startingCardData = snapshot.data()[gamePin].startingCard;
+            const startingCard = new Card(startingCardData.name, startingCardData.borders, startingCardData.seas, startingCardData.image);
+            addCardToBoard(startingCard, Math.ceil(boardCols/2), Math.ceil(boardRows/2))
+            startingCardPlaced = true;
         }
     });
 }
