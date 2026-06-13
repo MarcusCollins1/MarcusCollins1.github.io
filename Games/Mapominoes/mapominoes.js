@@ -592,7 +592,9 @@ async function updatePlayersList() {
         }
         el.playersList.appendChild(playerNameLi);
     });
-    el.startBtn.disabled = playerNames.length < 2;
+    if (!playing) {
+        el.startBtn.disabled = playerNames.length < 2;
+    }
 }
 
 async function updateHand() {
