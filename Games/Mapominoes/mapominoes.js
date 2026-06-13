@@ -602,9 +602,10 @@ async function updateHand() {
     const snapshot = await getDoc(gamesRef);
     const gameData = snapshot.data()[gamePin];
     
-    const cards = gameData.hands[name];
-
-    player.dealCards(cards.map(cardData => new Card(cardData.name, cardData.borders, cardData.seas, cardData.image)), 2);
+    if (Object.hasOwn(gameData.hands, name)) {
+        const cards = gameData.hands[name];
+        player.dealCards(cards.map(cardData => new Card(cardData.name, cardData.borders, cardData.seas, cardData.image)), 2);
+    }
 }
 
 function getStartCardIdx() {
