@@ -607,6 +607,7 @@ async function updateHand() {
     if (Object.hasOwn(gameData.hands, name)) {
         const cards = gameData.hands[name];
         player.dealCards(cards.map(cardData => new Card(cardData.name, cardData.borders, cardData.seas, cardData.image)), 2);
+        renderHand();
     }
 }
 
