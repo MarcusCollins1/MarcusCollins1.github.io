@@ -386,7 +386,7 @@ function renderHand() {
         });
         el.playerHand.appendChild(transitElement);
     }
-    el.playerHand.style.display = "block";
+    el.playerHand.style.display = "flex";
 }
 
 function removeCardFromHandByName(cardName) {
