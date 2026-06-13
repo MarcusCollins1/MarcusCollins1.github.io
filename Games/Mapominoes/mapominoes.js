@@ -627,6 +627,7 @@ function shuffle(array) {
 
 async function gameStarted() {
     playing = true;
+    player = new Player(name);
     // Get all cards and seas
     allCards = [];
     allSeas = [];
@@ -676,8 +677,6 @@ async function gameStarted() {
     const snapshot = await getDoc(gamesRef);
     const gameData = snapshot.data()[gamePin];
     index = gameData.players.indexOf(name);
-
-    player = new Player(name);
 }
 
 async function startGame() {
