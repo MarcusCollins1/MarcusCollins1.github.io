@@ -682,15 +682,17 @@ async function gameStarted() {
         await updateDoc(gamesRef, {
             [`${gamePin}.startingCard`]: allCards[startCardIdx].toDict()
         });
-        await updateDoc(gamesRef, {
-            [`${gamePin}.turn`]: 0
-        });
     }
-
+    
     const gamesRef = doc(db, "Mapominoes", "Games");
     const snapshot = await getDoc(gamesRef);
     const gameData = snapshot.data()[gamePin];
     index = gameData.players.indexOf(name);
+    if (host) {
+        await updateDoc(gamesRef, {
+            [`${gamePin}.turn`]: 0
+        });
+    }
 }
 
 async function startGame() {
