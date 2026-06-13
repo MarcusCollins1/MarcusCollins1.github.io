@@ -347,7 +347,7 @@ el.playerHand.addEventListener("mouseup", () => {
 el.playerHand.addEventListener("mouseleave", () => {
     isHandDragging = false;
     
-    const cards = querySelectorAll(".card-in-hand");
+    const cards = document.querySelectorAll(".card-in-hand");
     cards.forEach(card => (card.style.pointerEvents = ""));
 });
 
