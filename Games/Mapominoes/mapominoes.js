@@ -50,6 +50,7 @@ export const el = {
     unhighlightCardsBtn: document.getElementById("unhighlightCardsBtn"),
 
     playerHand: document.getElementById("playerHand"),
+    playerHandWhiteSpace: document.getElementById("playerHandWhiteSpace"),
     
     getTransitCardDiv: document.getElementById("getTransitCardDiv"),
     getTransitCardCountriesUl: document.getElementById("getTransitCardCountriesUl"),
@@ -387,6 +388,7 @@ function renderHand() {
         el.playerHand.appendChild(transitElement);
     }
     el.playerHand.style.display = "flex";
+    el.playerHandWhiteSpace.style.display = "block";
 }
 
 function removeCardFromHandByName(cardName) {
