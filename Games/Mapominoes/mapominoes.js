@@ -665,10 +665,13 @@ async function gameStarted() {
         await updateDoc(gamesRef, {
             [`${gamePin}.hands`] : handsByPlayer
         });
+        await updateDoc(gamesRef, {
+            [`${gamePin}.startingCard`]: allCards[startCardIdx].toDict()
+        });
     }
 
     const gamesRef = doc(db, "Mapominoes", "Games");
-    const snapshot = getDoc(gamesRef);
+    const snapshot = await getDoc(gamesRef);
     const gameData = snapshot.data()[gamePin];
     index = gameData.players.indexOf(name);
 
