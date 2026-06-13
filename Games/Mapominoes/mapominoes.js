@@ -659,7 +659,7 @@ async function gameStarted() {
 
         // Update on firebase
         const handsByPlayer = Object.fromEntries(
-            hands.map((hand, idx) => playerNames[idx], hand)
+            hands.map((hand, idx) => [playerNames[idx], hand])
         );
         const gamesRef = doc(db, "Mapominoes", "Games");
         await updateDoc(gamesRef, {
