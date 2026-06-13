@@ -609,6 +609,7 @@ async function updateHand() {
         const cards = gameData.hands[name];
         player.dealCards(cards.map(cardData => new Card(cardData.name, cardData.borders, cardData.seas, cardData.image)), 2);
         renderHand();
+        el.boardContainer.style.display = "block";
     }
 }
 
