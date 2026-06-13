@@ -78,7 +78,7 @@ button:hover {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    background-image: url("Cards/Transit.jpg");
+    background-image: url("./Images/Cards/Transit.jpg");
     border: 2px solid #fff;
     border-radius: 5px;
     z-index: 1;
