@@ -717,6 +717,9 @@ function endGame(finishedOrder) {
 
 el.startBtn.addEventListener("click", startGame);
 el.centerBtn.addEventListener("click", centerBoard);
+el.skipTurnBtn.addEventListener("click", skipTurn);
+el.highlightCardsBtn.addEventListener("click", highlightCards);
+el.unhighlightCardsBtn.addEventListener("click", unhighlightCards);
 
 window.addEventListener("pagehide", () => leaveGame)
 listenToGame()
