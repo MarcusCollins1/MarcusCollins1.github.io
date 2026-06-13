@@ -603,6 +603,8 @@ async function updateHand() {
     const gameData = snapshot.data()[gamePin];
     
     const cards = gameData.hands[index];
+
+    player.dealCards(cards.map(cardData => new Card(cardData.name, cardData.borders, cardData.seas, cardData.image)), 2);
 }
 
 function getStartCardIdx() {
