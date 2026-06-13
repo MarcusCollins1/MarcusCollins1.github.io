@@ -87,6 +87,7 @@ export let player = null;
 let index = null;
 
 let playing = false;
+let isPlayerTurn = false;
 
 el.returnBtn.addEventListener("click", returnHome);
 el.returnHomeBtn.addEventListener("click", returnHome);
@@ -107,6 +108,9 @@ function listenToGame() {
             gameStarted();
         }
         updateHand();
+        if (snapshot.data()[gamePin].turn === index && !isPlayerTurn) {
+            startTurn();
+        }
     });
 }
 
@@ -402,7 +406,6 @@ function removeTransitFromHand() {
 
 let allCards;
 let allSeas;
-let isPlayerTurn = false;
 
 function getCardByName(cardName) {
     for (const card of allCards) if (card.name === cardName) return card;
@@ -678,6 +681,9 @@ async function gameStarted() {
         });
         await updateDoc(gamesRef, {
             [`${gamePin}.startingCard`]: allCards[startCardIdx].toDict()
+        });
+        await updateDoc(gamesRef, {
+            [`${gamePin}.turn`]: 0
         });
     }
 
