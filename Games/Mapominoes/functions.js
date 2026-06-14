@@ -67,6 +67,7 @@ export function getAllowedCountriesAt(row, col) {
             allowedCountries.push(boardState[key].borders.filter(border => hasCardThatBordersCountry(border)));
         }
     }
+    if (allowedCountries.length === 0) return [];
     return allowedCountries.reduce((acc, currArray) => {
         return acc.filter(item => currArray.includes(item));
     }).filter(countryName => {
@@ -100,6 +101,7 @@ export function getAllowedSeasAt(row, col) {
             allowedSeas.push(boardState[key].seas.filter(sea => hasCardThatBordersSea(sea)));
         }
     }
+    if (allowedSeas.length === 0) return [];
     return allowedSeas.reduce((acc, currArray) => {
         return acc.filter(item => currArray.includes(item));
     }).filter(seaName => {
