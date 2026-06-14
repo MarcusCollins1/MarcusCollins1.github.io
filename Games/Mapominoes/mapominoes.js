@@ -30,7 +30,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 
-const el = {
+export const el = {
     returnBtn: document.getElementById("returnBtn"),
 
     infoContainer: document.getElementById("infoContainer"),
@@ -86,7 +86,7 @@ let boardScale = 1;
 const minBoardScale = 0.5;
 const maxBoardScale = 4;
 
-let player = null;
+export let player = null;
 window.player = player;
 
 let index = null;
