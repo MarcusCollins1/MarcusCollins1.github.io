@@ -5,6 +5,11 @@ import {
     getCardByName,
 } from "./mapominoes.js"
 
+import {
+    Card,
+    Sea
+} from "./classes.js"
+
 export function isCountryAllowedAtRowCol(row, col, card) {
     const directions = [[-1, 0], [0, 1], [1, 0], [0, -1]];
     for (const [dRow, dCol] of directions) {
