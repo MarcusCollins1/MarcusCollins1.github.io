@@ -30,7 +30,7 @@ export function bordersTransit(row, col) {
     for (const [dRow, dCol] of directions) {
         const element = getElementByRowCol(row+dRow, col+dCol);
         if (element === undefined) continue;
-        if ("transit-on-board" in element.classList) return true;
+        if (element.classList.contains("transit-on-board")) return true;
     }
     return false;
 }
