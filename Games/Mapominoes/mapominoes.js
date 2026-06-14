@@ -258,7 +258,7 @@ async function addPossibleToBoard(row, col, numBorders) {
         event.preventDefault();
     });
 
-    possibleElement.add("drop", async (event) => {
+    possibleElement.addEventListener("drop", async (event) => {
         event.preventDefault();
         unhighlightCards();
         const isTransit = draggingCardName.includes("transit");
