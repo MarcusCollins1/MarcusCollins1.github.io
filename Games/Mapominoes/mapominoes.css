@@ -191,33 +191,33 @@ button:hover {
     background-color: grey;
     color: whitesmoke;
 }
-#highlightCards {
+#highlightCardsBtn {
     display: none;
     margin: 0 auto;
     font-size: large;
     background-color: pink;
     color: black;
 }
-#highlightCards:hover {
+#highlightCardsBtn:hover {
     background-color: black;
     color: pink;
 }
-#highlightCards:disabled {
+#highlightCardsBtn:disabled {
     background-color: grey;
     color: whitesmoke;
 }
-#unhighlightCards {
+#unhighlightCardsBtn {
     display: none;
     margin: 0 auto;
     font-size: large;
     background-color: aqua;
     color: darkred;
 }
-#unhighlightCards:hover {
+#unhighlightCardsBtn:hover {
     background-color: darkred;
     color: aqua;
 }
-#unhighlightCards:disabled {
+#unhighlightCardsBtn:disabled {
     background-color: grey;
     color: whitesmoke;
 }

@@ -696,6 +696,11 @@ async function gameStarted() {
             [`${gamePin}.startingCard`]: allCards[startCardIdx].toDict()
         });
     }
+
+    // Show Highlight cards, unhighlight cards and skip turn buttons
+    el.highlightCardsBtn.style.display = "block";
+    el.unhighlightCardsBtn.style.display = "block";
+    el.skipTurnBtn.style.display = "block";
     
     const gamesRef = doc(db, "Mapominoes", "Games");
     const snapshot = await getDoc(gamesRef);
