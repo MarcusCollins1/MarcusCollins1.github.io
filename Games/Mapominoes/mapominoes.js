@@ -616,9 +616,10 @@ async function updatePlayersList() {
     }
 }
 
+let handLoaded = false;
+
 async function updateHand() {
-    if (!player) return;
-    if (player.cards) return;
+    if (!player || handLoaded) return;
     const gamesRef = doc(db, "Mapominoes", "Games");
     const snapshot = await getDoc(gamesRef);
     const gameData = snapshot.data()[gamePin];
@@ -626,6 +627,7 @@ async function updateHand() {
     if (Object.hasOwn(gameData.hands, name)) {
         const cards = gameData.hands[name];
         player.dealCards(cards.map(cardData => new Card(cardData.name, cardData.borders, cardData.seas, cardData.image)), 2);
+        handLoaded = true;
         renderHand();
         el.boardContainer.style.display = "block";
     }
