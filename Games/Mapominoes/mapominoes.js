@@ -30,7 +30,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 
-export const el = {
+const el = {
     returnBtn: document.getElementById("returnBtn"),
 
     infoContainer: document.getElementById("infoContainer"),
@@ -60,6 +60,7 @@ export const el = {
     finishedOrderOl: document.getElementById("finishedOrderOl"),
     returnHomeBtn: document.getElementById("returnHomeBtn"),
 };
+window.el = el;
 
 const host = window.localStorage.getItem("host") == "true";
 const gamePin = parseInt(window.localStorage.getItem("gamePin"));
@@ -85,7 +86,9 @@ let boardScale = 1;
 const minBoardScale = 0.5;
 const maxBoardScale = 4;
 
-export let player = null;
+let player = null;
+window.player = player;
+
 let index = null;
 
 let playing = false;
