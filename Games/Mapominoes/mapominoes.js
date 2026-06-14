@@ -618,7 +618,7 @@ async function updatePlayersList() {
 
 async function updateHand() {
     if (!player) return;
-    if (player.hand) return;
+    if (player.cards) return;
     const gamesRef = doc(db, "Mapominoes", "Games");
     const snapshot = await getDoc(gamesRef);
     const gameData = snapshot.data()[gamePin];
