@@ -418,7 +418,7 @@ function removeTransitFromHand() {
 let allCards;
 let allSeas;
 
-function getCardByName(cardName) {
+export function getCardByName(cardName) {
     for (const card of allCards) if (card.name === cardName) return card;
 }
 function getSeaByName(seaName) {

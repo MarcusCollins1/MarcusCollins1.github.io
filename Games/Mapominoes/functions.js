@@ -2,6 +2,7 @@ import {
     boardState,
     el,
     player,
+    getCardByName,
 } from "./mapominoes.js"
 
 export function isCountryAllowedAtRowCol(row, col, card) {
