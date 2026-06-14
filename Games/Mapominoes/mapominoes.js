@@ -72,6 +72,8 @@ const boardCols = 101;
 const boardRows = 101;
 const boardWidth = cardWidth * boardCols;
 const boardHeight = cardHeight * boardRows;
+el.board.style.width = `${boardWidth}px`;
+el.board.style.height = `${boardHeight}px`;
 
 let packNames = [];
 let playerNames = [];
