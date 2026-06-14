@@ -245,7 +245,7 @@ function addCardToBoard(card, row, col, isTransit = false) {
     cardElement.style.gridColumn = col;
 
     el.board.appendChild(cardElement);
-    boardScale[`${row}-${col}`] = card;
+    boardState[`${row}-${col}`] = card;
 }
 async function addPossibleToBoard(row, col, numBorders) {
     const possibleElement = document.createElement("div");
