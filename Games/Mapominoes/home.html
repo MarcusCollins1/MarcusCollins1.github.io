@@ -12,14 +12,14 @@
 
     <h2>Name:</h2>
     <input type="text" id="nameInput" placeholder="Enter your name">
-    
+
     <br>
 
     <form id="packsForm"></form>
 
     <ul id="gamePinsList"></ul>
 
-    <button id="getGamesBtn">Reload</button>
+    <button id="getGamesBtn" type="button">Reload</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -27,6 +27,7 @@
             getFirestore,
             doc,
             getDoc,
+            setDoc,
             updateDoc,
             deleteField,
             onSnapshot,
@@ -39,158 +40,219 @@
             storageBucket: "marcus-collins-github-website.firebasestorage.app",
             messagingSenderId: "328004594228",
             appId: "1:328004594228:web:47074e07c446a328bbf861",
-            measurementId: "G-6M9HBX4E3Z"
+            measurementId: "G-6M9HBX4E3Z",
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-
         const packsForm = document.getElementById("packsForm");
         const getGamesBtn = document.getElementById("getGamesBtn");
         const gamePinsList = document.getElementById("gamePinsList");
+        const nameInput = document.getElementById("nameInput");
 
-        let nameInput = document.getElementById("nameInput");
         let packNames = [];
+        let listenerStarted = false;
 
-        function listenToGames() {
-            const gamesRef = doc(db, "Mapominoes", "Games");
-
-            onSnapshot(gamesRef, snapshot => {
-                if (!snapshot.exists) return;
-                getGames();
-            });
+        function packsDocRef() {
+            return doc(db, "Mapominoes", "Packs");
         }
 
-        async function getGames() {
-            const gamesRef = doc(db, "Mapominoes", "Games");
-            const snapshot = await getDoc(gamesRef);
-            const games = snapshot.data();
-            gamePinsList.innerHTML = "";
-            for (const [gamePin, gameData] of Object.entries(games)) {
-                const numPlayers = gameData.players.length;
-                if (numPlayers === 0) {
-                    await updateDoc(gamesRef, {
-                        [gamePin]: deleteField()
-                    });
-                    return;
-                }
-                if (!gameData.playing) {
-                    const li = document.createElement("li");
-                    const btn = document.createElement("button");
-                    btn.textContent = `Join Game ${gamePin} (${numPlayers} players)`;
-                    btn.addEventListener("click", async () => {
-                        const name = nameInput.value.trim();
-                        if (name === "") {
-                            alert("Please enter your name");
-                            return;
-                        }
-                        if (gameData.players.includes(name)) {
-                            alert("This name is taken in this game. Please choose another name.");
-                            return;
-                        }
-                        // Update firebase with the new player
-                        const gameRef = doc(db, "Mapominoes", "Games");
-                        await updateDoc(gameRef, {
-                            [`${gamePin}.players`]: [...gameData.players, name]
-                        });
-    
-                        
-                        // Update the data in local storage and redirect to the game page
-                        window.localStorage.setItem("gamePin", gamePin);
-                        window.localStorage.setItem("host", false);
-                        window.localStorage.setItem("name", name);
-                        window.location.href = "./mapominoes.html";
-                    });
-                    li.appendChild(btn);
-                    gamePinsList.appendChild(li);
-                }
-            }
+        function gamesDocRef() {
+            return doc(db, "Mapominoes", "Games");
         }
 
-        document.addEventListener("DOMContentLoaded", async function() {
-            const packsRef = doc(db, "Mapominoes", "Packs");
-            const snapshot = await getDoc(packsRef);
-            
-            packNames = snapshot.data().packs;
-
-            populatePacksForm();
-            listenToGames();
-        });
-
-        packsForm.addEventListener("submit", async (event) => {
-            event.preventDefault();
-
-            if (nameInput.value.trim() === "") {
-                alert("Please enter your name");
-                return;
-            }
-
-            let formData = {};
-            packsForm.querySelectorAll("input[type='checkbox']").forEach(checkBox => {
-                formData[checkBox.name] = checkBox.checked ? true : false;
-            });
-            if (!Object.values(formData).some(value => value)) {
-                alert("You must select at least 1 pack");
-                return;
-            }
-            formData["name"] = nameInput.value.trim();
-
-            let gamePin;
-            const gameRef = doc(db, "Mapominoes", "Games");
-            const snapshot = await getDoc(gameRef);
-            const gamePins = Object.values(snapshot.data());
-            while (true) {
-                gamePin = generateGamePin();
-                if (!gamePins.includes(gamePin)) break;
-            }
-            
-            await updateDoc(gameRef, {
-                [gamePin]: {
-                    players: [formData.name],
-                    packs: Object.keys(formData).filter(key => key !== "name" && formData[key]),
-                    hands: {},
-                    startingCard: null,
-                    turn: -1,
-                    playing: false,
-                }
-            });
-
-            window.localStorage.setItem("gamePin", gamePin);
-            window.localStorage.setItem("host", true);
-            window.localStorage.setItem("name", nameInput.value);
-            window.location.href = "./mapominoes.html";
-        });
-
-        function populatePacksForm() {
-            packsForm.innerHTML = "";
-            const packsH2 = document.createElement("h2");
-            packsH2.textContent = "Packs:";
-            packsForm.appendChild(packsH2);
-            packNames.forEach(packName => {
-                const packCheckBox = document.createElement("input");
-                packCheckBox.id = `${packName}-checkbox`;
-                packCheckBox.type = "checkbox";
-                packCheckBox.name = packName;
-                packsForm.appendChild(packCheckBox);
-                const packLabel = document.createElement("label");
-                packLabel.htmlFor = `${packName}-checkbox`;
-                packLabel.textContent = packName;
-                packsForm.appendChild(packLabel);
-                packsForm.appendChild(document.createElement("br"));
-            });
-            const submitBtn = document.createElement("button");
-            submitBtn.id = "submitBtn";
-            submitBtn.textContent = "Create Game";
-            packsForm.appendChild(submitBtn);
-        }
-        
         function generateGamePin() {
             return Math.floor(1000 + Math.random() * 9000).toString();
         }
 
-        getGamesBtn.addEventListener("click", getGames);
-        getGames();
+        async function ensureDocs() {
+            const packsSnap = await getDoc(packsDocRef());
+            if (!packsSnap.exists()) {
+                await setDoc(packsDocRef(), { packs: [] });
+            }
+
+            const gamesSnap = await getDoc(gamesDocRef());
+            if (!gamesSnap.exists()) {
+                await setDoc(gamesDocRef(), {});
+            }
+        }
+
+        function readSelectedPacks() {
+            const selected = [];
+            packsForm.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
+                if (checkbox.checked) {
+                    selected.push(checkbox.name);
+                }
+            });
+            return selected;
+        }
+
+        function renderPackForm() {
+            packsForm.innerHTML = "";
+
+            const h2 = document.createElement("h2");
+            h2.textContent = "Packs:";
+            packsForm.appendChild(h2);
+
+            if (packNames.length === 0) {
+                const p = document.createElement("p");
+                p.textContent = "No packs are available yet.";
+                packsForm.appendChild(p);
+            }
+
+            packNames.forEach((packName) => {
+                const wrapper = document.createElement("div");
+
+                const checkbox = document.createElement("input");
+                checkbox.id = `${packName}-checkbox`;
+                checkbox.type = "checkbox";
+                checkbox.name = packName;
+
+                const label = document.createElement("label");
+                label.htmlFor = `${packName}-checkbox`;
+                label.textContent = packName;
+
+                wrapper.appendChild(checkbox);
+                wrapper.appendChild(label);
+                packsForm.appendChild(wrapper);
+            });
+
+            const submitBtn = document.createElement("button");
+            submitBtn.id = "submitBtn";
+            submitBtn.type = "submit";
+            submitBtn.textContent = "Create Game";
+            packsForm.appendChild(submitBtn);
+        }
+
+        async function refreshPacks() {
+            const snapshot = await getDoc(packsDocRef());
+            if (!snapshot.exists()) {
+                packNames = [];
+            } else {
+                const data = snapshot.data() ?? {};
+                packNames = Array.isArray(data.packs) ? data.packs : [];
+            }
+            renderPackForm();
+        }
+
+        async function refreshGames() {
+            const snapshot = await getDoc(gamesDocRef());
+            const games = snapshot.exists() ? (snapshot.data() ?? {}) : {};
+
+            gamePinsList.innerHTML = "";
+
+            for (const [gamePin, gameData] of Object.entries(games)) {
+                const players = Array.isArray(gameData.players) ? gameData.players : [];
+                const playing = Boolean(gameData.playing);
+
+                if (players.length === 0) {
+                    await updateDoc(gamesDocRef(), {
+                        [gamePin]: deleteField(),
+                    });
+                    continue;
+                }
+
+                if (playing) {
+                    continue;
+                }
+
+                const li = document.createElement("li");
+                const btn = document.createElement("button");
+                btn.textContent = `Join Game ${gamePin} (${players.length} players)`;
+
+                btn.addEventListener("click", async () => {
+                    const name = nameInput.value.trim();
+                    if (!name) {
+                        alert("Please enter your name");
+                        return;
+                    }
+
+                    if (players.includes(name)) {
+                        alert("This name is taken in this game. Please choose another name.");
+                        return;
+                    }
+
+                    await updateDoc(gamesDocRef(), {
+                        [`${gamePin}.players`]: [...players, name],
+                        [`${gamePin}.transits.${name}`]: 2,
+                    });
+
+                    window.localStorage.setItem("gamePin", gamePin);
+                    window.localStorage.setItem("host", "false");
+                    window.localStorage.setItem("name", name);
+                    window.location.href = "./mapominoes.html";
+                });
+
+                li.appendChild(btn);
+                gamePinsList.appendChild(li);
+            }
+        }
+
+        async function startListener() {
+            if (listenerStarted) {
+                return;
+            }
+            listenerStarted = true;
+
+            onSnapshot(gamesDocRef(), () => {
+                void refreshGames();
+            });
+        }
+
+        packsForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert("Please enter your name");
+                return;
+            }
+
+            const selectedPacks = readSelectedPacks();
+            if (selectedPacks.length === 0) {
+                alert("You must select at least 1 pack");
+                return;
+            }
+
+            const gamesSnap = await getDoc(gamesDocRef());
+            const games = gamesSnap.exists() ? (gamesSnap.data() ?? {}) : {};
+
+            let gamePin = generateGamePin();
+            while (Object.hasOwn(games, gamePin)) {
+                gamePin = generateGamePin();
+            }
+
+            const newGame = {
+                players: [name],
+                packs: selectedPacks,
+                hands: {},
+                transits: { [name]: 2 },
+                board: {},
+                startingCard: null,
+                turn: 0,
+                playing: false,
+                finishedOrder: [],
+            };
+
+            await updateDoc(gamesDocRef(), {
+                [gamePin]: newGame,
+            });
+
+            window.localStorage.setItem("gamePin", gamePin);
+            window.localStorage.setItem("host", "true");
+            window.localStorage.setItem("name", name);
+            window.location.href = "./mapominoes.html";
+        });
+
+        getGamesBtn.addEventListener("click", () => {
+            void refreshGames();
+        });
+
+        await ensureDocs();
+        await refreshPacks();
+        await refreshGames();
+        await startListener();
     </script>
 </body>
 </html>

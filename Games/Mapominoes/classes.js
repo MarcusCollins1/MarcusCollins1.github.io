@@ -1,71 +1,108 @@
 export class Game {
-    constructor(gamePin, players, packs, joinable) {
+    constructor({
+        gamePin,
+        players = [],
+        packs = [],
+        joinable = true,
+        playing = false,
+        hands = {},
+        transits = {},
+        board = {},
+        startingCard = null,
+        turn = 0,
+        finishedOrder = [],
+    } = {}) {
         this.gamePin = gamePin;
         this.players = players;
         this.packs = packs;
         this.joinable = joinable;
+        this.playing = playing;
+        this.hands = hands;
+        this.transits = transits;
+        this.board = board;
+        this.startingCard = startingCard;
+        this.turn = turn;
+        this.finishedOrder = finishedOrder;
     }
 }
 
 export class Player {
-    constructor(name) {
+    constructor(name, cards = [], numTransits = 2) {
         this.name = name;
-        this.cards = [];
-        this.numTransits = 0;
-    }
-    
-    dealCards(cards, numTransits) {
         this.cards = cards;
         this.numTransits = numTransits;
     }
 
+    dealCards(cards, numTransits = this.numTransits) {
+        this.cards = [...cards];
+        this.numTransits = numTransits;
+    }
+
     hasCardByName(cardName) {
-        for (let card of this.cards) {
-            if (card.name === cardName) return true;
-        }
-        return false;
+        return this.cards.some((card) => card.name === cardName);
     }
 
     getCardByName(cardName) {
-        for (let card of this.cards) {
-            if (card.name === cardName) return card;
-        }
-        return null;
+        return this.cards.find((card) => card.name === cardName) ?? null;
     }
 
     getCardIndexByName(cardName) {
-        for (let i = 0; i < this.cards.length; i++) {
-            if (this.cards[i].name === cardName) return i;
-        }
-        return -1;
+        return this.cards.findIndex((card) => card.name === cardName);
     }
 
     removeCardFromHandByName(cardName) {
-        this.cards.splice(this.getCardIndexByName(cardName), 1);
+        const index = this.getCardIndexByName(cardName);
+        if (index >= 0) {
+            this.cards.splice(index, 1);
+        }
+    }
+
+    toPlainCards() {
+        return this.cards.map((card) => {
+            if (card && typeof card.toDict === "function") {
+                return card.toDict();
+            }
+            return {
+                name: card.name,
+                borders: Array.isArray(card.borders) ? [...card.borders] : [],
+                seas: Array.isArray(card.seas) ? [...card.seas] : [],
+                image: card.image ?? "",
+            };
+        });
     }
 }
 
 export class Card {
     constructor(name, borders, seas, image) {
         this.name = name;
-        this.borders = borders;
-        this.seas = seas;
+        this.borders = Array.isArray(borders) ? [...borders] : [];
+        this.seas = Array.isArray(seas) ? [...seas] : [];
         this.image = image;
+        this.isTransit = false;
     }
+
     toDict() {
         return {
             name: this.name,
-            borders: this.borders,
-            seas: this.seas,
+            borders: [...this.borders],
+            seas: [...this.seas],
             image: this.image,
         };
     }
 }
 
 export class Sea {
-    constructor (name, image) {
+    constructor(name, image) {
         this.name = name;
         this.image = image;
+        this.isTransit = false;
+    }
+
+    toDict() {
+        return {
+            name: this.name,
+            image: this.image,
+        };
     }
 }
 

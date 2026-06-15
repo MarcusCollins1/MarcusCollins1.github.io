@@ -1,19 +1,19 @@
-import { bordersTransit, getAllowedCountriesAt, getAllowedSeasAt, getElementByRowCol } from "./functions.js";
-import { Game, Player, Card, Sea, Pack } from "./classes.js";
+import { Game, Player, Card, Sea } from "./classes.js";
+import {
+    bordersTransit,
+    getAllowedCountriesAt,
+    getAllowedSeasAt,
+    getElementByRowCol,
+} from "./functions.js";
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
     getFirestore,
     doc,
-    collection,
     getDoc,
-    getDocs,
-    setDoc,
     updateDoc,
-    deleteDoc,
     deleteField,
     onSnapshot,
-    arrayRemove,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -23,209 +23,169 @@ const firebaseConfig = {
     storageBucket: "marcus-collins-github-website.firebasestorage.app",
     messagingSenderId: "328004594228",
     appId: "1:328004594228:web:47074e07c446a328bbf861",
-    measurementId: "G-6M9HBX4E3Z"
+    measurementId: "G-6M9HBX4E3Z",
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+const gamePinValue = window.localStorage.getItem("gamePin");
+const nameValue = window.localStorage.getItem("name");
+const hostValue = window.localStorage.getItem("host");
+
+if (!gamePinValue || !nameValue || hostValue === null) {
+    window.location.href = "./home.html";
+}
+
+const gamePin = String(gamePinValue);
+const name = String(nameValue);
+const host = hostValue === "true";
+const gameKey = gamePin;
+const gamesRef = doc(db, "Mapominoes", "Games");
 
 export const el = {
     returnBtn: document.getElementById("returnBtn"),
-
     infoContainer: document.getElementById("infoContainer"),
     gamePinP: document.getElementById("gamePinP"),
     packsP: document.getElementById("packsP"),
     playersList: document.getElementById("playersList"),
-
     startBtn: document.getElementById("startBtn"),
     waitingForGameToStartP: document.getElementById("waitingForGameToStartP"),
-
     boardContainer: document.getElementById("boardContainer"),
     board: document.getElementById("board"),
     centerBtn: document.getElementById("centerBtn"),
-
     skipTurnBtn: document.getElementById("skipTurnBtn"),
     highlightCardsBtn: document.getElementById("highlightCardsBtn"),
     unhighlightCardsBtn: document.getElementById("unhighlightCardsBtn"),
-
     playerHand: document.getElementById("playerHand"),
     playerHandWhiteSpace: document.getElementById("playerHandWhiteSpace"),
-    
     getTransitCardDiv: document.getElementById("getTransitCardDiv"),
     getTransitCardCountriesUl: document.getElementById("getTransitCardCountriesUl"),
     getTransitCardSeasUl: document.getElementById("getTransitCardSeasUl"),
-
     gameEndDiv: document.getElementById("gameEndDiv"),
     finishedOrderOl: document.getElementById("finishedOrderOl"),
     returnHomeBtn: document.getElementById("returnHomeBtn"),
 };
 window.el = el;
 
-const host = window.localStorage.getItem("host") == "true";
-const gamePin = parseInt(window.localStorage.getItem("gamePin"));
-const name = window.localStorage.getItem("name");
+export const boardState = {};
+window.boardState = boardState;
 
-const cardWidth = 80;
-const cardHeight = 128;
-const boardCols = 101;
-const boardRows = 101;
-const boardWidth = cardWidth * boardCols;
-const boardHeight = cardHeight * boardRows;
-el.board.style.width = `${boardWidth}px`;
-el.board.style.height = `${boardHeight}px`;
+export let player = null;
+window.player = player;
 
+let allCards = [];
+let allSeas = [];
 let packNames = [];
 let playerNames = [];
-
-let startingCardPlaced = false;
+let playing = false;
+let isPlayerTurn = false;
+let gameInitialized = false;
+let assetsLoaded = false;
+let handLoaded = false;
+let lastBoardSignature = "";
+let index = -1;
 
 let isBoardDragging = false;
-let boardStartX, boardStartY;
+let boardStartX = 0;
+let boardStartY = 0;
 let boardX = 0;
 let boardY = 0;
 let boardScale = 1;
 const minBoardScale = 0.5;
 const maxBoardScale = 4;
 
-export let player = null;
-window.player = player;
+let draggingCardName = "";
+let draggingCard = null;
+let mustPlayOff = false;
+let mustPlayOffRow = null;
+let mustPlayOffCol = null;
+let resolveTransitChoice = null;
 
-let index = null;
+const cardWidth = 80;
+const cardHeight = 128;
+const boardCols = 101;
+const boardRows = 101;
+el.board.style.width = `${cardWidth * boardCols}px`;
+el.board.style.height = `${cardHeight * boardRows}px`;
 
-let playing = false;
-let isPlayerTurn = false;
-
-el.returnBtn.addEventListener("click", returnHome);
-el.returnHomeBtn.addEventListener("click", returnHome);
-
-function listenToGame() {
-    const gamesRef = doc(db, "Mapominoes", "Games");
-
-    onSnapshot(gamesRef, snapshot => {
-        if (!snapshot.exists()) return;
-        if (!Object.hasOwn(snapshot.data(), gamePin.toString()) && !host) {
-            // Game deleted
-            alert("Game deleted");
-            window.location.href = "./home.html";
-        }
-        const gameData = snapshot.data()[gamePin];
-        updatePlayersList();
-        if (gameData.playing && !playing) {
-            gameStarted();
-        }
-        updateHand();
-        if (snapshot.data()[gamePin].turn === index && !isPlayerTurn) {
-            startTurn();
-        }
-        if (snapshot.data()[gamePin].startingCard && !startingCardPlaced) {
-            const startingCardData = snapshot.data()[gamePin].startingCard;
-            const startingCard = new Card(startingCardData.name, startingCardData.borders, startingCardData.seas, startingCardData.image);
-            addCardToBoard(startingCard, Math.ceil(boardCols/2), Math.ceil(boardRows/2))
-            startingCardPlaced = true;
-        }
-    });
+function gameData() {
+    return window.__mapominoesGameData ?? null;
 }
 
-async function leaveGame() {
-    const gamesRef = doc(db, "Mapominoes", "Games");
-    
-    if (host) {
-        await updateDoc(gamesRef, {
-            [gamePin]: deleteField()
-        })
-    } else {
-        await updateDoc(gamesRef, {
-            [`${gamePin}.players`]: arrayRemove(name)
-        });
+function setGameData(data) {
+    window.__mapominoesGameData = data;
+}
+
+function setPlayer(nextPlayer) {
+    player = nextPlayer;
+    window.player = player;
+}
+
+function gameSnapshotToData(snapshot) {
+    if (!snapshot.exists()) {
+        return null;
     }
-}
-async function returnHome() {
-    await leaveGame();
-    window.location.href = "./home.html";
+    const data = snapshot.data() ?? {};
+    return data[gameKey] ?? null;
 }
 
-const startBoardDrag = (event) => {
-    isBoardDragging = true;
-    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+function gamesDoc() {
+    return doc(db, "Mapominoes", "Games");
+}
 
-    boardStartX = clientX;
-    boardStartY = clientY;
-    el.board.style.cursor = "grabbing";
-};
-const moveBoard = (event) => {
-    if (!isBoardDragging) return;
-    event.preventDefault();
-    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
-
-    const dx = clientX - boardStartX;
-    const dy = clientY - boardStartY;
-
-    boardStartX = clientX;
-    boardStartY = clientY;
-
-    boardX += dx;
-    boardY += dy;
-
-    updateBoardTransform();
-};
-const stopBoardDrag = () => {
-    isBoardDragging = false;
-    el.board.style.cursor = "grab";
-};
-const cancelBoardDrag = () => {
-    if (isBoardDragging) {
-        isBoardDragging = false;
-        el.board.style.cursor = "grab";
+function toPlainCard(card) {
+    if (card && typeof card.toDict === "function") {
+        return card.toDict();
     }
+
+    return {
+        name: card.name,
+        borders: Array.isArray(card.borders) ? [...card.borders] : [],
+        seas: Array.isArray(card.seas) ? [...card.seas] : [],
+        image: card.image ?? "",
+    };
 }
 
-const updateBoardTransform = () => {
+function serializeBoardCell(card, isTransit = false) {
+    return {
+        kind: card instanceof Sea ? "sea" : "country",
+        card: toPlainCard(card),
+        transit: Boolean(isTransit),
+    };
+}
+
+function hydrateBoardCell(cell) {
+    if (!cell || !cell.card) {
+        return null;
+    }
+
+    if (cell.kind === "sea") {
+        const sea = new Sea(cell.card.name, cell.card.image);
+        sea.isTransit = Boolean(cell.transit);
+        return sea;
+    }
+
+    const card = new Card(
+        cell.card.name,
+        cell.card.borders ?? [],
+        cell.card.seas ?? [],
+        cell.card.image
+    );
+    card.isTransit = Boolean(cell.transit);
+    return card;
+}
+
+function clearBoard() {
+    for (const key of Object.keys(boardState)) {
+        delete boardState[key];
+    }
+    el.board.innerHTML = "";
+}
+
+function updateBoardTransform() {
     el.board.style.transform = `translate(-50%, -50%) translate(${boardX}px, ${boardY}px) scale(${boardScale})`;
 }
-
-el.board.addEventListener("wheel", (event) => {
-    event.preventDefault();
-    const zoomSpeed = 0.1;
-    boardScale += event.deltaY < 0 ? zoomSpeed : -zoomSpeed;
-    boardScale = Math.max(minBoardScale, Math.min(maxBoardScale, boardScale));
-    updateBoardTransform();
-});
-let initialPinchDistance = null;
-el.board.addEventListener("touchmove", (event) => {
-    if (event.touches.length === 2) {
-        event.preventDefault();
-        const [touch1, touch2] = event.touches;
-        const pinchDistance = Math.hypot(
-            touch2.clientX - touch1.clientX,
-            touch2.clientY - touch1.clientY
-        );
-        if (initialPinchDistance === null) {
-            initialPinchDistance = pinchDistance;
-            return;
-        }
-        const pinchScale = pinchDistance / initialPinchDistance;
-        boardScale *= pinchScale;
-        boardScale = Math.max(minBoardScale, Math.min(maxBoardScale, boardScale));
-        initialPinchDistance = pinchDistance;
-        updateBoardTransform();
-    }
-});
-el.board.addEventListener(("touchend"), (event) => {
-    initialPinchDistance = null;
-});
-
-el.board.addEventListener("mousedown", startBoardDrag);
-el.board.addEventListener("mousemove", moveBoard);
-el.board.addEventListener("mouseup", stopBoardDrag);
-el.board.addEventListener("mouseleave", cancelBoardDrag);
-
-el.board.addEventListener("touchstart", startBoardDrag);
-el.board.addEventListener("touchmove", moveBoard);
-el.board.addEventListener("touchend", stopBoardDrag);
-el.board.addEventListener("touchcancel", stopBoardDrag);
 
 function centerBoard() {
     boardX = 0;
@@ -234,27 +194,312 @@ function centerBoard() {
     updateBoardTransform();
 }
 
-export const boardState = {};
-
 function addCardToBoard(card, row, col, isTransit = false) {
-    if (isTransit) el.skipTurnBtn.disabled = true;
+    boardState[`${row}-${col}`] = card;
+    card.isTransit = Boolean(isTransit);
+
     const cardElement = document.createElement("div");
     cardElement.classList.add("card-on-board");
-    if (isTransit) cardElement.classList.add("transit-on-board");
-    cardElement.id = card.name;
-    cardElement.style.backgroundImage = `url(${card.image.replace(/ /g, "_")})`;
-    cardElement.style.gridRow = row;
-    cardElement.style.gridColumn = col;
+    if (isTransit) {
+        cardElement.classList.add("transit-on-board");
+    }
+
+    cardElement.dataset.row = String(row);
+    cardElement.dataset.col = String(col);
+    cardElement.id = `${card.name}-${row}-${col}`;
+    cardElement.style.gridRow = String(row);
+    cardElement.style.gridColumn = String(col);
+    cardElement.style.backgroundImage = `url(${String(card.image).replace(/ /g, "_")})`;
 
     el.board.appendChild(cardElement);
-    boardState[`${row}-${col}`] = card;
 }
-async function addPossibleToBoard(row, col, numBorders) {
+
+function renderBoard(boardData) {
+    const signature = JSON.stringify(boardData ?? {});
+    if (signature === lastBoardSignature) {
+        return;
+    }
+
+    lastBoardSignature = signature;
+    clearBoard();
+
+    for (const [key, cell] of Object.entries(boardData ?? {})) {
+        const [rowStr, colStr] = key.split("-");
+        const row = Number(rowStr);
+        const col = Number(colStr);
+        const card = hydrateBoardCell(cell);
+
+        if (!Number.isFinite(row) || !Number.isFinite(col) || !card) {
+            continue;
+        }
+
+        addCardToBoard(card, row, col, Boolean(cell.transit));
+    }
+}
+
+function setBoardVisibility(visible) {
+    el.boardContainer.style.display = visible ? "flex" : "none";
+}
+
+function setHandVisibility(visible) {
+    el.playerHand.style.display = visible ? "flex" : "none";
+    el.playerHandWhiteSpace.style.display = visible ? "block" : "none";
+}
+
+function renderPlayersList(players) {
+    el.playersList.innerHTML = "";
+    players.forEach((playerName) => {
+        const li = document.createElement("li");
+        if (playerName === name) {
+            const strong = document.createElement("strong");
+            strong.textContent = playerName;
+            li.appendChild(strong);
+        } else {
+            li.textContent = playerName;
+        }
+        el.playersList.appendChild(li);
+    });
+}
+
+function renderLobby(game) {
+    const players = Array.isArray(game?.players) ? game.players : [];
+    const packs = Array.isArray(game?.packs) ? game.packs : [];
+
+    playerNames = players;
+    packNames = packs;
+
+    el.gamePinP.textContent = `Game PIN: ${gamePin}`;
+    el.packsP.textContent = `Packs: ${packs.join(", ")}`;
+    renderPlayersList(players);
+
+    if (host) {
+        el.startBtn.style.display = "block";
+        el.startBtn.disabled = players.length < 2 || Boolean(game?.playing);
+        el.waitingForGameToStartP.style.display = "none";
+    } else {
+        el.startBtn.style.display = "none";
+        el.waitingForGameToStartP.style.display = game?.playing ? "none" : "block";
+    }
+}
+
+async function loadAssetsOnce() {
+    if (assetsLoaded) {
+        return;
+    }
+
+    allCards = [];
+    allSeas = [];
+
+    for (const packName of packNames) {
+        const countriesRef = doc(db, "Mapominoes", "Packs", packName, "Countries");
+        const countriesSnap = await getDoc(countriesRef);
+        const countries = countriesSnap.exists() ? (countriesSnap.data() ?? {}) : {};
+
+        for (const [countryName, countryData] of Object.entries(countries)) {
+            allCards.push(
+                new Card(
+                    countryName,
+                    countryData.Borders ?? countryData.borders ?? [],
+                    countryData.Seas ?? countryData.seas ?? [],
+                    `./Images/Cards/${packName}/${countryName}.jpg`
+                )
+            );
+        }
+
+        const seasRef = doc(db, "Mapominoes", "Packs", packName, "Seas");
+        const seasSnap = await getDoc(seasRef);
+        const seas = seasSnap.exists() ? (seasSnap.data() ?? {}) : {};
+
+        for (const [seaName] of Object.entries(seas)) {
+            allSeas.push(new Sea(seaName, `./Images/Cards/Seas/${seaName}.jpg`));
+        }
+    }
+
+    assetsLoaded = true;
+}
+
+export function getCardByName(cardName) {
+    return allCards.find((card) => card.name === cardName) ?? null;
+}
+
+function getSeaByName(seaName) {
+    return allSeas.find((sea) => sea.name === seaName) ?? null;
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function getStartCardIdx(cards) {
+    const idx = cards.findIndex((card) => Array.isArray(card.borders) && card.borders.length >= 3);
+    return idx >= 0 ? idx : 0;
+}
+
+function makeHands(cards, numPlayers, startCardIdx) {
+    const hands = Array.from({ length: numPlayers }, () => []);
+    let currentPlayer = 0;
+
+    cards.forEach((card, idx) => {
+        if (idx === startCardIdx) {
+            return;
+        }
+        hands[currentPlayer].push(card.toDict());
+        currentPlayer = (currentPlayer + 1) % numPlayers;
+    });
+
+    return hands;
+}
+
+async function startGame() {
+    const game = gameData();
+    if (!game) {
+        return;
+    }
+
+    if (!Array.isArray(game.players) || game.players.length < 2) {
+        alert("Need at least 2 players to start the game.");
+        return;
+    }
+
+    await loadAssetsOnce();
+
+    const deck = shuffle([...allCards]);
+    const startCardIdx = getStartCardIdx(deck);
+    const startCard = deck[startCardIdx];
+    const centerRow = Math.ceil(boardRows / 2);
+    const centerCol = Math.ceil(boardCols / 2);
+
+    const hands = makeHands(deck, game.players.length, startCardIdx);
+    const handsByPlayer = Object.fromEntries(hands.map((hand, idx) => [game.players[idx], hand]));
+    const transitsByPlayer = Object.fromEntries(game.players.map((playerName) => [playerName, 2]));
+
+    await updateDoc(gamesRef, {
+        [`${gameKey}.hands`]: handsByPlayer,
+        [`${gameKey}.transits`]: transitsByPlayer,
+        [`${gameKey}.board`]: {
+            [`${centerRow}-${centerCol}`]: serializeBoardCell(startCard, false),
+        },
+        [`${gameKey}.startingCard`]: startCard.toDict(),
+        [`${gameKey}.turn`]: 0,
+        [`${gameKey}.playing`]: true,
+        [`${gameKey}.finishedOrder`]: [],
+    });
+
+    el.startBtn.disabled = true;
+}
+
+async function leaveGame() {
+    const game = gameData();
+    if (!game) {
+        return;
+    }
+
+    if (host) {
+        await updateDoc(gamesRef, {
+            [gameKey]: deleteField(),
+        });
+        return;
+    }
+
+    const players = Array.isArray(game.players) ? game.players.filter((playerName) => playerName !== name) : [];
+    await updateDoc(gamesRef, {
+        [`${gameKey}.players`]: players,
+        [`${gameKey}.hands.${name}`]: deleteField(),
+        [`${gameKey}.transits.${name}`]: deleteField(),
+    });
+}
+
+async function returnHome() {
+    try {
+        await leaveGame();
+    } finally {
+        window.location.href = "./home.html";
+    }
+}
+
+function startBoardDrag(event) {
+    isBoardDragging = true;
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+    boardStartX = clientX;
+    boardStartY = clientY;
+    el.board.style.cursor = "grabbing";
+}
+
+function moveBoard(event) {
+    if (!isBoardDragging) {
+        return;
+    }
+
+    event.preventDefault();
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+    const dx = clientX - boardStartX;
+    const dy = clientY - boardStartY;
+
+    boardStartX = clientX;
+    boardStartY = clientY;
+    boardX += dx;
+    boardY += dy;
+    updateBoardTransform();
+}
+
+function stopBoardDrag() {
+    isBoardDragging = false;
+    el.board.style.cursor = "grab";
+}
+
+function cancelBoardDrag() {
+    isBoardDragging = false;
+    el.board.style.cursor = "grab";
+}
+
+let initialPinchDistance = null;
+
+function handleTouchMove(event) {
+    if (event.touches.length !== 2) {
+        return;
+    }
+
+    event.preventDefault();
+    const [touch1, touch2] = event.touches;
+    const pinchDistance = Math.hypot(
+        touch2.clientX - touch1.clientX,
+        touch2.clientY - touch1.clientY
+    );
+
+    if (initialPinchDistance === null) {
+        initialPinchDistance = pinchDistance;
+        return;
+    }
+
+    const pinchScale = pinchDistance / initialPinchDistance;
+    boardScale *= pinchScale;
+    boardScale = Math.max(minBoardScale, Math.min(maxBoardScale, boardScale));
+    initialPinchDistance = pinchDistance;
+    updateBoardTransform();
+}
+
+function handleTouchEnd() {
+    initialPinchDistance = null;
+}
+
+function clearPossiblePositions() {
+    document.querySelectorAll(".possible").forEach((possible) => possible.remove());
+}
+
+function addPossibleToBoard(row, col, numBorders) {
     const possibleElement = document.createElement("div");
     possibleElement.classList.add("possible");
-    possibleElement.style.gridRow = row;
-    possibleElement.style.gridColumn = col;
-    possibleElement.setAttribute("numBorders", numBorders);
+    possibleElement.dataset.row = String(row);
+    possibleElement.dataset.col = String(col);
+    possibleElement.style.gridRow = String(row);
+    possibleElement.style.gridColumn = String(col);
+    possibleElement.setAttribute("numBorders", String(numBorders));
 
     possibleElement.addEventListener("dragover", (event) => {
         event.preventDefault();
@@ -262,33 +507,37 @@ async function addPossibleToBoard(row, col, numBorders) {
 
     possibleElement.addEventListener("drop", async (event) => {
         event.preventDefault();
-        unhighlightCards();
-        const isTransit = draggingCardName.includes("transit");
-        const row = parseInt(event.target.style.gridRow);
-        const col = parseInt(event.target.style.gridColumn);
-        const numBorders = parseInt(event.target.getAttribute("numBorders"));
+        clearPossiblePositions();
+
+        const target = event.currentTarget;
+        const row = Number(target.dataset.row);
+        const col = Number(target.dataset.col);
+        const numBorders = Number(target.getAttribute("numBorders") ?? 0);
+        const isTransit = draggingCardName.startsWith("transit");
+
         if (isTransit) {
             mustPlayOff = true;
             mustPlayOffRow = row;
             mustPlayOffCol = col;
-            const card = await getTransitCard(getAllowedCountriesAt(row, col), getAllowedSeasAt(row, col));
-            if (card instanceof Sea || card instanceof Card) {
-                addCardToBoard(card, row, col, true);
-                removeTransitFromHand();
-                // Add firebase code
-            } else {
-                alert("Unknown type of card selected");
+
+            const allowedCountries = getAllowedCountriesAt(row, col);
+            const allowedSeas = getAllowedSeasAt(row, col);
+            const chosenCard = await getTransitCard(allowedCountries, allowedSeas);
+
+            if (chosenCard instanceof Card || chosenCard instanceof Sea) {
+                await placeCard(chosenCard, row, col, true, numBorders);
+                await removeTransitFromHand();
             }
-        } else {
-            mustPlayOff = false;
-            addCardToBoard(draggingCard, row, col);
-            removeCardFromHandByName(draggingCardName);
-            // Add firebase code
+            return;
+        }
+
+        mustPlayOff = false;
+        if (draggingCard) {
+            await placeCard(draggingCard, row, col, false, numBorders);
+            await removeCardFromHandByName(draggingCardName);
 
             if (numBorders <= 1) {
-                // end go
-                endTurn();
-                // Add firebase code
+                await endTurnRemote();
             }
         }
     });
@@ -296,259 +545,335 @@ async function addPossibleToBoard(row, col, numBorders) {
     el.board.appendChild(possibleElement);
 }
 
+let resolveTransitPromise = null;
+
 async function getTransitCard(countryNames, seaNames) {
     el.getTransitCardDiv.style.display = "block";
     el.getTransitCardCountriesUl.innerHTML = "";
     el.getTransitCardSeasUl.innerHTML = "";
 
+    const buttons = [];
+
+    countryNames.forEach((countryName) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = countryName;
+        button.addEventListener("click", () => {
+            el.getTransitCardDiv.style.display = "none";
+            if (resolveTransitPromise) {
+                resolveTransitPromise(getCardByName(countryName));
+                resolveTransitPromise = null;
+            }
+        });
+        el.getTransitCardCountriesUl.appendChild(button);
+        buttons.push(button);
+    });
+
+    seaNames.forEach((seaName) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = seaName;
+        button.addEventListener("click", () => {
+            el.getTransitCardDiv.style.display = "none";
+            if (resolveTransitPromise) {
+                resolveTransitPromise(getSeaByName(seaName));
+                resolveTransitPromise = null;
+            }
+        });
+        el.getTransitCardSeasUl.appendChild(button);
+        buttons.push(button);
+    });
+
+    if (buttons.length === 0) {
+        el.getTransitCardDiv.style.display = "none";
+        alert("No valid transit options here.");
+        return null;
+    }
+
     return new Promise((resolve) => {
-        countryNames.forEach(countryName => {
-            const countryNameElement = document.createElement("button");
-            countryNameElement.textContent = countryName;
-            countryNameElement.onclick = () => {
-                el.getTransitCardDiv.style.display = "none";
-                resolve(getCardByName(countryName));
-            };
-            el.getTransitCardCountriesUl.appendChild(countryNameElement);
-        });
-        seaNames.forEach(seaName => {
-            const seaNameElement = document.createElement("button");
-            seaNameElement.textContent = seaName;
-            seaNameElement.onclick = () => {
-                el.getTransitCardDiv.style.display = "none";
-                resolve(getSeaByName(seaName));
-            };
-            el.getTransitCardSeasUl.appendChild(seaNameElement);
-        });
+        resolveTransitPromise = resolve;
     });
 }
 
-function selectTransitCard(cardName, isCountry) {
-    if (isCountry) return getCardByName(cardName);
-    else return getSeaByName(cardName);
-    el.getTransitCardDiv.style.display = "none";
+async function placeCard(card, row, col, isTransit, numBorders) {
+    addCardToBoard(card, row, col, isTransit);
+    await updateDoc(gamesRef, {
+        [`${gameKey}.board.${row}-${col}`]: serializeBoardCell(card, isTransit),
+    });
+
+    if (numBorders > 1) {
+        return;
+    }
 }
 
-let isHandDragging = false;
-let handStartX, scrollLeft;
-let draggingCardName;
-let draggingCard;
+async function persistHand() {
+    if (!player) {
+        return;
+    }
 
-let mustPlayOff = false;
-let mustPlayOffRow, mustPlayOffCol;
+    await updateDoc(gamesRef, {
+        [`${gameKey}.hands.${name}`]: player.toPlainCards(),
+    });
+}
 
-el.playerHand.addEventListener("mousedown", (event) => {
-    if (event.target.classList.contains("card-in-hand")) return;
-    isHandDragging = true;
-    handStartX = event.pageX - el.playerHand.offsetLeft;
-    scrollLeft = el.playerHand.scrollLeft;
-    el.playerHand.style.cursor = "grabbing";
+async function persistTransitCount() {
+    if (!player) {
+        return;
+    }
 
-    const cards = document.querySelectorAll(".card-in-hand");
-    cards.forEach(card => (card.style.pointerEvents = "none"));
-});
-el.playerHand.addEventListener("mousemove", (event) => {
-    if (!isHandDragging) return;
-    event.preventDefault();
-    const x = event.pageX - el.playerHand.offsetLeft;
-    const walk = (x - handStartX) * 2;
-    el.playerHand.scrollLeft = scrollLeft - walk;
-});
-el.playerHand.addEventListener("mouseup", () => {
-    isHandDragging = false;
-    el.playerHand.style.cursor = "grab";
+    await updateDoc(gamesRef, {
+        [`${gameKey}.transits.${name}`]: player.numTransits,
+    });
+}
 
-    const cards = document.querySelectorAll(".card-in-hand");
-    cards.forEach(card => (card.style.pointerEvents = ""));
-});
-el.playerHand.addEventListener("mouseleave", () => {
-    isHandDragging = false;
-    
-    const cards = document.querySelectorAll(".card-in-hand");
-    cards.forEach(card => (card.style.pointerEvents = ""));
-});
+async function removeCardFromHandByName(cardName) {
+    if (!player) {
+        return;
+    }
+
+    player.removeCardFromHandByName(cardName);
+    renderHand();
+    await persistHand();
+}
+
+async function removeTransitFromHand() {
+    if (!player) {
+        return;
+    }
+
+    player.numTransits = Math.max(0, player.numTransits - 1);
+    renderHand();
+    await persistTransitCount();
+}
 
 function renderHand() {
     el.playerHand.innerHTML = "";
-    player.cards.forEach(card => {
+
+    if (!player) {
+        setHandVisibility(false);
+        return;
+    }
+
+    player.cards.forEach((card) => {
         const cardElement = document.createElement("div");
         cardElement.id = card.name;
         cardElement.classList.add("card-in-hand");
-        if (!isPlayerTurn) cardElement.classList.add("disabled");
-        cardElement.style.backgroundImage = `url(${card.image.replace(/ /g, "_")})`;
+        if (!isPlayerTurn) {
+            cardElement.classList.add("disabled");
+        }
+        cardElement.dataset.cardName = card.name;
+        cardElement.style.backgroundImage = `url(${String(card.image).replace(/ /g, "_")})`;
         cardElement.draggable = isPlayerTurn;
 
-        cardElement.addEventListener("dragstart", (event) => {
+        cardElement.addEventListener("dragstart", () => {
             draggingCard = card;
             draggingCardName = card.name;
             renderPossiblePositions();
         });
-        cardElement.addEventListener("dragend", (event) => {
-            destroyPossiblePositions();
+
+        cardElement.addEventListener("dragend", () => {
+            clearPossiblePositions();
+            draggingCard = null;
+            draggingCardName = "";
         });
+
         el.playerHand.appendChild(cardElement);
     });
-    for (let i = 0; i<player.numTransits; i++) {
+
+    for (let i = 0; i < (player.numTransits ?? 0); i += 1) {
         const transitElement = document.createElement("div");
         transitElement.id = `transit-${i}`;
         transitElement.classList.add("transit-in-hand");
-        if (!isPlayerTurn) transitElement.classList.add("disabled");
+        if (!isPlayerTurn) {
+            transitElement.classList.add("disabled");
+        }
         transitElement.draggable = isPlayerTurn;
 
-        transitElement.addEventListener("dragstart", (event) => {
+        transitElement.addEventListener("dragstart", () => {
+            draggingCard = null;
             draggingCardName = `transit-${i}`;
             renderPossiblePositions();
         });
-        transitElement.addEventListener("dragend", (event) => {
-            destroyPossiblePositions();
+
+        transitElement.addEventListener("dragend", () => {
+            clearPossiblePositions();
+            draggingCardName = "";
         });
+
         el.playerHand.appendChild(transitElement);
     }
-    el.playerHand.style.display = "flex";
-    el.playerHandWhiteSpace.style.display = "block";
-}
 
-function removeCardFromHandByName(cardName) {
-    player.removeCardFromHandByName(cardName);
-    renderHand();
-}
-function removeTransitFromHand() {
-    player.numTransits -= 1;
-    renderHand();
-}
-
-let allCards;
-let allSeas;
-
-export function getCardByName(cardName) {
-    for (const card of allCards) if (card.name === cardName) return card;
-}
-function getSeaByName(seaName) {
-    for (const sea of allSeas) if (sea.name === seaName) return sea;
+    setHandVisibility(true);
 }
 
 function getPositionsOfPossibles() {
-    const isTransit = draggingCardName.includes("transit");
-    const directions = [[-1, 0], [0, 1], [1, 0], [0, -1]];
+    if (!draggingCardName) {
+        return {};
+    }
+
+    const isTransit = draggingCardName.startsWith("transit");
+    const directions = [
+        [-1, 0],
+        [0, 1],
+        [1, 0],
+        [0, -1],
+    ];
     const numBorders = {};
+
     if (mustPlayOff) {
-        if (isTransit) return;
+        if (isTransit) {
+            return {};
+        }
+
         const key = `${mustPlayOffRow}-${mustPlayOffCol}`;
-        if (boardState.hasOwnProperty(key)) {
-            const card = boardState[key];
+        if (Object.hasOwn(boardState, key)) {
             directions.forEach(([dRow, dCol]) => {
-                if (!(`${mustPlayOffRow+dRow}-${mustPlayOffCol+dCol}` in boardState)) {
-                    numBorders[`${mustPlayOffRow+dRow}-${mustPlayOffCol+dCol}`] = 0;
+                const nextKey = `${mustPlayOffRow + dRow}-${mustPlayOffCol + dCol}`;
+                if (!Object.hasOwn(boardState, nextKey)) {
+                    numBorders[nextKey] = 0;
                 }
             });
         }
     } else {
-        for (const key in boardState) {
-            const [row, col] = key.split("-").map(x => parseInt(x));
-            if (boardState.hasOwnProperty(key)) {
-                directions.forEach(([dRow, dCol]) => {
-                    if (!(`${row+dRow}-${col+dCol}` in boardState)) {
-                        numBorders[`${row+dRow}-${col+dCol}`] = 0;
-                    }
-                });
-            }
-        }
-    }
-    if (isTransit) {
-        for (const key in numBorders) {
-            const [row, col] = key.split("-").map(x => parseInt(x));
-            if (numBorders.hasOwnProperty(key)) {
-                if (((getAllowedCountriesAt(row, col).length + getAllowedSeasAt(row, col).length) === 0) || (bordersTransit(row, col))) numBorders[key] = null;
-            }
-        }
-    } else {
-        for (const key in boardState) {
-            const [row, col] = key.split("-").map(x => parseInt(x));
-            if (boardState.hasOwnProperty(key)) {
-                const currCard = boardState[key];
-                if (currCard instanceof Card) {
-                    directions.forEach(([dRow, dCol]) => {
-                        if (`${row+dRow}-${col+dCol}` in numBorders) {
-                            if (currCard.borders.includes(draggingCard.name)) {
-                                if (numBorders[`${row+dRow}-${col+dCol}`] !== null && !(getElementByRowCol(row, col).classList.contains("transit-on-board"))) {
-                                    numBorders[`${row+dRow}-${col+dCol}`] += 1;
-                                }
-                            } else {
-                                numBorders[`${row+dRow}-${col+dCol}`] = null;
-                            }
-                        }
-                    });
-                } else if (currCard instanceof Sea) {
-                    directions.forEach(([dRow, dCol]) => {
-                        if (`${row+dRow}-${col+dCol}` in numBorders) {
-                            if (draggingCard.seas.includes(currCard.name)) {
-                                if (numBorders[`${row+dRow}-${col+dCol}`] !== null && !(getElementByRowCol(row,col).classList.contains("transit-on-board"))) {
-                                    numBorders[`${row+dRow}-${col+dCol}`] += 1;
-                                }
-                            } else {
-                                numBorders[`${row+dRow}-${col+dCol}`] = null;
-                            }
-                        }
-                    });
-                } else {
-                    alert("Unknown type of card");
+        for (const key of Object.keys(boardState)) {
+            const [row, col] = key.split("-").map((value) => Number(value));
+            directions.forEach(([dRow, dCol]) => {
+                const nextKey = `${row + dRow}-${col + dCol}`;
+                if (!Object.hasOwn(boardState, nextKey)) {
+                    numBorders[nextKey] = 0;
                 }
-            }
+            });
         }
     }
-    return Object.fromEntries(Object.entries(numBorders).filter(([key, value]) => value !== null));
+
+    if (isTransit) {
+        for (const key of Object.keys(numBorders)) {
+            const [row, col] = key.split("-").map((value) => Number(value));
+            if (getAllowedCountriesAt(row, col).length + getAllowedSeasAt(row, col).length === 0 || bordersTransit(row, col)) {
+                numBorders[key] = null;
+            }
+        }
+        return Object.fromEntries(Object.entries(numBorders).filter(([, value]) => value !== null));
+    }
+
+    if (!draggingCard) {
+        return {};
+    }
+
+    for (const key of Object.keys(boardState)) {
+        const [row, col] = key.split("-").map((value) => Number(value));
+        const currCard = boardState[key];
+
+        directions.forEach(([dRow, dCol]) => {
+            const nextKey = `${row + dRow}-${col + dCol}`;
+            if (!(nextKey in numBorders)) {
+                return;
+            }
+
+            const element = getElementByRowCol(row, col);
+            if (element && element.classList.contains("transit-on-board")) {
+                numBorders[nextKey] = null;
+                return;
+            }
+
+            if (currCard instanceof Card) {
+                if (currCard.borders.includes(draggingCard.name)) {
+                    if (numBorders[nextKey] !== null) {
+                        numBorders[nextKey] += 1;
+                    }
+                } else {
+                    numBorders[nextKey] = null;
+                }
+            } else if (currCard instanceof Sea) {
+                if (draggingCard.seas.includes(currCard.name)) {
+                    if (numBorders[nextKey] !== null) {
+                        numBorders[nextKey] += 1;
+                    }
+                } else {
+                    numBorders[nextKey] = null;
+                }
+            } else {
+                numBorders[nextKey] = null;
+            }
+        });
+    }
+
+    return Object.fromEntries(Object.entries(numBorders).filter(([, value]) => value !== null));
 }
 
 function renderPossiblePositions() {
+    clearPossiblePositions();
     const positions = getPositionsOfPossibles();
-    for (const key of Object.keys(positions)) {
-        const [row, col] = key.split("-").map(x => parseInt(x));
-        addPossibleToBoard(row, col, positions[key]);
+    for (const [key, numBorders] of Object.entries(positions)) {
+        const [row, col] = key.split("-").map((value) => Number(value));
+        addPossibleToBoard(row, col, numBorders);
     }
-}
-function destroyPossiblePositions() {
-    document.querySelectorAll(".possible").forEach(possible => possible.remove());
 }
 
 async function skipTurn() {
+    const currentGame = gameData();
+    if (!player || !currentGame || index < 0) {
+        return;
+    }
+
     player.numTransits += 1;
     renderHand();
+
+    const nextTurn = (currentGame.turn + 1) % playerNames.length;
+    await updateDoc(gamesRef, {
+        [`${gameKey}.transits.${name}`]: player.numTransits,
+        [`${gameKey}.turn`]: nextTurn,
+    });
+
     endTurn();
-    // Add Firebase code
 }
 
 function highlightCards() {
-    for (const card of el.playerHand.children) {
-        if (card.classList.contains("transit-in-hands")) continue;
-        draggingCardName = card.id;
+    if (!player) {
+        return;
+    }
+
+    for (const cardElement of el.playerHand.children) {
+        if (!cardElement.classList.contains("card-in-hand")) {
+            continue;
+        }
+
+        draggingCardName = cardElement.id;
         draggingCard = getCardByName(draggingCardName);
-        if (Object.values(getPositionsOfPossibles()).filter(value => value !== null).length === 0) {
-            card.classList.add("blurred");
+
+        if (Object.keys(getPositionsOfPossibles()).length === 0) {
+            cardElement.classList.add("blurred");
         }
     }
+
+    draggingCard = null;
+    draggingCardName = "";
 }
+
 function unhighlightCards() {
-    for (const card of el.playerHand.children) {
-        card.classList.remove("blurred");
+    for (const cardElement of el.playerHand.children) {
+        cardElement.classList.remove("blurred");
     }
 }
 
 async function startTurn() {
-    if (player.cards.length === 0) {
-        // Add firebase code
+    if (!player) {
         return;
     }
+
     isPlayerTurn = true;
     el.skipTurnBtn.disabled = false;
     el.highlightCardsBtn.disabled = false;
     el.unhighlightCardsBtn.disabled = false;
-    document.querySelectorAll(".card-in-hand").forEach(card => {
-        card.classList.remove("disabled");
-        card.draggable = true;
+
+    document.querySelectorAll(".card-in-hand").forEach((cardElement) => {
+        cardElement.classList.remove("disabled");
+        cardElement.draggable = true;
     });
-    document.querySelectorAll(".transit-in-hand").forEach(transit => {
-        transit.classList.remove("disabled");
-        transit.draggable = true;
+
+    document.querySelectorAll(".transit-in-hand").forEach((transitElement) => {
+        transitElement.classList.remove("disabled");
+        transitElement.draggable = true;
     });
 }
 
@@ -557,189 +882,220 @@ function endTurn() {
     el.skipTurnBtn.disabled = true;
     el.highlightCardsBtn.disabled = true;
     el.unhighlightCardsBtn.disabled = true;
-    document.querySelectorAll(".card-in-hand").forEach(card => {
-        card.classList.add("disabled");
-        card.draggable = false;
+
+    document.querySelectorAll(".card-in-hand").forEach((cardElement) => {
+        cardElement.classList.add("disabled");
+        cardElement.draggable = false;
     });
-    document.querySelectorAll(".transit-in-hand").forEach(transit => {
-        transit.classList.add("disabled");
-        transit.draggable = false;
+
+    document.querySelectorAll(".transit-in-hand").forEach((transitElement) => {
+        transitElement.classList.add("disabled");
+        transitElement.draggable = false;
     });
 }
 
-document.addEventListener("DOMContentLoaded", async function () {
+async function endTurnRemote() {
+    const currentGame = gameData();
+    if (!currentGame || index < 0) {
+        return;
+    }
+
+    const nextTurn = (currentGame.turn + 1) % playerNames.length;
+    await updateDoc(gamesRef, {
+        [`${gameKey}.turn`]: nextTurn,
+    });
+    endTurn();
+}
+
+function renderGameOver(finishedOrder) {
+    el.gameEndDiv.style.display = "block";
+    el.finishedOrderOl.innerHTML = "";
+
+    finishedOrder.forEach((playerName) => {
+        const li = document.createElement("li");
+        li.textContent = playerName;
+        el.finishedOrderOl.appendChild(li);
+    });
+}
+
+async function syncFromGame(game) {
+    if (!game) {
+        if (!host) {
+            alert("Game deleted");
+            window.location.href = "./home.html";
+        }
+        return;
+    }
+
+    setGameData(game);
+    renderLobby(game);
+
+    if (game.playing && !gameInitialized) {
+        gameInitialized = true;
+        setPlayer(new Player(name));
+        index = Array.isArray(game.players) ? game.players.indexOf(name) : -1;
+        await loadAssetsOnce();
+        setBoardVisibility(true);
+        setHandVisibility(true);
+    }
+
+    if (game.playing) {
+        if (!handLoaded && game.hands && Array.isArray(game.hands[name])) {
+            const cards = game.hands[name].map((cardData) => new Card(
+                cardData.name,
+                cardData.borders ?? [],
+                cardData.seas ?? [],
+                cardData.image
+            ));
+            const numTransits = game.transits?.[name] ?? 2;
+            player.dealCards(cards, numTransits);
+            handLoaded = true;
+            renderHand();
+        } else if (player && game.transits && Object.hasOwn(game.transits, name)) {
+            player.numTransits = game.transits[name];
+            renderHand();
+        }
+
+        renderBoard(game.board ?? {});
+
+        if (index === game.turn) {
+            if (!isPlayerTurn) {
+                await startTurn();
+            }
+        } else if (isPlayerTurn) {
+            endTurn();
+        }
+
+        if (Array.isArray(game.finishedOrder) && game.finishedOrder.length > 0) {
+            renderGameOver(game.finishedOrder);
+        }
+    } else {
+        endTurn();
+        setBoardVisibility(false);
+        if (host) {
+            el.startBtn.disabled = (Array.isArray(game.players) ? game.players.length : 0) < 2;
+        }
+    }
+}
+
+function listenToGame() {
+    onSnapshot(gamesRef, (snapshot) => {
+        const game = gameSnapshotToData(snapshot);
+        void syncFromGame(game);
+    });
+}
+
+function attachHandDragScroll() {
+    let isHandDragging = false;
+    let handStartX = 0;
+    let scrollLeft = 0;
+
+    el.playerHand.addEventListener("mousedown", (event) => {
+        if (event.target.classList.contains("card-in-hand") || event.target.classList.contains("transit-in-hand")) {
+            return;
+        }
+
+        isHandDragging = true;
+        handStartX = event.pageX - el.playerHand.offsetLeft;
+        scrollLeft = el.playerHand.scrollLeft;
+        el.playerHand.style.cursor = "grabbing";
+
+        document.querySelectorAll(".card-in-hand, .transit-in-hand").forEach((cardElement) => {
+            cardElement.style.pointerEvents = "none";
+        });
+    });
+
+    el.playerHand.addEventListener("mousemove", (event) => {
+        if (!isHandDragging) {
+            return;
+        }
+
+        event.preventDefault();
+        const x = event.pageX - el.playerHand.offsetLeft;
+        const walk = (x - handStartX) * 2;
+        el.playerHand.scrollLeft = scrollLeft - walk;
+    });
+
+    const stopDraggingHand = () => {
+        isHandDragging = false;
+        el.playerHand.style.cursor = "grab";
+
+        document.querySelectorAll(".card-in-hand, .transit-in-hand").forEach((cardElement) => {
+            cardElement.style.pointerEvents = "";
+        });
+    };
+
+    el.playerHand.addEventListener("mouseup", stopDraggingHand);
+    el.playerHand.addEventListener("mouseleave", stopDraggingHand);
+}
+
+function attachBoardEvents() {
+    el.board.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        const zoomSpeed = 0.1;
+        boardScale += event.deltaY < 0 ? zoomSpeed : -zoomSpeed;
+        boardScale = Math.max(minBoardScale, Math.min(maxBoardScale, boardScale));
+        updateBoardTransform();
+    }, { passive: false });
+
+    el.board.addEventListener("mousedown", startBoardDrag);
+    el.board.addEventListener("mousemove", moveBoard);
+    el.board.addEventListener("mouseup", stopBoardDrag);
+    el.board.addEventListener("mouseleave", cancelBoardDrag);
+
+    el.board.addEventListener("touchstart", startBoardDrag, { passive: true });
+    el.board.addEventListener("touchmove", handleTouchMove, { passive: false });
+    el.board.addEventListener("touchend", handleTouchEnd);
+    el.board.addEventListener("touchcancel", handleTouchEnd);
+}
+
+function attachButtonEvents() {
+    el.returnBtn.addEventListener("click", () => {
+        void returnHome();
+    });
+    el.returnHomeBtn.addEventListener("click", () => {
+        void returnHome();
+    });
+    el.centerBtn.addEventListener("click", centerBoard);
+    el.skipTurnBtn.addEventListener("click", () => {
+        void skipTurn();
+    });
+    el.highlightCardsBtn.addEventListener("click", highlightCards);
+    el.unhighlightCardsBtn.addEventListener("click", unhighlightCards);
+    el.startBtn.addEventListener("click", () => {
+        void startGame();
+    });
+}
+
+function attachUnloadEvents() {
+    window.addEventListener("pagehide", () => {
+        void leaveGame();
+    });
+
+    window.addEventListener("beforeunload", () => {
+        void leaveGame();
+    });
+}
+
+function init() {
+    el.gamePinP.textContent = `Game PIN: ${gamePin}`;
+    el.infoContainer.style.display = "block";
+
     if (host) {
         el.startBtn.style.display = "block";
     } else {
         el.waitingForGameToStartP.style.display = "block";
     }
-    el.infoContainer.style.display = "block";
-    // Add firebase code
 
-    el.gamePinP.textContent = `Game PIN: ${gamePin}`;
-    updatePacksList();
-    updatePlayersList();
-});
-
-async function updatePacksList() {
-    // Get pack names from firebase
-    const gameRef = doc(db, "Mapominoes", "Games");
-    const snapshot = await getDoc(gameRef);
-    const gameData = snapshot.data()[gamePin];
-    packNames = gameData.packs;
-
-    // Update packsP
-    el.packsP.textContent = `Packs: ${packNames.join(", ")}`;
+    attachBoardEvents();
+    attachHandDragScroll();
+    attachButtonEvents();
+    attachUnloadEvents();
+    listenToGame();
 }
 
-async function updatePlayersList() {
-    // Get player names from firebase
-    const gameRef = doc(db, "Mapominoes", "Games");
-    const snapshot = await getDoc(gameRef);
-    const gameData = snapshot.data()[gamePin];
-    playerNames = gameData.players;
-    // Update playersList
-    el.playersList.innerHTML = "";
-    playerNames.forEach(playerName => {
-        const playerNameLi = document.createElement("li");
-        if (playerName === name) {
-            const strong = document.createElement("strong");
-            strong.textContent = playerName;
-            playerNameLi.appendChild(strong);
-        } else {
-            playerNameLi.textContent = playerName;
-        }
-        el.playersList.appendChild(playerNameLi);
-    });
-    if (!playing) {
-        el.startBtn.disabled = playerNames.length < 2;
-    }
-}
+init();
 
-let handLoaded = false;
-
-async function updateHand() {
-    if (!player || handLoaded) return;
-    const gamesRef = doc(db, "Mapominoes", "Games");
-    const snapshot = await getDoc(gamesRef);
-    const gameData = snapshot.data()[gamePin];
-    
-    if (Object.hasOwn(gameData.hands, name)) {
-        const cards = gameData.hands[name];
-        player.dealCards(cards.map(cardData => new Card(cardData.name, cardData.borders, cardData.seas, cardData.image)), 2);
-        handLoaded = true;
-        renderHand();
-        el.boardContainer.style.display = "block";
-    }
-}
-
-function getStartCardIdx() {
-    let i = 0;
-    while (true) {
-        if (allCards[i].borders.length >= 3) return i;
-        i++;
-    }
-}
-
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-
-    return array;
-}
-
-async function gameStarted() {
-    playing = true;
-    player = new Player(name);
-    // Get all cards and seas
-    allCards = [];
-    allSeas = [];
-    for (const packName of packNames) {
-        const countriesRef = doc(db, "Mapominoes", "Packs", packName, "Countries");
-        const countriesSnapshot = await getDoc(countriesRef);
-        for (const [countryName, countryData] of Object.entries(countriesSnapshot.data())) {
-            const currCard = new Card(countryName, countryData.Borders, countryData.Seas, `./Images/Cards/${packName}/${countryName}.jpg`);
-            allCards.push(currCard);
-        }
-        const seasRef = doc(db, "Mapominoes", "Packs", packName, "Seas");
-        const seasSnapshot = await getDoc(seasRef);
-        for (const [seaName, seaData] of Object.entries(seasSnapshot.data())) {
-            const currSea = new Sea(seaName, `./Images/Cards/Seas/${seaName}.jpg`);
-            allSeas.push(currSea);
-        }
-    }
-
-    if (host) {
-        // Deal cards
-        shuffle(allCards);
-        const startCardIdx = getStartCardIdx();
-        let pNum = 0;
-        const numPlayers = playerNames.length;
-        const hands = Array.from({ length: numPlayers }, () => []);
-        allCards.forEach((card, idx) => {
-            if (idx !== startCardIdx) {
-                hands[pNum].push(card.toDict());
-                pNum = (pNum + 1)%numPlayers;
-            }
-        });
-
-        // Update on firebase
-        const handsByPlayer = Object.fromEntries(
-            hands.map((hand, idx) => [playerNames[idx], hand])
-        );
-        const gamesRef = doc(db, "Mapominoes", "Games");
-        await updateDoc(gamesRef, {
-            [`${gamePin}.hands`] : handsByPlayer
-        });
-        await updateDoc(gamesRef, {
-            [`${gamePin}.startingCard`]: allCards[startCardIdx].toDict()
-        });
-    }
-
-    // Show Highlight cards, unhighlight cards and skip turn buttons
-    el.highlightCardsBtn.style.display = "block";
-    el.unhighlightCardsBtn.style.display = "block";
-    el.skipTurnBtn.style.display = "block";
-    
-    const gamesRef = doc(db, "Mapominoes", "Games");
-    const snapshot = await getDoc(gamesRef);
-    const gameData = snapshot.data()[gamePin];
-    index = gameData.players.indexOf(name);
-    if (host) {
-        await updateDoc(gamesRef, {
-            [`${gamePin}.turn`]: 0
-        });
-    }
-}
-
-async function startGame() {
-    // Add firebase code
-    const gameRef = doc(db, "Mapominoes", "Games");
-    await updateDoc(gameRef, {
-        [`${gamePin}.playing`]: true,
-    });
-    el.startBtn.disabled = true;
-}
-
-function endGame(finishedOrder) {
-    el.gameEndDiv.style.display = "block";
-
-    el.finishedOrderOl.innerHTML = "";
-    finishedOrder.forEach(playerName => {
-        const playerNameLi = document.createElement("li");
-        playerNameLi.textContent = playerName;
-        el.finishedOrderOl.appendChild(playerNameLi);
-    });
-}
-
-el.startBtn.addEventListener("click", startGame);
-el.centerBtn.addEventListener("click", centerBoard);
-el.skipTurnBtn.addEventListener("click", skipTurn);
-el.highlightCardsBtn.addEventListener("click", highlightCards);
-el.unhighlightCardsBtn.addEventListener("click", unhighlightCards);
-
-window.addEventListener("pagehide", () => leaveGame)
-listenToGame()
+window.getCardByName = getCardByName;
+window.boardState = boardState;
+window.__mapominoesGameData = null;
