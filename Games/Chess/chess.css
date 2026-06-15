@@ -46,6 +46,10 @@ button:hover {
     vertical-align: center;
     font-size: 48px;
     user-select: none;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .row:nth-child(odd) .cell:nth-child(odd),
