@@ -1,17 +1,15 @@
 body {
-    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
     display: block;
     background-color: lightslategray;
-    overflow-y: auto;
-    font-family: Arial, sans-serif;
+    overflow-y: scroll;
 }
-
 h1 {
     font-size: 50px;
     color: blueviolet;
-    margin: 0.5rem 0;
 }
-
 button {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
@@ -19,49 +17,42 @@ button {
     margin: 4px;
     cursor: pointer;
 }
-
 button:hover {
     background-color: lightcoral;
 }
-
 .return-button {
     background-color: lightblue;
     color: hotpink;
     font-size: large;
     font-weight: bold;
 }
-
 .return-button:hover {
     background-color: hotpink;
     color: lightblue;
 }
 
-.card-on-board,
-.possible {
+.card-on-board {
     width: 80px;
     height: 128px;
-    box-sizing: border-box;
-    border-radius: 5px;
-}
-
-.card-on-board {
-    border: 2px solid #fff;
+    position: absolute;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    border: 2px solid #fff;
+    border-radius: 5px;
 }
-
 .transit-on-board {
     filter: opacity(0.75);
 }
-
 .possible {
+    width: 80px;
+    height: 128px;
+    position: absolute;
     background-color: rgba(150, 150, 150, 0.7);
     border: 2px solid black;
+    border-radius: 5px;
 }
-
-.card-in-hand,
-.transit-in-hand {
+.card-in-hand {
     flex-shrink: 0;
     cursor: grab;
     background-size: cover;
@@ -74,60 +65,61 @@ button:hover {
     height: 90%;
     aspect-ratio: 5 / 8;
 }
-
-.card-in-hand:hover,
+.card-in-hand:hover {
+    transform: scale(1.3);
+    z-index: 10;
+}
+.card-in-hand:active {
+    cursor: grabbing;
+}
+.transit-in-hand {
+    flex-shrink: 0;
+    cursor: grab;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url("./Images/Cards/Transit.jpg");
+    border: 2px solid #fff;
+    border-radius: 5px;
+    z-index: 1;
+    transition: transform 0.2s, z-index 0.2s;
+    height: 90%;
+    aspect-ratio: 5 / 8;
+}
 .transit-in-hand:hover {
     transform: scale(1.3);
     z-index: 10;
 }
-
-.card-in-hand:active,
 .transit-in-hand:active {
     cursor: grabbing;
 }
-
-.transit-in-hand {
-    background-image: url("Cards/Transit.jpg");
-}
-
 .disabled {
     filter: grayscale(100%);
 }
-
 .blurred {
     filter: blur(2px);
     background-color: lightgreen;
 }
-
 #infoContainer {
-    display: none;
     height: 20vh;
-    width: min(50vw, 700px);
+    width: 50vw;
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: scroll;
     border: 1px solid black;
-    background: rgba(255, 255, 255, 0.3);
-    margin: 0.5rem 0;
-    padding: 0.5rem;
-    box-sizing: border-box;
 }
-
 #startBtn {
     display: none;
     font-size: large;
     background-color: green;
     color: white;
 }
-
 #startBtn:hover {
     background-color: white;
     color: green;
 }
-
 #startBtn:disabled {
     background-color: gray;
 }
-
 #boardContainer {
     display: none;
     margin: 0 auto;
@@ -140,7 +132,6 @@ button:hover {
     overflow: hidden;
     position: relative;
 }
-
 #board {
     margin: 0;
     position: absolute;
@@ -148,13 +139,12 @@ button:hover {
     left: 50%;
     transform: translate(-50%, -50%);
     display: grid;
-    grid-template-columns: repeat(101, 80px);
-    grid-template-rows: repeat(101, 128px);
+    grid-template-columns: repeat(auto-fill, 80px);
+    grid-template-rows: repeat(auto-fill, 128px);
     transform-origin: center;
     cursor: grab;
     background-color: lightblue;
 }
-
 #centerBtn {
     position: absolute;
     bottom: 0;
@@ -166,7 +156,6 @@ button:hover {
     background-position: center;
     background-image: url(Images/center.png);
 }
-
 #playerHand {
     position: fixed;
     bottom: 0;
@@ -176,7 +165,6 @@ button:hover {
     width: 100%;
     display: none;
     align-items: flex-end;
-    gap: 8px;
     overflow-x: auto;
     padding: 20px;
     box-sizing: border-box;
@@ -185,62 +173,68 @@ button:hover {
     white-space: nowrap;
     scrollbar-width: none;
 }
-
 #playerHand::-webkit-scrollbar {
     display: none;
 }
-
-#skipTurnBtn,
-#highlightCardsBtn,
-#unhighlightCardsBtn {
+#skipTurnBtn {
     display: none;
     margin: 0 auto;
     font-size: large;
-}
-
-#skipTurnBtn {
     background-color: saddlebrown;
     color: whitesmoke;
 }
-
 #skipTurnBtn:hover {
     background-color: white;
     color: saddlebrown;
 }
-
-#skipTurnBtn:disabled,
-#highlightCardsBtn:disabled,
-#unhighlightCardsBtn:disabled {
+#skipTurnBtn:disabled {
     background-color: grey;
     color: whitesmoke;
 }
-
 #highlightCardsBtn {
+    display: none;
+    margin: 0 auto;
+    font-size: large;
     background-color: pink;
     color: black;
 }
-
 #highlightCardsBtn:hover {
     background-color: black;
     color: pink;
 }
-
+#highlightCardsBtn:disabled {
+    background-color: grey;
+    color: whitesmoke;
+}
 #unhighlightCardsBtn {
+    display: none;
+    margin: 0 auto;
+    font-size: large;
     background-color: aqua;
     color: darkred;
 }
-
 #unhighlightCardsBtn:hover {
     background-color: darkred;
     color: aqua;
 }
-
+#unhighlightCardsBtn:disabled {
+    background-color: grey;
+    color: whitesmoke;
+}
 #playerHandWhiteSpace {
     height: 25vh;
     display: none;
 }
-
-#getTransitCardDiv,
+#getTransitCardDiv {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: gray;
+    border: 2px solid black;
+    z-index: 10;
+}
 #gameEndDiv {
     display: none;
     position: fixed;
@@ -249,22 +243,14 @@ button:hover {
     transform: translate(-50%, -50%);
     background-color: gray;
     border: 2px solid black;
-    z-index: 20;
+    z-index: 10;
     padding: 20px;
 }
-
-#getTransitCardDiv {
-    max-height: 80vh;
-    overflow: auto;
-    min-width: 280px;
-}
-
 #returnHomeBtn {
     font-size: large;
     background-color: blue;
     color: white;
 }
-
 #returnHomeBtn:hover {
     background-color: white;
     color: blue;
