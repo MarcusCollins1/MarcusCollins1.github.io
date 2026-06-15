@@ -28,7 +28,7 @@ function renderBoard() {
             const cellValue = board[rowIdx][colIdx];
             if (cellValue === "") continue;
             const cell = document.getElementById(`${rowIdx+1}-${colIdx+1}`);
-            cell.style.backgroundImage = `url(./Images/Pieces/${setInUse}/${cellValue})`;
+            cell.style.backgroundImage = `url(./Images/Pieces/${setInUse}/${cellValue}.png)`;
         }
     }
 }
