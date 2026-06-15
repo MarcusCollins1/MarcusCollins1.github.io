@@ -24,5 +24,26 @@ button:hover {
 }
 
 .chess-table {
-    
+    border-collapse: collapse;
+    border: 6px solid #4a2c1a;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cell {
+    width: 80px;
+    height: 80px;
+    text-align: center;
+    vertical-align: center;
+    font-size: 48px;
+    user-select: none;
+}
+
+.row:nth-child(odd) .cell:nth-child(odd),
+.row:nth-child(even) .cell:nth-child(even) {
+    background-color: #f0d9b5;
+}
+
+.row:nth-child(odd) .cell:nth-child(even),
+.row:nth-child(even) .cell:nth-child(odd) {
+    background-color: #b58863;
 }
