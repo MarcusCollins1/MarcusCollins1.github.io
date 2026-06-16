@@ -12,7 +12,7 @@ export function findValidMoves(rowIdx, colIdx) {
     console.log(pieceColour, piece);
     
     const validMoves = [];
-    const dirs;
+    const dirs = [];
 
     switch (piece) {
         // Bishop
