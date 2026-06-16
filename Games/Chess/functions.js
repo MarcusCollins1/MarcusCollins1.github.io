@@ -220,14 +220,11 @@ export function findValidMoves(rowIdx, colIdx) {
 }
 
 function renderValidMoves() {
-    const currDots = document.getElementsByClassName("dot");
-    for (const dot of currDots) dot.remove();
+    Array.from(document.getElementsByClassName("dot")).forEach(dot => dot.remove());
     for (const [row, col] of validMoves) {
         const cell = document.getElementById(`${row+1}-${col+1}`)
         const img = document.createElement("img");
         img.src = "./Images/Dot.png"
-        img.style.width = cell.style.width;
-        img.style.height = cell.style.height;
         img.classList = "dot";
         cell.appendChild(img);
     }

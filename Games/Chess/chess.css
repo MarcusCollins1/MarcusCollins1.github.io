@@ -51,6 +51,12 @@ button:hover {
     background-position: center;
     background-repeat: no-repeat;
 }
+.cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
 
 .row:nth-child(odd) .cell:nth-child(odd),
 .row:nth-child(even) .cell:nth-child(even) {
