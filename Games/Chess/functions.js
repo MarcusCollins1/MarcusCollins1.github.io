@@ -277,7 +277,3 @@ function renderValidMoves() {
 function makeMove(row, col) {
 
 }
-
-function checkForCheck(currBoard) {
-
-}
