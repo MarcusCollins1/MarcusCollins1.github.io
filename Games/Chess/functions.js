@@ -220,6 +220,8 @@ export function findValidMoves(rowIdx, colIdx) {
 }
 
 function renderValidMoves() {
+    const currDots = document.getElementsByClassName("dot");
+    for (const dot of currDots) dot.remove();
     for (const [row, col] of validMoves) {
         const cell = document.getElementById(`${row+1}-${col+1}`)
         const img = document.createElement("img");
