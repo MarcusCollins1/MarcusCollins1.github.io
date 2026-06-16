@@ -3,6 +3,10 @@ import {
     currTurn,
 } from "./chess.js"
 
+function positionInBoard(row, col) {
+    return (0 <= row) && (row < board.length) && (0 <= col) && (col < board[0].length);
+}
+
 export function findValidMoves(rowIdx, colIdx) {
     const cellValue = board[rowIdx][colIdx];
     if (cellValue === "") return;
@@ -22,7 +26,7 @@ export function findValidMoves(rowIdx, colIdx) {
                 while (true) {
                     newRow += dir[0];
                     newCol += dir[1];
-                    if (!((0 <= newRow) && (newRow < board.length) && (0 <= newCol) && (newCol < board[0].length))) break;
+                    if (!positionInBoard(rowIdx, colIdx)) break;
                     const newPiece = board[newRow][newCol];
                     if (newPiece === "") {
                         validMoves.add((newRow, newCol));
@@ -41,7 +45,7 @@ export function findValidMoves(rowIdx, colIdx) {
             dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
             for (const dir of dirs) {
                 const [newRow, newCol] = [rowIdx+dir[0], colIdx+dir[1]];
-                if (!((0 <= newRow < board.length) && (0 <= newCol <= board[0].length))) continue;
+                if (!positionInBoard(rowIdx, colIdx)) continue;
                 const newPiece = board[newRow][newCol];
                 if (newPiece === "") {
                     validMoves.add((newRow, newCol));
