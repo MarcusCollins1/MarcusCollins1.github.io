@@ -3,6 +3,9 @@ import {
     currTurn,
 } from "./chess.js"
 
+const canWhiteCastle = [true, true];
+const canBlackCastle = [true, true];
+
 function positionInBoard(row, col) {
     return (0 <= row) && (row < board.length) && (0 <= col) && (col < board[0].length);
 }
@@ -26,19 +29,18 @@ export function findValidMoves(rowIdx, colIdx) {
                 while (true) {
                     newRow += dir[0];
                     newCol += dir[1];
-                    if (!positionInBoard(rowIdx, colIdx)) break;
+                    if (!positionInBoard(newRow, newCol)) break;
                     const newPiece = board[newRow][newCol];
                     if (newPiece === "") {
-                        validMoves.add((newRow, newCol));
+                        validMoves.add([newRow, newCol]);
                     } else if (newPiece[0] !== currTurn) {
-                        validMoves.add((newRow, newCol));
+                        validMoves.add([newRow, newCol]);
                         break;
                     } else {
                         break;
                     }
                 }
             }
-            console.log(validMoves);
             break;
         // King
         case "k":
@@ -48,20 +50,123 @@ export function findValidMoves(rowIdx, colIdx) {
                 if (!positionInBoard(rowIdx, colIdx)) continue;
                 const newPiece = board[newRow][newCol];
                 if (newPiece === "") {
-                    validMoves.add((newRow, newCol));
+                    validMoves.add([newRow, newCol]);
                 } else if (newPiece[0] !== currTurn) {
-                    validMoves.add((newRow, newCol));
+                    validMoves.add([newRow, newCol]);
+                    continue;
+                } else {
+                    continue;
+                }
+            }
+            // Check for castle
+            if (pieceColour === "w") {
+                if (canWhiteCastle[0]) {
+                    if ((board[7][1] === "") && (board[7][2] === "") && (board[7][3] === "")) {
+                        validMoves.add([7, 2])
+                    }
+                }
+                if (canWhiteCastle[1]) {
+                    if ((board[7][5] === "") && (board[7][6] === "")) {
+                        validMoves.add([7, 6])
+                    }
+                }
+            } else {
+                if (canBlackCastle[0]) {
+                    if ((board[0][1] === "") && (board[0][2] === "") && (board[0][3] === "")) {
+                        validMoves.add([0, 2])
+                    }
+                }
+                if (canBlackCastle[1]) {
+                    if ((board[0][5] === "") && (board[0][6] === "")) {
+                        validMoves.add([0, 6])
+                    }
+                }
+            }
+            break
+        // Knight
+        case "n":
+            dirs = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+            for (const dir of dirs) {
+                const [newRow, newCol] = [rowIdx+dir[0], colIdx+dir[1]];
+                if (!positionInBoard(newRow, newCol)) continue;
+                const newPiece = board[newRow][newCol];
+                if (newPiece === "") {
+                    validMoves.add([newRow, newCol]);
+                } else if (newPiece[0] !== currTurn) {
+                    validMoves.add([newRow, newCol]);
                     continue;
                 } else {
                     continue;
                 }
             }
             break
-        // Knight
-        case "n":
-            break
         // Pawn
         case "p":
+            if (pieceColour === "w") {
+                // Can move 1 up
+                const [newRow, newCol] = [rowIdx-1, colIdx];
+                if (positionInBoard(newRow, newCol)) {
+                    if (board[newRow][newCol] === "") {
+                        validMoves.add([newRow, newCol]);
+                    }
+                }
+                // Can move 2 up
+                if (rowIdx == 6) {
+                    const [newRow, newCol] = [rowIdx-2, colIdx];
+                    if (positionInBoard(newRow, newCol)) {
+                        if (board[newRow][newCol] === "" && board[newRow+1][newCol] === "") {
+                            validMoves.add([newRow, newCol]);
+                        }
+                    }
+                }
+                // Can move diagonal
+                // Up-Left
+                const [newRow, newCol] = [rowIdx-1, colIdx-1];
+                if (positionInBoard(newRow, newCol)) {
+                    if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "b") {
+                        validMoves.add([newRow, newCol]);
+                    }
+                }
+                // Up-Right
+                const [newRow, newCol] = [rowIdx-1, colIdx+1];
+                if (positionInBoard(newRow, newCol)) {
+                    if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "b") {
+                        validMoves.add([newRow, newCol]);
+                    }
+                }
+            } else {
+                // Can move 1 down
+                const [newRow, newCol] = [rowIdx+1, colIdx];
+                if (positionInBoard(newRow, newCol)) {
+                    if (board[newRow][newCol] === "") {
+                        validMoves.add([newRow, newCol]);
+                    }
+                }
+                // Can move 2 down
+                if (rowIdx == 1) {
+                    const [newRow, newCol] = [rowIdx+2, colIdx];
+                    if (positionInBoard(newRow, newCol)) {
+                        if (board[newRow][newCol] === "" && board[newRow+1][newCol] === "") {
+                            validMoves.add([newRow, newCol]);
+                        }
+                    }
+                }
+                // Can move diagonal
+                // Down-Left
+                const [newRow, newCol] = [rowIdx+1, colIdx-1];
+                if (positionInBoard(newRow, newCol)) {
+                    if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "w") {
+                        validMoves.add([newRow, newCol]);
+                    }
+                }
+                // Down-Right
+                const [newRow, newCol] = [rowIdx+1, colIdx+1];
+                if (positionInBoard(newRow, newCol)) {
+                    if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "w") {
+                        validMoves.add([newRow, newCol]);
+                    }
+                }
+            }
             break
         // Queen
         case "q":
@@ -70,5 +175,6 @@ export function findValidMoves(rowIdx, colIdx) {
         case "r":
             break
     }
+    console.log(validMoves);
     return validMoves;
 }
