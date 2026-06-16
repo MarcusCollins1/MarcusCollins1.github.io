@@ -22,7 +22,7 @@ export function findValidMoves(rowIdx, colIdx) {
                 while (true) {
                     newRow += dir[0];
                     newCol += dir[1];
-                    if (!((0 <= newRow < board.length) && (0 <= newCol < board[0].length))) break;
+                    if (!((0 <= newRow) && (newRow < board.length) && (0 <= newCol) && (newCol < board[0].length))) break;
                     const newPiece = board[newRow][newCol];
                     if (newPiece === "") {
                         validMoves.add((newRow, newCol));
