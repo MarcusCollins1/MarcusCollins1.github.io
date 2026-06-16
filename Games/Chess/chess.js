@@ -10,8 +10,8 @@ const el = {
 
 let setInUse = "Standard";
 
-let board = [];
-let currTurn;
+export let board = [];
+export let currTurn;
 
 function resetBoard() {
     board = [
