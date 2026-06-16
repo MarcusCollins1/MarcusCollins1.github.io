@@ -235,7 +235,6 @@ export function findValidMoves(rowIdx, colIdx) {
             }
             break
     }
-    console.log(validMoves);
     checkValidMoves();
     renderValidMoves();
 }
@@ -291,6 +290,10 @@ function makeMove(row, col) {
     board[row][col] = board[currRow][currCol];
     board[currRow][currCol] = "";
 
-    if (currTurn === "w") currTurn = "b";
-    else currTurn = "w";
+    if (currTurn === "w") {
+        currTurn = "b";
+    }
+    else {
+        currTurn = "w";
+    }
 }
