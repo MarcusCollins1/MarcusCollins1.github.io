@@ -9,7 +9,7 @@ import {
 const canWhiteCastle = [true, true];
 const canBlackCastle = [true, true];
 
-let validMoves;
+let validMoves = [];
 let currRow;
 let currCol;
 
