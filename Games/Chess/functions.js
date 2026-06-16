@@ -18,7 +18,7 @@ export function findValidMoves(rowIdx, colIdx) {
         case "b":
             dirs = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
             for (const dir of dirs) {
-                const [newRow, newCol] = [rowIdx, colIdx];
+                let [newRow, newCol] = [rowIdx, colIdx];
                 while (true) {
                     newRow += dir[0];
                     newCol += dir[1];
