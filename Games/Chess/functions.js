@@ -6,6 +6,8 @@ import {
 const canWhiteCastle = [true, true];
 const canBlackCastle = [true, true];
 
+let validMoves;
+
 function positionInBoard(row, col) {
     return (0 <= row) && (row < board.length) && (0 <= col) && (col < board[0].length);
 }
@@ -17,7 +19,7 @@ export function findValidMoves(rowIdx, colIdx) {
     const piece = cellValue[1];
     if (pieceColour !== currTurn) return;
     
-    let validMoves = [];
+    validMoves = [];
     let dirs = [];
     let newRow;
     let newCol;
@@ -172,11 +174,58 @@ export function findValidMoves(rowIdx, colIdx) {
             break
         // Queen
         case "q":
+            dirs = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+            for (const dir of dirs) {
+                [newRow, newCol] = [rowIdx, colIdx];
+                while (true) {
+                    newRow += dir[0];
+                    newCol += dir[1];
+                    if (!positionInBoard(newRow, newCol)) break;
+                    const newPiece = board[newRow][newCol];
+                    if (newPiece === "") {
+                        validMoves.push([newRow, newCol]);
+                    } else if (newPiece[0] !== currTurn) {
+                        validMoves.push([newRow, newCol]);
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+            }
             break
         // Rook
         case "r":
+            dirs = [[-1, 0], [0, -1], [0, 1], [1, 0]];
+            for (const dir of dirs) {
+                [newRow, newCol] = [rowIdx, colIdx];
+                while (true) {
+                    newRow += dir[0];
+                    newCol += dir[1];
+                    if (!positionInBoard(newRow, newCol)) break;
+                    const newPiece = board[newRow][newCol];
+                    if (newPiece === "") {
+                        validMoves.push([newRow, newCol]);
+                    } else if (newPiece[0] !== currTurn) {
+                        validMoves.push([newRow, newCol]);
+                        break;
+                    } else {
+                        break;
+                    }
+                }
+            }
             break
     }
     console.log(validMoves);
-    return validMoves;
+    renderValidMoves();
+}
+
+function renderValidMoves() {
+    for (const [row, col] of validMoves) {
+        const cell = document.getElementById(`${row+1}-${col+1}`)
+        const img = document.createElement("img");
+        img.src = "./Images/Dot.png"
+        img.style.width = cell.style.width;
+        img.style.height = cell.style.height;
+        cell.appendChild(img);
+    }
 }
