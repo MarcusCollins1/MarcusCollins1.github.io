@@ -31,7 +31,7 @@ function resetBoard() {
     currTurn = "w";
 }
 
-function renderBoard() {
+export function renderBoard() {
     if (board.length === 0) return;
     for (let rowIdx = 0; rowIdx < 8; rowIdx++) {
         for (let colIdx = 0; colIdx < 8; colIdx++) {
