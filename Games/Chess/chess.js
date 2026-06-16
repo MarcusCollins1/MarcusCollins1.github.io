@@ -39,6 +39,7 @@ export function renderBoard() {
             const cell = document.getElementById(`${rowIdx+1}-${colIdx+1}`);
             // Clear the cell
             cell.innerHTML = "";
+            cell.style.backgroundImage = "";
             // Add piece to cell
             if (cellValue === "") continue;
             cell.style.backgroundImage = `url(./Images/Pieces/${setInUse}/${cellValue}.png)`;
