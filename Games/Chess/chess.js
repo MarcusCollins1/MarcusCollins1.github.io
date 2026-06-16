@@ -7,6 +7,7 @@ const el = {
 let setInUse = "Standard";
 
 let board = [];
+let currTurn;
 
 function resetBoard() {
     board = [
@@ -19,6 +20,7 @@ function resetBoard() {
     ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
     ["wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"]
     ];
+    currTurn = "w";
 }
 
 function renderBoard() {
@@ -37,9 +39,12 @@ function renderBoard() {
 }
 
 function findValidMoves(rowIDx, colIdx) {
-    const piece = board[rowIDx][colIdx];
-    if (piece === "") return;
-    console.log(piece);
+    const cellValue = board[rowIDx][colIdx];
+    if (cellValue === "") return;
+    const pieceColour = cellValue[0];
+    const piece = cellValue[1];
+    if (pieceColour !== currTurn);
+    console.log(pieceColour, piece);
 }
 
 
