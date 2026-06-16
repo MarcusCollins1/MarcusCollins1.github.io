@@ -1,4 +1,4 @@
-function checkForCheck(board) {
+export function checkForCheck(board) {
     const whiteKing = findKing(board, "w");
     const blackKing = findKing(board, "b");
 
