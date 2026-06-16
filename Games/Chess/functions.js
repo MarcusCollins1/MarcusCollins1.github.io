@@ -9,10 +9,9 @@ export function findValidMoves(rowIdx, colIdx) {
     const pieceColour = cellValue[0];
     const piece = cellValue[1];
     if (pieceColour !== currTurn) return;
-    console.log(pieceColour, piece);
     
-    const validMoves = [];
-    const dirs = [];
+    let validMoves = [];
+    let dirs = [];
 
     switch (piece) {
         // Bishop
