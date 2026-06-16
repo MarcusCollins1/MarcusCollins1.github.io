@@ -19,13 +19,15 @@ export function findValidMoves(rowIdx, colIdx) {
     
     let validMoves = [];
     let dirs = [];
+    let newRow;
+    let newCol;
 
     switch (piece) {
         // Bishop
         case "b":
             dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
             for (const dir of dirs) {
-                let [newRow, newCol] = [rowIdx, colIdx];
+                [newRow, newCol] = [rowIdx, colIdx];
                 while (true) {
                     newRow += dir[0];
                     newCol += dir[1];
@@ -46,7 +48,7 @@ export function findValidMoves(rowIdx, colIdx) {
         case "k":
             dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
             for (const dir of dirs) {
-                const [newRow, newCol] = [rowIdx+dir[0], colIdx+dir[1]];
+                [newRow, newCol] = [rowIdx+dir[0], colIdx+dir[1]];
                 if (!positionInBoard(rowIdx, colIdx)) continue;
                 const newPiece = board[newRow][newCol];
                 if (newPiece === "") {
@@ -87,7 +89,7 @@ export function findValidMoves(rowIdx, colIdx) {
         case "n":
             dirs = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
             for (const dir of dirs) {
-                const [newRow, newCol] = [rowIdx+dir[0], colIdx+dir[1]];
+                [newRow, newCol] = [rowIdx+dir[0], colIdx+dir[1]];
                 if (!positionInBoard(newRow, newCol)) continue;
                 const newPiece = board[newRow][newCol];
                 if (newPiece === "") {
@@ -104,7 +106,7 @@ export function findValidMoves(rowIdx, colIdx) {
         case "p":
             if (pieceColour === "w") {
                 // Can move 1 up
-                const [newRow, newCol] = [rowIdx-1, colIdx];
+                [newRow, newCol] = [rowIdx-1, colIdx];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] === "") {
                         validMoves.add([newRow, newCol]);
@@ -112,7 +114,7 @@ export function findValidMoves(rowIdx, colIdx) {
                 }
                 // Can move 2 up
                 if (rowIdx == 6) {
-                    const [newRow, newCol] = [rowIdx-2, colIdx];
+                    [newRow, newCol] = [rowIdx-2, colIdx];
                     if (positionInBoard(newRow, newCol)) {
                         if (board[newRow][newCol] === "" && board[newRow+1][newCol] === "") {
                             validMoves.add([newRow, newCol]);
@@ -121,14 +123,14 @@ export function findValidMoves(rowIdx, colIdx) {
                 }
                 // Can move diagonal
                 // Up-Left
-                const [newRow, newCol] = [rowIdx-1, colIdx-1];
+                [newRow, newCol] = [rowIdx-1, colIdx-1];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "b") {
                         validMoves.add([newRow, newCol]);
                     }
                 }
                 // Up-Right
-                const [newRow, newCol] = [rowIdx-1, colIdx+1];
+                [newRow, newCol] = [rowIdx-1, colIdx+1];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "b") {
                         validMoves.add([newRow, newCol]);
@@ -136,7 +138,7 @@ export function findValidMoves(rowIdx, colIdx) {
                 }
             } else {
                 // Can move 1 down
-                const [newRow, newCol] = [rowIdx+1, colIdx];
+                [newRow, newCol] = [rowIdx+1, colIdx];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] === "") {
                         validMoves.add([newRow, newCol]);
@@ -144,7 +146,7 @@ export function findValidMoves(rowIdx, colIdx) {
                 }
                 // Can move 2 down
                 if (rowIdx == 1) {
-                    const [newRow, newCol] = [rowIdx+2, colIdx];
+                    [newRow, newCol] = [rowIdx+2, colIdx];
                     if (positionInBoard(newRow, newCol)) {
                         if (board[newRow][newCol] === "" && board[newRow+1][newCol] === "") {
                             validMoves.add([newRow, newCol]);
@@ -153,14 +155,14 @@ export function findValidMoves(rowIdx, colIdx) {
                 }
                 // Can move diagonal
                 // Down-Left
-                const [newRow, newCol] = [rowIdx+1, colIdx-1];
+                [newRow, newCol] = [rowIdx+1, colIdx-1];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "w") {
                         validMoves.add([newRow, newCol]);
                     }
                 }
                 // Down-Right
-                const [newRow, newCol] = [rowIdx+1, colIdx+1];
+                [newRow, newCol] = [rowIdx+1, colIdx+1];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "w") {
                         validMoves.add([newRow, newCol]);
