@@ -1,3 +1,7 @@
+import {
+    findValidMoves,
+} from "./functions.js"
+
 const el = {
     returnBtn: document.getElementById("return-button"),
 
@@ -36,15 +40,6 @@ function renderBoard() {
             cell.style.backgroundImage = `url(./Images/Pieces/${setInUse}/${cellValue}.png)`;
         }
     }
-}
-
-function findValidMoves(rowIDx, colIdx) {
-    const cellValue = board[rowIDx][colIdx];
-    if (cellValue === "") return;
-    const pieceColour = cellValue[0];
-    const piece = cellValue[1];
-    if (pieceColour !== currTurn);
-    console.log(pieceColour, piece);
 }
 
 
