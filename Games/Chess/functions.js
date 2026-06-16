@@ -18,6 +18,10 @@ function positionInBoard(row, col) {
 }
 
 export function findValidMoves(rowIdx, colIdx) {
+    if (validMoves.contains([rowIdx, colIdx])) {
+        makeMove(rowIdx, colIdx);
+        return;
+    }
     validMoves = [];
     const cellValue = board[rowIdx][colIdx];
     if (cellValue === "") {
@@ -267,9 +271,6 @@ function renderValidMoves() {
         const img = document.createElement("img");
         img.src = "./Images/Dot.png"
         img.classList = "dot";
-        img.addEventListener("click", () => {
-            makeMove(row, col);
-        });
         cell.appendChild(img);
     }
 }
