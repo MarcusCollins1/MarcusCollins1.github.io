@@ -19,15 +19,15 @@ export function findValidMoves(rowIdx, colIdx) {
         case "b":
             dirs = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
             for (const dir of dirs) {
-                const [newRow, newCol] = rowIdx, colIdx;
+                const [newRow, newCol] = [rowIdx, colIdx];
                 while (true) {
                     newRow += dir[0];
                     newCol += dir[1];
                     if (!((0 <= newRow < board.length) && (0 <= newCol <= board[0].length))) break;
                     const newPiece = board[newRow][newCol];
-                    if (piece === "") {
+                    if (newPiece === "") {
                         validMoves.add((newRow, newCol));
-                    } else if (piece[0] !== currTurn) {
+                    } else if (newPiece[0] !== currTurn) {
                         validMoves.add((newRow, newCol));
                         break;
                     } else {
@@ -39,6 +39,20 @@ export function findValidMoves(rowIdx, colIdx) {
             break;
         // King
         case "k":
+            dirs = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
+            for (const dir of dirs) {
+                const [newRow, newCol] = [rowIdx+dir[0], colIdx+dir[1]];
+                if (!((0 <= newRow < board.length) && (0 <= newCol <= board[0].length))) continue;
+                const newPiece = board[newRow][newCol];
+                if (newPiece === "") {
+                    validMoves.add((newRow, newCol));
+                } else if (newPiece[0] !== currTurn) {
+                    validMoves.add((newRow, newCol));
+                    continue;
+                } else {
+                    continue;
+                }
+            }
             break
         // Knight
         case "n":
