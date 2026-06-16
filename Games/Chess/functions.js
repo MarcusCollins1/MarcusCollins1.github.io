@@ -18,7 +18,7 @@ function positionInBoard(row, col) {
 }
 
 export function findValidMoves(rowIdx, colIdx) {
-    if (validMoves.contains([rowIdx, colIdx])) {
+    if (validMoves.includes([rowIdx, colIdx])) {
         makeMove(rowIdx, colIdx);
         return;
     }
