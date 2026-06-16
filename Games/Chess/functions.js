@@ -34,9 +34,9 @@ export function findValidMoves(rowIdx, colIdx) {
                     if (!positionInBoard(newRow, newCol)) break;
                     const newPiece = board[newRow][newCol];
                     if (newPiece === "") {
-                        validMoves.add([newRow, newCol]);
+                        validMoves.push([newRow, newCol]);
                     } else if (newPiece[0] !== currTurn) {
-                        validMoves.add([newRow, newCol]);
+                        validMoves.push([newRow, newCol]);
                         break;
                     } else {
                         break;
@@ -52,9 +52,9 @@ export function findValidMoves(rowIdx, colIdx) {
                 if (!positionInBoard(rowIdx, colIdx)) continue;
                 const newPiece = board[newRow][newCol];
                 if (newPiece === "") {
-                    validMoves.add([newRow, newCol]);
+                    validMoves.push([newRow, newCol]);
                 } else if (newPiece[0] !== currTurn) {
-                    validMoves.add([newRow, newCol]);
+                    validMoves.push([newRow, newCol]);
                     continue;
                 } else {
                     continue;
@@ -64,23 +64,23 @@ export function findValidMoves(rowIdx, colIdx) {
             if (pieceColour === "w") {
                 if (canWhiteCastle[0]) {
                     if ((board[7][1] === "") && (board[7][2] === "") && (board[7][3] === "")) {
-                        validMoves.add([7, 2])
+                        validMoves.push([7, 2])
                     }
                 }
                 if (canWhiteCastle[1]) {
                     if ((board[7][5] === "") && (board[7][6] === "")) {
-                        validMoves.add([7, 6])
+                        validMoves.push([7, 6])
                     }
                 }
             } else {
                 if (canBlackCastle[0]) {
                     if ((board[0][1] === "") && (board[0][2] === "") && (board[0][3] === "")) {
-                        validMoves.add([0, 2])
+                        validMoves.push([0, 2])
                     }
                 }
                 if (canBlackCastle[1]) {
                     if ((board[0][5] === "") && (board[0][6] === "")) {
-                        validMoves.add([0, 6])
+                        validMoves.push([0, 6])
                     }
                 }
             }
@@ -93,9 +93,9 @@ export function findValidMoves(rowIdx, colIdx) {
                 if (!positionInBoard(newRow, newCol)) continue;
                 const newPiece = board[newRow][newCol];
                 if (newPiece === "") {
-                    validMoves.add([newRow, newCol]);
+                    validMoves.push([newRow, newCol]);
                 } else if (newPiece[0] !== currTurn) {
-                    validMoves.add([newRow, newCol]);
+                    validMoves.push([newRow, newCol]);
                     continue;
                 } else {
                     continue;
@@ -109,7 +109,7 @@ export function findValidMoves(rowIdx, colIdx) {
                 [newRow, newCol] = [rowIdx-1, colIdx];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] === "") {
-                        validMoves.add([newRow, newCol]);
+                        validMoves.push([newRow, newCol]);
                     }
                 }
                 // Can move 2 up
@@ -117,7 +117,7 @@ export function findValidMoves(rowIdx, colIdx) {
                     [newRow, newCol] = [rowIdx-2, colIdx];
                     if (positionInBoard(newRow, newCol)) {
                         if (board[newRow][newCol] === "" && board[newRow+1][newCol] === "") {
-                            validMoves.add([newRow, newCol]);
+                            validMoves.push([newRow, newCol]);
                         }
                     }
                 }
@@ -126,14 +126,14 @@ export function findValidMoves(rowIdx, colIdx) {
                 [newRow, newCol] = [rowIdx-1, colIdx-1];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "b") {
-                        validMoves.add([newRow, newCol]);
+                        validMoves.push([newRow, newCol]);
                     }
                 }
                 // Up-Right
                 [newRow, newCol] = [rowIdx-1, colIdx+1];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "b") {
-                        validMoves.add([newRow, newCol]);
+                        validMoves.push([newRow, newCol]);
                     }
                 }
             } else {
@@ -141,7 +141,7 @@ export function findValidMoves(rowIdx, colIdx) {
                 [newRow, newCol] = [rowIdx+1, colIdx];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] === "") {
-                        validMoves.add([newRow, newCol]);
+                        validMoves.push([newRow, newCol]);
                     }
                 }
                 // Can move 2 down
@@ -149,7 +149,7 @@ export function findValidMoves(rowIdx, colIdx) {
                     [newRow, newCol] = [rowIdx+2, colIdx];
                     if (positionInBoard(newRow, newCol)) {
                         if (board[newRow][newCol] === "" && board[newRow+1][newCol] === "") {
-                            validMoves.add([newRow, newCol]);
+                            validMoves.push([newRow, newCol]);
                         }
                     }
                 }
@@ -158,14 +158,14 @@ export function findValidMoves(rowIdx, colIdx) {
                 [newRow, newCol] = [rowIdx+1, colIdx-1];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "w") {
-                        validMoves.add([newRow, newCol]);
+                        validMoves.push([newRow, newCol]);
                     }
                 }
                 // Down-Right
                 [newRow, newCol] = [rowIdx+1, colIdx+1];
                 if (positionInBoard(newRow, newCol)) {
                     if (board[newRow][newCol] !== "" && board[newRow][newCol][0] === "w") {
-                        validMoves.add([newRow, newCol]);
+                        validMoves.push([newRow, newCol]);
                     }
                 }
             }
