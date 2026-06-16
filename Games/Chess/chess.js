@@ -48,7 +48,7 @@ el.chessTable.addEventListener("click", (e) => {
     if (!cell) return;
 
     const [row, col] = cell.id.split("-").map(Number);
-    findValidMoves(row, col);
+    findValidMoves(row-1, col-1);
 })
 
 resetBoard();
