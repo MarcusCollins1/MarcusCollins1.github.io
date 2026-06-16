@@ -226,6 +226,7 @@ function renderValidMoves() {
         img.src = "./Images/Dot.png"
         img.style.width = cell.style.width;
         img.style.height = cell.style.height;
+        img.classList = "dot";
         cell.appendChild(img);
     }
 }
