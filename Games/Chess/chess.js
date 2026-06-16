@@ -29,22 +29,27 @@ function renderBoard() {
             const cell = document.getElementById(`${rowIdx+1}-${colIdx+1}`);
             // Clear the cell
             cell.innerHTML = "";
-            cell.removeEventListener("click");
             // Add piece to cell
             if (cellValue === "") continue;
             cell.style.backgroundImage = `url(./Images/Pieces/${setInUse}/${cellValue}.png)`;
-            cell.addEventListener("click", () => {
-                findValidMoves(rowIdx, colIdx);
-            });
         }
     }
 }
 
 function findValidMoves(rowIDx, colIdx) {
     const piece = board[rowIDx][colIdx];
+    if (piece === "") return;
     console.log(piece);
 }
 
+
+el.chessTable.addEventListener("click", (e) => {
+    const cell = e.target.closest(".cell");
+    if (!cell) return;
+
+    const [row, col] = cell.id.split("-").map(Number);
+    findValidMoves(row, col);
+})
 
 resetBoard();
 renderBoard();
