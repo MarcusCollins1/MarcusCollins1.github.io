@@ -1,6 +1,7 @@
 import {
     board,
     currTurn,
+    setCurrTurn,
 } from "./chess.js"
 import {
     checkForCheck
@@ -291,9 +292,9 @@ function makeMove(row, col) {
     board[currRow][currCol] = "";
 
     if (currTurn === "w") {
-        currTurn = "b";
+        setCurrTurn("b");
     }
     else {
-        currTurn = "w";
+        setCurrTurn("w");
     }
 }

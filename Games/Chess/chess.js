@@ -13,6 +13,10 @@ let setInUse = "Standard";
 export let board = [];
 export let currTurn;
 
+export function setCurrTurn(turn) {
+    currTurn = turn;
+}
+
 function resetBoard() {
     board = [
     ["br", "bn", "bb", "bq", "bk", "bb", "bn", "br"],
