@@ -2,24 +2,38 @@ import {
     board,
     currTurn,
 } from "./chess.js"
+import {
+    checkForCheck
+} from "./check.js"
 
 const canWhiteCastle = [true, true];
 const canBlackCastle = [true, true];
 
 let validMoves;
+let currRow;
+let currCol;
 
 function positionInBoard(row, col) {
     return (0 <= row) && (row < board.length) && (0 <= col) && (col < board[0].length);
 }
 
 export function findValidMoves(rowIdx, colIdx) {
+    validMoves = [];
     const cellValue = board[rowIdx][colIdx];
-    if (cellValue === "") return;
+    if (cellValue === "") {
+        renderValidMoves();
+        return;
+    }
     const pieceColour = cellValue[0];
     const piece = cellValue[1];
-    if (pieceColour !== currTurn) return;
+    if (pieceColour !== currTurn)  {
+        renderValidMoves();
+        return;
+    }
     
-    validMoves = [];
+    currRow = rowIdx;
+    currCol = colIdx;
+
     let dirs = [];
     let newRow;
     let newCol;
@@ -216,7 +230,34 @@ export function findValidMoves(rowIdx, colIdx) {
             break
     }
     console.log(validMoves);
+    checkValidMoves();
     renderValidMoves();
+}
+
+function checkValidMoves() {
+    const newValidMoves = [];
+    for (const [row, col] of validMoves) {
+        const currBoard = board.map(row => [...row]);
+
+        // Check for castle
+        if (currBoard[currRow][currCol] !== "" && currBoard[currRow][currCol][1] === "k" && (Math.abs(row-currRow)+Math.abs(col-currCol) === 2)) {
+            if (col == 1) {
+                currBoard[row][2] = currBoard[row][0];
+                currBoard[row][0] = "";
+            } else if (col === 7) {
+                currBoard[row][5] = currBoard[row][7];
+                currBoard[row][7] = "";
+            }
+        }
+        currBoard[row][col] = currBoard[currRow][currCol];
+        currBoard[currRow][currCol] = "";
+
+        const isCheck = checkForCheck(currBoard);
+        if (isCheck === currTurn) continue;
+
+        newValidMoves.push([row, col]);
+    }
+    validMoves = newValidMoves;
 }
 
 function renderValidMoves() {
@@ -226,6 +267,17 @@ function renderValidMoves() {
         const img = document.createElement("img");
         img.src = "./Images/Dot.png"
         img.classList = "dot";
+        img.addEventListener("click", () => {
+            makeMove(row, col);
+        });
         cell.appendChild(img);
     }
+}
+
+function makeMove(row, col) {
+
+}
+
+function checkForCheck(currBoard) {
+
 }
