@@ -70,7 +70,7 @@ export function findValidMoves(rowIdx, colIdx) {
             break;
         // King
         case "k":
-            dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+            dirs = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
             for (const dir of dirs) {
                 [newRow, newCol] = [rowIdx+dir[0], colIdx+dir[1]];
                 if (!positionInBoard(newRow, newCol)) continue;
