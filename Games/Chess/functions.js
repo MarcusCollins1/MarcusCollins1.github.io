@@ -299,4 +299,6 @@ function makeMove(row, col) {
         setCurrTurn("w");
     }
     renderBoard();
+    validMoves = [];
+    renderValidMoves();
 }
