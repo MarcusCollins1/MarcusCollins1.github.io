@@ -73,7 +73,7 @@ export function findValidMoves(rowIdx, colIdx) {
             dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
             for (const dir of dirs) {
                 [newRow, newCol] = [rowIdx+dir[0], colIdx+dir[1]];
-                if (!positionInBoard(rowIdx, colIdx)) continue;
+                if (!positionInBoard(newRow, newCol)) continue;
                 const newPiece = board[newRow][newCol];
                 if (newPiece === "") {
                     validMoves.push([newRow, newCol]);
