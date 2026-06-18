@@ -248,7 +248,7 @@ function checkValidMoves() {
 
         // Check for castle
         if (currBoard[currRow][currCol] !== "" && currBoard[currRow][currCol][1] === "k" && (Math.abs(row-currRow)+Math.abs(col-currCol) === 2)) {
-            if (col == 1) {
+            if (col == 2) {
                 currBoard[row][2] = currBoard[row][0];
                 currBoard[row][0] = "";
             } else if (col === 6) {
