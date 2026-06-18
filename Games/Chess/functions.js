@@ -281,7 +281,7 @@ function renderValidMoves() {
 function makeMove(row, col) {
     // Check for castle
     if (board[currRow][currCol] !== "" && board[currRow][currCol][1] === "k" && (Math.abs(row-currRow)+Math.abs(col-currCol) === 2)) {
-        if (col === 1) {
+        if (col === 2) {
             board[row][2] = board[row][0];
             board[row][0] = "";
         } else if (col === 6) {
