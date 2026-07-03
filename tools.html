@@ -20,6 +20,14 @@
     <br>
     <button id="fourier-transform-button" onclick="location.href='Tools/FourierTransform/fourierTransform.html'">Fourier Transform</button>
     <br>
-    <button id="shopping-list-button" onclick="location.href='Tools/ShoppingList/shoppingList.html'">Shopping List</button>
+    <button id="shopping-list-button" onclick=openShoppingList>Shopping List</button>
+
+    <script>
+        function openShoppingList() {
+            if (prompt("Enter password:") === "Tedda" ) {
+                location.href = 'Tools/ShoppingList/shoppingList.html';
+            }
+        }
+    </script>
 </body>
 </html>
