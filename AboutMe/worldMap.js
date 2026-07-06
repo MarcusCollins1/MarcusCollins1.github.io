@@ -31,3 +31,18 @@ new svgMap({
         values
     }
 });
+
+const visitedCountriesRing = document.getElementById("visitedCountriesRing");
+const visitedCountriesPercentage = document.getElementById("visitedCountriesPercentage");
+const visitedCountriesCount = document.getElementById("visitedCountriesCount");
+
+let percentage = Math.round(visitedCountries.length / allCountries.length * 100);
+if (visitedCountries.length > 0 && percentage === 0) {
+    percentage = 1;
+}
+if (visitedCountries < allCountries.length && percentage === 100) {
+    percentage = 99;
+}
+visitedCountriesRing.style = `--percent: ${percentage};`;
+visitedCountriesPercentage.textContent = `${percentage}%`;
+visitedCountriesCount.textContent = `${visitedCountries.length}/${allCountries.length}`;
