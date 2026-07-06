@@ -133,7 +133,7 @@ button:hover {
     margin-bottom: 16px;
 }
 .gradient-text {
-    background: linear-gradient(90deg, #fff, #c4b5fd, #67e8f9);
+    background: linear-gradient(90deg, rgb(214, 2, 112), rgb(155, 79, 150), rgb(0, 56, 168));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
