@@ -201,6 +201,7 @@ button:hover {
     background: rgba(255, 255, 255, 0.06);
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
 }
 .stat strong {
     display: block;
