@@ -41,3 +41,38 @@ button:hover {
     min-height: 100vh;
     gap: 15px;
 }
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-card {
+    background: #111827;
+    padding: 24px;
+    border-radius: 12px;
+    width: min(90vw, 360px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.modal-card input,
+.modal-card button {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.auth-error {
+    min-height: 1.2em;
+    margin: 0;
+    color: salmon;
+}
+
+
+
+.hidden {
+    display: none;
+}

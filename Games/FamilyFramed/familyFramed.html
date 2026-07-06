@@ -13,12 +13,27 @@
     <div class="container">
         <h1 class="title">Family Framed</h1>
         
-        <button id="playBtn">Play</button>
-        <button id="previousGamesBtn">Previous Games</button>
-        <button id="statsBtn">Stats</button>
+        <button disabled id="playBtn">Play</button>
+        <button disabled id="previousGamesBtn">Previous Games</button>
+        <button disabled id="statsBtn">Stats</button>
         <button id="loginBtn">Login / Sign up</button>
-
-        <script type="module" src="familyFramed.js"></script>
     </div>
+
+    <div id="loginModal" class="modal hidden">
+        <div class="modal-card">
+            <h2 id="authTitle">Log in</h2>
+
+            <input id="usernameInput" type="text" placeholder="Username" autocomplete="username">
+            <input id="passwordInput" type="password" placeholder="Password" autocomplete="current-password">
+
+            <p id="authError" class="auth-error"></p>
+
+            <button id="submitAuthBtn">Log in</button>
+            <button id="toggleAuthModeBtn" type="button">Need an account? Sign up</button>
+            <button id="closeAuthBtn" type="button">Cancel</button>
+        </div>
+    </div>
+
+    <script type="module" src="familyFramed.js"></script>
 </body>
 </html>
