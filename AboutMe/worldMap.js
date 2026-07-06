@@ -11,7 +11,7 @@ new svgMap({
         applyData: "visited",
 
         values: {
-            GBR: { visited: 1 },
+            GB: { visited: 1 },
         }
     }
 });
