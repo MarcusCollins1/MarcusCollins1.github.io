@@ -1,4 +1,4 @@
-const visitedCountries = ["GB", "DE"];
+const visitedCountries = ["GB", "BE", "CA"];
 const values = {};
 visitedCountries.forEach(code => {
     values[code] = { visited: 1 };
