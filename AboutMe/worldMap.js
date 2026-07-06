@@ -6,7 +6,8 @@ visitedCountries.forEach(code => {
 
 new svgMap({
     targetElementID: "svgMap",
-    showTooltips: false,
+    showTooltips: true,
+    tooltipTrigger: "click",
     data: {
         data: {
             visited: {
