@@ -12,6 +12,7 @@ new svgMap({
 
         values: {
             GB: { visited: 1 },
+            BE: { visited: 1 }
         }
     }
 });
