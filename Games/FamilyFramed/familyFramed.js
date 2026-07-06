@@ -19,7 +19,9 @@ import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signOut,
-    updateProfile
+    updateProfile,
+    setPersistence,
+    browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -36,6 +38,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
+await setPersistence(auth, browserLocalPersistence);
 
 const playBtn = document.getElementById("playBtn");
 const previousGamesBtn = document.getElementById("previousGamesBtn");
