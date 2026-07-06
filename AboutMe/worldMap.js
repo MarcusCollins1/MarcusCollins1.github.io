@@ -9,6 +9,7 @@ allCountries.forEach(code => {
         }
     } else {
         values[code] = {
+            color: "#aaaaaa",
             visited: false
         }
     }
