@@ -25,6 +25,12 @@ const sectionObserver = new IntersectionObserver((entries) => {
 
 document.querySelectorAll("section").forEach(sec => sectionObserver.observe(sec));
 
-document.getElementById("stat1").addEventListener("click", location.href = "#about");
-document.getElementById("stat2").addEventListener("click", location.href = "#skills");
-document.getElementById("stat3").addEventListener("click", location.href = "#contact");
+document.getElementById("stat1").addEventListener("click", () => {
+    location.href = "#about";
+});
+document.getElementById("stat2").addEventListener("click", () => {
+    location.href = "#skills";
+});;
+document.getElementById("stat3").addEventListener("click", () => {
+    location.href = "#contact";
+});;
