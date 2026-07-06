@@ -93,17 +93,6 @@ button:hover {
     background-color: lightcoral;
 }
 
-.return-button {
-    background-color: lightblue;
-    color: hotpink;
-    font-size: large;
-    font-weight: bold;
-}
-.return-button:hover {
-    background-color: hotpink;
-    color: lightblue;
-}
-
 .wrap {
     width: min(1100px, 100%);
     display: grid;
@@ -467,4 +456,18 @@ button:hover {
 }
 .visited-country:hover {
     fill: #22d3ee !important;
+}
+
+#returnBtn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0f172a !important;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 8px 16px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+#returnBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.35);
+    color: #0f172a !important;
 }
