@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Me</title>
     <link rel="stylesheet" href="aboutMe.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/svgmap@2.10.1/dist/svgMap.min.css">
 </head>
 <body>
     <button id="return-button" class="return-button" onclick="location.href='../index.html'">← Return</button>
@@ -14,6 +15,7 @@
         <a href="#about">About</a>
         <a href="#skills">Skills</a>
         <a href="#employment">Employment</a>
+        <a href="#travel">Travel</a>
         <a href="#story">Story</a>
         <a href="#contact">Contact</a>
     </nav>
@@ -213,6 +215,19 @@
         </div>
     </section>
 
+    <section id="travel">
+        <div class="wrap">
+            <div class="panel reveal" style="padding: 34px;">
+                <h2 class="section-title">Places I have visited</h2>
+                <p class="section-text">Countries that I have visited are highlighted on the map.</p>
+
+                <div class="map-card">
+                    <div id="svgMap"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="story">
         <div class="wrap">
             <div class="panel reveal" style="padding: 34px;">
@@ -300,5 +315,7 @@
     </section>
 
     <script src="aboutMe.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/svgmap@2.10.1/dist/svgMap.min.js"></script>
+    <script src="worldMap.js"></script>
 </body>
 </html>
