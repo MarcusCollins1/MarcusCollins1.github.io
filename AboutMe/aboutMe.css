@@ -397,7 +397,7 @@ button:hover {
     width: fit-content;
     padding: 10px 16px;
     border-radius: 999px;
-    background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+    background: linear-gradient(135deg, rgb(214, 2, 112), rgb(155, 79, 150), rgb(0, 56, 168));
     color: #0f172a;
     font-weight: 700;
     font-size: 0.95rem;
