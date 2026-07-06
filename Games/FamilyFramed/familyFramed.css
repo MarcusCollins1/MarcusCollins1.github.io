@@ -29,7 +29,15 @@ button:hover {
     color: lightblue;
 }
 
+.title {
+    font-size: 4rem;
+    color: lightblue;
+}
 .container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    gap: 15px;
 }
