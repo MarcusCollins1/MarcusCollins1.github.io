@@ -1,6 +1,7 @@
 const reveals = document.querySelectorAll(".reveal");
 const navLinks = document.querySelectorAll("nav a");
 
+
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
