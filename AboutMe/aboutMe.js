@@ -24,7 +24,9 @@ const sectionObserver = new IntersectionObserver((entries) => {
     });
 }, { threshold: 0.6 });
 
-document.querySelectorAll("section").forEach(sec => sectionObserver.observe(sec));
+document.querySelectorAll("section").forEach(sec => {
+    sectionObserver.observe(sec);
+});
 
 document.getElementById("stat1").addEventListener("click", () => {
     location.href = "#about";
