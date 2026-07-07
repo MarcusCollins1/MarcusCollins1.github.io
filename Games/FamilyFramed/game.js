@@ -218,21 +218,26 @@ logoutBtn?.addEventListener("click", async () => {
 
 if (guessInput) {
     guessInput.addEventListener("keydown", (e) => {
-        const guess = e.target.value;
         if (e.key === "Enter") {
             submitGuess();
-        } else {
-            suggestions.innerHTML = "";
-            if (guess === "") return;
-            const options = LEVELS.filter(level => level.toLowerCase().startsWith(guess.toLowerCase()) && level.toLowerCase() !== guess);
-            console.log(guess)
-            console.log(options);
-            options.forEach(option => {
-                const optionEl = document.createElement("option");
-                optionEl.value = option;
-                suggestions.appendChild(optionEl);
-            });
         }
+    });
+    guessInput.addEventListener("input", (e) => {
+        const guess = e.target.value;
+
+        suggestions.innerHTML = "";
+        if (guess === "") return;
+
+        const options = LEVELS.filter(level => 
+            level.toLowerCase().startsWith(guess.toLowerCase()) &&
+            level.toLowerCase() !== guess.toLowerCase()
+        );
+
+        options.forEach(option => {
+            const optionEl = document.createElement("option");
+            optionEl.value = option;
+            suggestions.appendChild(optionEl);
+        });
     });
 }
 
