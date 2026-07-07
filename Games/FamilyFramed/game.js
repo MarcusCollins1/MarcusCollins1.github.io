@@ -1,5 +1,13 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    arrayUnion
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+import {
     getAuth,
     onAuthStateChanged,
     signOut,
@@ -18,13 +26,118 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 const auth = getAuth(app);
 
 const backBtn = document.getElementById("backBtn");
 const logoutBtn = document.getElementById("logoutBtn");
-const startGameBtn = document.getElementById("startGameBtn");
-const welcomeText = document.getElementById("welcomeText");
+const statusText = document.getElementById("statusText");
 const gameArea = document.getElementById("gameArea");
+
+const LEVELS = [];
+
+let currentUser = null;
+let todaysLevel = null;
+let midnightTimer = null;
+
+function userDoc(uid) {
+    return doc(db, "family-framed-users", uid);
+}
+
+function localDateKey(date = new Date()) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+function msUntilNextMidnight() {
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(24, 0, 0, 0);
+    return next - now
+}
+
+function randomChoice(items) {
+    return items[Math.floor(Math.random() * items.length)];
+}
+
+async function ensureUserProgress(uid) {
+    const ref = userDoc(uid);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+        const initialData = {
+            completedLevelIds: [],
+            dailyLevelDate: "",
+            dailyLevelId: ""
+        };
+        await setDoc(ref, initialData);
+        return initialData;
+    }
+    return snap.data();
+}
+
+function pickTodaysLevel(progress) {
+    const completed = Array.isArray(progress.completedLevelIds)
+        ? progress.completedLevelIds
+        : [];
+    
+    const unplayed = LEVELS.fill(level => !completed.includes(level));
+    const pool = unplayed.length > 0 ? unplayed : LEVELS;
+
+    return randomChoice(pool);
+}
+
+function renderLevel(level) {
+    if (!level) {
+        statusText.textContent = "No level loaded.";
+        return;
+    }
+    statusText.textContent = `Today's level: ${localDateKey()}`;
+}
+
+async function loadTodaysLevel() {
+    if (!currentUser) return;
+
+    const today = localDateKey();
+    const ref = userDoc(currentUser.uid);
+    const progress = await ensureUserProgress(currentUser.uid);
+
+    if (progress.dailyLevelDate === today && progress.dailyLevelId) {
+        todaysLevel = LEVELS.find(level => level.id === progress.dailyLevelId) || null;
+    } else {
+        todaysLevel = pickTodaysLevel(progress);
+        await updateDoc(ref, {
+            dailyLevelDate: today,
+            dailyLevelId: todaysLevel
+        });
+    }
+
+    renderLevel(todaysLevel);
+    scheduleMidnightRefresh();
+}
+
+function scheduleMidnightRefresh() {
+    if (midnightTimer) clearTimeout(midnightTimer);
+
+    midnightTimer = setTimeout(async () => {
+        if (currentUser) {
+            await loadTodaysLevel();
+        }
+    }, msUntilNextMidnight() + 1000);
+}
+
+async function completeCurrentLevel() {
+    if (!currentUser || !todaysLevel) return;
+
+    const ref = userDoc(currentUser.uid);
+    await updateDoc(ref, {
+        completedLevelIds: arrayUnion(todaysLevel)
+    });
+
+    statusText.textContent = "Level completed. Come back tomorrow for the next one.";
+}
 
 backBtn.addEventListener("click", () => {
     location.href = "familyFramed.html";
@@ -39,9 +152,6 @@ logoutBtn?.addEventListener("click", async () => {
     }
 });
 
-startGameBtn?.addEventListener("click", () => {
-    welcomeText.textContent = "Game started!";
-});
 
 async function init() {
     try {
@@ -50,14 +160,14 @@ async function init() {
         console.warn("Could not set auth persistence:", error);
     }
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            const name = user.displayName || "Player";
-            welcomeText.textContent = `Welcome, ${name}!`;
-            gameArea.classList.remove("hidden");
-        } else {
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
             location.href = "familyFramed.html";
+            return;
         }
+
+        currentUser = user;
+        await loadTodaysLevel();
     });
 }
 
