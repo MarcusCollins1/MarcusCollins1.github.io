@@ -19,18 +19,27 @@ button:hover {
 }
 
 .return-button {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+
     background-color: lightblue;
     color: hotpink;
     font-size: large;
     font-weight: bold;
+    z-index: 100;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .return-button:hover {
     background-color: hotpink;
     color: lightblue;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(139, 92, 246, 0.35);
 }
 
 .title {
-    font-size: 4rem;
+    font-size: clamp(2rem, 8vw, 4rem);
+    text-align: center;
     color: lightblue;
 }
 .container {
