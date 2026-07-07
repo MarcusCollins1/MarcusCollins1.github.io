@@ -84,7 +84,8 @@ async function ensureUserProgress(uid) {
         const initialData = {
             completedLevelIds: {},
             dailyLevelDate: "",
-            dailyLevelId: ""
+            dailyLevelId: "",
+            lastDateComplete: ""
         };
         await setDoc(ref, initialData);
         return initialData;
@@ -121,15 +122,41 @@ function renderPicture() {
     imgBox.src = `Images/${todaysLevel}/${currentPicNum}.jpg`;
 }
 
+function addPreviousGuess(guess = null) {
+    const prevGuessEl = document.createElement("p");
+    prevGuessEl.classList.add("previous-guess");
+    if (guess === null) {
+        prevGuessEl.classList.add("skipped");
+        prevGuessEl.textContent = "Skipped"
+    } else {
+        prevGuessEl.textContent = guess;
+    }
+    previousGuessesContainer.appendChild(prevGuessEl);
+}
+
 function submitGuess() {
     const guess = guessInput.value;
     if (guess === "") {
-        // Skip
+        // Skipped
+        if (currentPicNum === 6) {
+            // Last guess used game over
+        } else {
+            currentPicNum ++;
+            addPreviousGuess();
+            renderPicture();
+        }
     } else if (LEVELS.includes(guess)) {
         if (guess === todaysLevel) {
             // Correct
         } else {
             // Incorrect
+            if (currentPicNum === 6) {
+                // Last guess used game over
+            } else {
+                currentPicNum++;
+                addPreviousGuess(guess);
+                renderPicture();
+            }
         }
     }
 }

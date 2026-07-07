@@ -51,6 +51,17 @@ button:hover {
     min-height: 100vh;
     gap: 15px;
 }
+.previous-guess {
+    width: 100%;
+    border: 1px solid black;
+    margin: 2px;
+    text-align: left;
+    background: darkblue;
+    color: white;
+}
+.skipped {
+    font-style: italic;
+}
 
 #gameArea {
     display: flex;
@@ -68,7 +79,7 @@ button:hover {
     object-fit: contain;
     border-radius: 8px;
 
-    padding: 0 0 20px 0;
+    margin: 0 0 20px 0;
 }
 #searchContainer {
     display: flex;
