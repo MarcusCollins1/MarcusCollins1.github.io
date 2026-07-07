@@ -118,7 +118,7 @@ async function loadTodaysLevel() {
     const progress = await ensureUserProgress(currentUser.uid);
 
     if (progress.dailyLevelDate === today && progress.dailyLevelId) {
-        todaysLevel = LEVELS.find(level => level.id === progress.dailyLevelId) || null;
+        todaysLevel = LEVELS.find(level => level === progress.dailyLevelId) || null;
     } else {
         todaysLevel = pickTodaysLevel(progress);
         await updateDoc(ref, {
