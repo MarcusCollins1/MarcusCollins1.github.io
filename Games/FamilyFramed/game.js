@@ -218,7 +218,7 @@ logoutBtn?.addEventListener("click", async () => {
 
 if (guessInput) {
     guessInput.addEventListener("keydown", (e) => {
-        const guess = guessInput.value;
+        const guess = e.target.value;
         if (e.key === "Enter") {
             submitGuess();
         } else {
