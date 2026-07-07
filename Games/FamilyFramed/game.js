@@ -225,6 +225,7 @@ if (guessInput) {
             suggestions.innerHTML = "";
             if (guess === "") return;
             const options = LEVELS.filter(level => level.toLowerCase().startsWith(guess.toLowerCase()) && level.toLowerCase() !== guess);
+            console.log(guess)
             console.log(options);
             options.forEach(option => {
                 const optionEl = document.createElement("option");
