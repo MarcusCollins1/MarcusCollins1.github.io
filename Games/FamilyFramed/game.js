@@ -34,6 +34,13 @@ const logoutBtn = document.getElementById("logoutBtn");
 const statusText = document.getElementById("statusText");
 const gameArea = document.getElementById("gameArea");
 
+const timerText = document.getElementById("timerText");
+const imgBox = document.getElementById("imgBox");
+const guessInput = document.getElementById("guessInput");
+const submitBtn = document.getElementById("submitBtn");
+const previousGuessesContainer = document.getElementById("previousGuessesContainer");
+const guessesRemainingText = document.getElementById("guessesRemainingText");
+
 const LEVELS = await getLevels();
 
 let currentUser = null;
@@ -73,7 +80,7 @@ async function ensureUserProgress(uid) {
 
     if (!snap.exists()) {
         const initialData = {
-            completedLevelIds: [],
+            completedLevelIds: {},
             dailyLevelDate: "",
             dailyLevelId: ""
         };
@@ -100,6 +107,7 @@ function renderLevel(level) {
         return;
     }
     statusText.textContent = `Today's level: ${localDateKey()}`;
+    gameArea.classList.remove("hidden");
 }
 
 async function loadTodaysLevel() {
