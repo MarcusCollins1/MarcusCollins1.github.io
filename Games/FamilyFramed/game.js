@@ -195,6 +195,8 @@ if (guessInput) {
         if (e.key === "Enter") {
             submitGuess();
         } else {
+            suggestions.innerHTML = "";
+            if (guess === "") return;
             const options = LEVELS.filter(level => level.toLowerCase().startsWith(guess.toLowerCase()));
             options.forEach(option => {
                 const optionEl = document.createElement("option");
