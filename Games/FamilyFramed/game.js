@@ -37,6 +37,7 @@ const gameArea = document.getElementById("gameArea");
 const timerText = document.getElementById("timerText");
 const imgBox = document.getElementById("imgBox");
 const guessInput = document.getElementById("guessInput");
+const suggestions = document.getElementById("suggestions");
 const submitBtn = document.getElementById("submitBtn");
 const previousGuessesContainer = document.getElementById("previousGuessesContainer");
 const guessesRemainingText = document.getElementById("guessesRemainingText");
@@ -110,6 +111,19 @@ function renderLevel(level) {
     gameArea.classList.remove("hidden");
 }
 
+function submitGuess() {
+    const guess = guessInput.value;
+    if (guess === "") {
+        // Skip
+    } else if (LEVELS.includes(guess)) {
+        if (guess === todaysLevel) {
+            // Correct
+        } else {
+            // Incorrect
+        }
+    }
+}
+
 async function loadTodaysLevel() {
     if (!currentUser) return;
 
@@ -165,10 +179,27 @@ logoutBtn?.addEventListener("click", async () => {
     }
 });
 
-guessInput.addEventListener("keydown", (e) => {
-    console.log(e.key);
-});
+if (guessInput) {
+    guessInput.addEventListener("keydown", (e) => {
+        const guess = guessInput.value;
+        if (e.key === "Enter") {
+            submitGuess();
+        } else {
+            const options = LEVELS.filter(level => level.toLowerCase().startsWith(guess.toLowerCase()));
+            options.forEach(option => {
+                const optionEl = document.createElement("option");
+                optionEl.value = option;
+                suggestions.appendChild(optionEl);
+            });
+        }
+    });
+}
 
+if (submitBtn) {
+    submitBtn.addEventListener("click", () => {
+        submitGuess();
+    });
+}
 
 async function init() {
     try {
