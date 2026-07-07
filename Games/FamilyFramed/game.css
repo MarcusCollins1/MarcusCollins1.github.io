@@ -42,6 +42,33 @@ button:hover {
     gap: 15px;
 }
 
+#gameArea {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#searchContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: min(600px, 90vw);
+}
+#guessInput {
+    width: min(500px, 90%);
+    padding: 10px 14px;
+    font-size: 1rem;
+    border: 1px solid #555;
+    border-radius: 8px;
+    background: #1a1a1a;
+    color: white;
+    box-sizing: border-box;
+}
+#guessInput:focus {
+    outline: none;
+    border-color: lightblue;
+}
+
 
 
 .hidden {

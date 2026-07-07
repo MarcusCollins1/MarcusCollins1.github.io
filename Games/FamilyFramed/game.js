@@ -165,6 +165,10 @@ logoutBtn?.addEventListener("click", async () => {
     }
 });
 
+guessInput.addEventListener("keydown", (e) => {
+    console.log(e.key);
+});
+
 
 async function init() {
     try {
