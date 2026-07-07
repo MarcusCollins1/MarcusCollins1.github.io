@@ -88,7 +88,7 @@ function pickTodaysLevel(progress) {
         ? progress.completedLevelIds
         : [];
     
-    const unplayed = LEVELS.fill(level => !completed.includes(level));
+    const unplayed = LEVELS.filter(level => !completed.includes(level));
     const pool = unplayed.length > 0 ? unplayed : LEVELS;
 
     return randomChoice(pool);
