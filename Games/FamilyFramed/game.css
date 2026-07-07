@@ -67,6 +67,8 @@ button:hover {
 
     object-fit: contain;
     border-radius: 8px;
+
+    padding: 0 0 20px 0;
 }
 #searchContainer {
     display: flex;
