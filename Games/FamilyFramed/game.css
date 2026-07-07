@@ -53,11 +53,11 @@ button:hover {
 }
 .previous-guess {
     width: 100%;
-    border: 1px solid black;
-    margin: 2px;
+    border: 1px solid white;
+    margin: 5px;
     text-align: left;
-    background: darkblue;
-    color: white;
+    background: purple;
+    color: lightblue;
 }
 .skipped {
     font-style: italic;
@@ -101,7 +101,9 @@ button:hover {
     outline: none;
     border-color: lightblue;
 }
-
+#previousGuessesContainer {
+    width: 70%;
+}
 
 
 .hidden {
