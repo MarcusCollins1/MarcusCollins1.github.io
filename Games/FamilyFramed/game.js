@@ -34,11 +34,16 @@ const logoutBtn = document.getElementById("logoutBtn");
 const statusText = document.getElementById("statusText");
 const gameArea = document.getElementById("gameArea");
 
-const LEVELS = [];
+const LEVELS = await getLevels();
 
 let currentUser = null;
 let todaysLevel = null;
 let midnightTimer = null;
+
+async function getLevels() {
+    const response = await fetch("levels.json");
+    return await response.json();
+}
 
 function userDoc(uid) {
     return doc(db, "family-framed-users", uid);
