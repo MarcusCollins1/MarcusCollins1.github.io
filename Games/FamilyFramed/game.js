@@ -47,6 +47,7 @@ const LEVELS = await getLevels();
 let currentUser = null;
 let todaysLevel = null;
 let midnightTimer = null;
+let currentPicNum = null;
 
 async function getLevels() {
     const response = await fetch("levels.json");
@@ -109,6 +110,15 @@ function renderLevel(level) {
     }
     statusText.textContent = `Today's level: ${localDateKey()}`;
     gameArea.classList.remove("hidden");
+    currentPicNum = 1;
+    renderPicture();
+}
+
+function renderPicture() {
+    if (!currentPicNum) return;
+    if (!(1 <= currentPicNum && currentPicNum <= 6)) return;
+
+    imgBox.src = `Images/${todaysLevel}/${currentPicNum}.jpg`;
 }
 
 function submitGuess() {
