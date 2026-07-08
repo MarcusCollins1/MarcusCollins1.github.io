@@ -366,16 +366,19 @@ async function init() {
         }
 
         currentUser = user;
-        await loadTodaysLevel();
-        // Get current max pic num
         const ref = userDoc(currentUser.uid);
         const snap = await getDoc(ref);
+        // Check if game has already been played today
         if (snap.exists()) {
             if (snap.data().lastDateComplete === localDateKey()) {
                 // Already completed todays
-                gameArea.style = "display: none;";
                 return;
             }
+        }
+        // Load level
+        await loadTodaysLevel();
+        // Get current max pic num
+        if (snap.exists()) {
             currentMaxPicNum = snap.data().todaysMaxPicNum;
             currentPicNum = currentMaxPicNum;
             renderPicture();
