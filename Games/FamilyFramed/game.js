@@ -97,7 +97,6 @@ async function ensureUserProgress(uid) {
             dailyLevelDate: "",
             dailyLevelId: "",
             lastDateComplete: "",
-            todaysMaxPicNum: 1,
             todaysGuesses: []
         };
         await setDoc(ref, initialData);
@@ -197,7 +196,6 @@ function submitGuess() {
         } else {
             currentMaxPicNum ++;
             currentPicNum = currentMaxPicNum;
-            updateTodaysMaxPicNum();
             addPreviousGuess();
             addGuessToTodaysGuesses("");
             renderPicture();
@@ -214,7 +212,6 @@ function submitGuess() {
             } else {
                 currentMaxPicNum++;
                 currentPicNum = currentMaxPicNum;
-                updateTodaysMaxPicNum();
                 addPreviousGuess(guess);
                 addGuessToTodaysGuesses(guess);
                 renderPicture();
@@ -227,13 +224,6 @@ async function addGuessToTodaysGuesses(guess) {
     const ref = userDoc(currentUser.uid);
     await updateDoc(ref, {
         todaysGuesses: arrayUnion(guess)
-    });
-}
-
-async function updateTodaysMaxPicNum() {
-    const ref = userDoc(currentUser.uid);
-    await updateDoc(ref, {
-        todaysMaxPicNum: currentMaxPicNum
     });
 }
 
@@ -253,7 +243,6 @@ async function loadTodaysLevel() {
         await updateDoc(ref, {
             dailyLevelDate: today,
             dailyLevelId: todaysLevel,
-            todaysMaxPicNum: 1,
             todaysGuesses: []
         });
     }
@@ -380,10 +369,11 @@ async function init() {
         await loadTodaysLevel();
         // Get current max pic num
         if (snap.exists()) {
-            currentMaxPicNum = snap.data().todaysMaxPicNum;
+            const guesses = snap.data().todaysGuesses;
+            currentMaxPicNum = guesses.length+1;
             currentPicNum = currentMaxPicNum;
             renderPicture();
-            snap.data().todaysGuesses.forEach(guess => {
+            guesses.forEach(guess => {
                 if (guess === "") {
                     addPreviousGuess();
                 } else {
