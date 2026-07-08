@@ -123,7 +123,7 @@ function renderLevel(level) {
         return;
     }
     statusText.textContent = `Today's level: ${localDateKey()}`;
-    gameArea.classList.remove("hidden");
+    gameArea.style = "";
     currentMaxPicNum = 1;
     currentPicNum = 1;
     renderPicture();
