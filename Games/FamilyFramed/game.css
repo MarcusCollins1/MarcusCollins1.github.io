@@ -90,9 +90,8 @@ button:hover {
 }
 #imgBtnContainer button {
     margin: 5px;
-    background: white;
     color: black;
-    border: 1px solid black;
+    border: 1px solid grey;
     border-radius: 3px;
 }
 #searchContainer {

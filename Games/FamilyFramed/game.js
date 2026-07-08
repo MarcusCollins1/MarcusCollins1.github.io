@@ -131,6 +131,7 @@ function renderPicture() {
     if (!(1 <= currentPicNum && currentPicNum <= 6)) return;
 
     imgBox.src = `Images/${todaysLevel}/${currentPicNum}.jpg`;
+    updateImgBtns();
 }
 
 function addPreviousGuess(guess = null, isCorrect = false) {
@@ -287,6 +288,31 @@ if (submitBtn) {
         submitGuess();
     });
 }
+
+imgBtns.b1.addEventListener("click", () => {
+    currentPicNum = 1;
+    renderPicture();
+});
+imgBtns.b2.addEventListener("click", () => {
+    currentPicNum = 2;
+    renderPicture();
+});
+imgBtns.b3.addEventListener("click", () => {
+    currentPicNum = 3;
+    renderPicture();
+});
+imgBtns.b4.addEventListener("click", () => {
+    currentPicNum = 4;
+    renderPicture();
+});
+imgBtns.b5.addEventListener("click", () => {
+    currentPicNum = 5;
+    renderPicture();
+});
+imgBtns.b6.addEventListener("click", () => {
+    currentPicNum = 6;
+    renderPicture();
+});
 
 async function init() {
     try {
