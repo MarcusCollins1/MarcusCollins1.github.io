@@ -96,7 +96,8 @@ async function ensureUserProgress(uid) {
             completedLevelIds: {},
             dailyLevelDate: "",
             dailyLevelId: "",
-            lastDateComplete: ""
+            lastDateComplete: "",
+            todaysMaxPicNum: 1
         };
         await setDoc(ref, initialData);
         return initialData;
@@ -187,6 +188,7 @@ function submitGuess() {
         } else {
             currentMaxPicNum ++;
             currentPicNum = currentMaxPicNum;
+            updateTodaysMaxPicNum();
             addPreviousGuess();
             renderPicture();
         }
@@ -202,11 +204,19 @@ function submitGuess() {
             } else {
                 currentMaxPicNum++;
                 currentPicNum = currentMaxPicNum;
+                updateTodaysMaxPicNum();
                 addPreviousGuess(guess);
                 renderPicture();
             }
         }
     }
+}
+
+async function updateTodaysMaxPicNum() {
+    const ref = userDoc(currentUser.uid);
+    await updateDoc(ref, {
+        todaysMaxPicNum: currentMaxPicNum
+    });
 }
 
 async function loadTodaysLevel() {
@@ -335,6 +345,14 @@ async function init() {
 
         currentUser = user;
         await loadTodaysLevel();
+        // Get current max pic num
+        const ref = userDoc(currentUser.uid);
+        const snap = await getDoc(ref);
+        if (snap.exists) {
+            currentMaxPicNum = snap.todaysMaxPicNum;
+            currentPicNum = currentMaxPicNum;
+            renderPicture();
+        }
     });
 }
 
