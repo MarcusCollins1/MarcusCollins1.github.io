@@ -58,6 +58,7 @@ let todaysLevel = null;
 let midnightTimer = null;
 let currentPicNum = null;
 let currentMaxPicNum = null;
+let playing = true;
 
 async function getLevels() {
     const response = await fetch("levels.json");
@@ -150,7 +151,7 @@ function addPreviousGuess(guess = null, isCorrect = false) {
 }
 
 async function gameOver() {
-
+    playing = false;
 }
 
 async function win(guess) {
@@ -160,6 +161,7 @@ async function win(guess) {
         [`completedLevelIds.${todaysLevel}`]: currentMaxPicNum,
         lastDateComplete: localDateKey()
     });
+    playing = false;
 }
 
 function updateImgBtns() {
@@ -174,7 +176,9 @@ function updateImgBtns() {
 }
 
 function submitGuess() {
+    if (!playing) return;
     const guess = guessInput.value;
+    guessInput.value = "";
     if (guess === "") {
         // Skipped
         if (currentMaxPicNum === 6) {
