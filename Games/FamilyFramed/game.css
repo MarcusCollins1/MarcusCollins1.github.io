@@ -62,6 +62,9 @@ button:hover {
 .skipped {
     font-style: italic;
 }
+.correct {
+    color: lightgreen;
+}
 
 #gameArea {
     display: flex;

@@ -48,6 +48,7 @@ let currentUser = null;
 let todaysLevel = null;
 let midnightTimer = null;
 let currentPicNum = null;
+let currentMaxPicNum = null;
 
 async function getLevels() {
     const response = await fetch("levels.json");
@@ -111,6 +112,7 @@ function renderLevel(level) {
     }
     statusText.textContent = `Today's level: ${localDateKey()}`;
     gameArea.classList.remove("hidden");
+    currentMaxPicNum = 1;
     currentPicNum = 1;
     renderPicture();
 }
@@ -122,10 +124,13 @@ function renderPicture() {
     imgBox.src = `Images/${todaysLevel}/${currentPicNum}.jpg`;
 }
 
-function addPreviousGuess(guess = null) {
+function addPreviousGuess(guess = null, isCorrect = false) {
     const prevGuessEl = document.createElement("p");
     prevGuessEl.classList.add("previous-guess");
-    if (guess === null) {
+    if (isCorrect) {
+        prevGuessEl.classList.add("correct");
+        prevGuessEl.textContent = guess;
+    } else if (guess === null) {
         prevGuessEl.classList.add("skipped");
         prevGuessEl.textContent = "Skipped"
     } else {
@@ -134,26 +139,43 @@ function addPreviousGuess(guess = null) {
     previousGuessesContainer.appendChild(prevGuessEl);
 }
 
+async function gameOver() {
+
+}
+
+async function win(guess) {
+    addPreviousGuess(guess, true);
+    const ref = userDoc(currentUser.uid);
+    await updateDoc(ref, {
+        [`completedLevelIds.${todaysLevel}`]: currentMaxPicNum
+    });
+}
+
 function submitGuess() {
     const guess = guessInput.value;
     if (guess === "") {
         // Skipped
-        if (currentPicNum === 6) {
+        if (currentMaxPicNum === 6) {
             // Last guess used game over
+            gameOver();
         } else {
-            currentPicNum ++;
+            currentMaxPicNum ++;
+            currentPicNum = currentMaxPicNum;
             addPreviousGuess();
             renderPicture();
         }
     } else if (LEVELS.includes(guess)) {
         if (guess === todaysLevel) {
             // Correct
+            win(guess);
         } else {
             // Incorrect
-            if (currentPicNum === 6) {
+            if (currentMaxPicNum === 6) {
                 // Last guess used game over
+                gameOver();
             } else {
-                currentPicNum++;
+                currentMaxPicNum++;
+                currentPicNum = currentMaxPicNum;
                 addPreviousGuess(guess);
                 renderPicture();
             }
