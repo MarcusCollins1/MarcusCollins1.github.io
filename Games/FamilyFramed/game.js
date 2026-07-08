@@ -53,6 +53,10 @@ const guessesRemainingText = document.getElementById("guessesRemainingText");
 
 const LEVELS = await getLevels();
 
+const GUESS_TIME_LIMIT = 15;
+let guessTimerId = null;
+let guessTimeLeft = GUESS_TIME_LIMIT;
+
 let currentUser = null;
 let todaysLevel = null;
 let midnightTimer = null;
@@ -134,6 +138,7 @@ function renderPicture() {
 
     imgBox.src = `Images/${todaysLevel}/${currentPicNum}.jpg`;
     updateImgBtns();
+    startGuessTimer();
 }
 
 function addPreviousGuess(guess = null, isCorrect = false) {
@@ -152,6 +157,7 @@ function addPreviousGuess(guess = null, isCorrect = false) {
 }
 
 async function gameOver() {
+    stopGuessTimer();
     const ref = userDoc(currentUser.uid);
     await updateDoc(ref, {
         [`completedLevelIds.${todaysLevel}`]: 7,
@@ -161,6 +167,7 @@ async function gameOver() {
 }
 
 async function win(guess) {
+    stopGuessTimer();
     addPreviousGuess(guess, true);
     addGuessToTodaysGuesses(guess);
     const ref = userDoc(currentUser.uid);
@@ -184,40 +191,56 @@ function updateImgBtns() {
     imgBtnContainer.children[currentPicNum-1].classList.add("selected");
 }
 
-function submitGuess() {
+async function submitGuess() {
     if (!playing) return;
+
+    stopGuessTimer();
+
     const guess = guessInput.value;
     guessInput.value = "";
+
     if (guess === "") {
         // Skipped
-        if (currentMaxPicNum === 6) {
-            // Last guess used game over
-            gameOver();
-        } else {
-            currentMaxPicNum ++;
-            currentPicNum = currentMaxPicNum;
-            addPreviousGuess();
-            addGuessToTodaysGuesses("");
-            renderPicture();
-        }
-    } else if (LEVELS.includes(guess)) {
+        await skipCurrentGuess();
+        return;
+    }
+    
+    if (LEVELS.includes(guess)) {
         if (guess === todaysLevel) {
             // Correct
-            win(guess);
+            await win(guess);
+            return;
         } else {
             // Incorrect
             if (currentMaxPicNum === 6) {
                 // Last guess used game over
-                gameOver();
+                await gameOver();
             } else {
                 currentMaxPicNum++;
                 currentPicNum = currentMaxPicNum;
                 addPreviousGuess(guess);
-                addGuessToTodaysGuesses(guess);
+                await addGuessToTodaysGuesses(guess);
                 renderPicture();
             }
         }
+    } else {
+        startGuessTimer();
     }
+}
+
+async function skipCurrentGuess() {
+    if (!playing) return;
+
+    if (currentMaxPicNum === 6) {
+        await gameOver();
+        return;
+    }
+
+    currentMaxPicNum++;
+    currentPicNum = currentMaxPicNum;
+    addPreviousGuess();
+    await addGuessToTodaysGuesses("");
+    renderPicture();
 }
 
 async function addGuessToTodaysGuesses(guess) {
@@ -270,6 +293,33 @@ async function completeCurrentLevel() {
     });
 
     statusText.textContent = "Level completed. Come back tomorrow for the next one.";
+}
+
+function updateTimerText() {
+    timerText.textContent = `${guessTimeLeft}s`;
+}
+
+function stopGuessTimer() {
+    if (guessTimerId) {
+        clearInterval(guessTimerId);
+        guessTimerId = null;
+    }
+}
+
+function startGuessTimer() {
+    stopGuessTimer();
+    guessTimeLeft = GUESS_TIME_LIMIT;
+    updateTimerText();
+
+    guessTimerId = setInterval(async () => {
+        guessTimeLeft--;
+        updateTimerText();
+
+        if (guessTimeLeft <= 0) {
+            stopGuessTimer();
+            await skipCurrentGuess();
+        }
+    }, 1000);
 }
 
 backBtn.addEventListener("click", () => {
