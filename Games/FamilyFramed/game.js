@@ -97,7 +97,8 @@ async function ensureUserProgress(uid) {
             dailyLevelDate: "",
             dailyLevelId: "",
             lastDateComplete: "",
-            todaysMaxPicNum: 1
+            todaysMaxPicNum: 1,
+            todaysGuesses: []
         };
         await setDoc(ref, initialData);
         return initialData;
@@ -152,6 +153,11 @@ function addPreviousGuess(guess = null, isCorrect = false) {
 }
 
 async function gameOver() {
+    const ref = userDoc(currentUser.uid);
+    await updateDoc(ref, {
+        [`completedLevelIds.${todaysLevel}`]: 7,
+        lastDateComplete: localDateKey()
+    })
     playing = false;
 }
 
@@ -190,6 +196,7 @@ function submitGuess() {
             currentPicNum = currentMaxPicNum;
             updateTodaysMaxPicNum();
             addPreviousGuess();
+            addGuessToTodaysGuesses("");
             renderPicture();
         }
     } else if (LEVELS.includes(guess)) {
@@ -206,10 +213,18 @@ function submitGuess() {
                 currentPicNum = currentMaxPicNum;
                 updateTodaysMaxPicNum();
                 addPreviousGuess(guess);
+                addGuessToTodaysGuesses(guess);
                 renderPicture();
             }
         }
     }
+}
+
+async function addGuessToTodaysGuesses(guess) {
+    const ref = userDoc(currentUser.uid);
+    await updateDoc(ref, {
+        todaysGuesses: arrayUnion(guess)
+    });
 }
 
 async function updateTodaysMaxPicNum() {
@@ -227,12 +242,16 @@ async function loadTodaysLevel() {
     const progress = await ensureUserProgress(currentUser.uid);
 
     if (progress.dailyLevelDate === today && progress.dailyLevelId) {
+        // Load level from name
         todaysLevel = LEVELS.find(level => level === progress.dailyLevelId) || null;
     } else {
+        // Load new level
         todaysLevel = pickTodaysLevel(progress);
         await updateDoc(ref, {
             dailyLevelDate: today,
-            dailyLevelId: todaysLevel
+            dailyLevelId: todaysLevel,
+            todaysMaxPicNum: 1,
+            todaysGuesses: []
         });
     }
 
@@ -349,9 +368,20 @@ async function init() {
         const ref = userDoc(currentUser.uid);
         const snap = await getDoc(ref);
         if (snap.exists) {
+            if (snap.data().lastDateComplete === localDateKey()) {
+                // Already completed todays
+                gameArea.classList.add("hidden");
+            }
             currentMaxPicNum = snap.data().todaysMaxPicNum;
             currentPicNum = currentMaxPicNum;
             renderPicture();
+            snap.data().todaysGuesses.forEach(guess => {
+                if (guess === "") {
+                    addPreviousGuess();
+                } else {
+                    addPreviousGuess(guess);
+                }
+            });
         }
     });
 }
