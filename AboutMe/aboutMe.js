@@ -1,6 +1,24 @@
 const reveals = document.querySelectorAll(".reveal");
 const navLinks = document.querySelectorAll("nav a");
+const carousel = document.getElementById("portraitCarousel");
 
+if (carousel) {
+    const slides = carousel.querySelectorAll(".slide");
+
+    carousel.addEventListener("scroll", () => {
+        // optional: add subtle fade/scale logic here later
+    });
+    
+    // optional keyboard support
+    carousel.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight") {
+            carousel.scrollBy({ left: carousel.clientWidth, behavior: "smooth" });
+        }
+        if (e.key === "ArrowLeft") {
+            carousel.scrollBy({ left: -carousel.clientWidth, behavior: "smooth" });
+        }
+    });
+}
 
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -27,13 +45,3 @@ const sectionObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll("section").forEach(sec => {
     sectionObserver.observe(sec);
 });
-
-document.getElementById("stat1").addEventListener("click", () => {
-    location.href = "#about";
-});
-document.getElementById("stat2").addEventListener("click", () => {
-    location.href = "#skills";
-});;
-document.getElementById("stat3").addEventListener("click", () => {
-    location.href = "#contact";
-});;
