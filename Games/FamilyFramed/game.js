@@ -372,6 +372,7 @@ async function init() {
         if (snap.exists()) {
             if (snap.data().lastDateComplete === localDateKey()) {
                 // Already completed todays
+                statusText.textContent = "You have already played for today. Come back tomorrow."
                 return;
             }
         }
