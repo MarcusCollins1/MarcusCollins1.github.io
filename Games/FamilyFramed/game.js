@@ -308,6 +308,7 @@ function stopGuessTimer() {
 
 function startGuessTimer() {
     stopGuessTimer();
+    if (!playing) return;
     guessTimeLeft = GUESS_TIME_LIMIT;
     updateTimerText();
 
