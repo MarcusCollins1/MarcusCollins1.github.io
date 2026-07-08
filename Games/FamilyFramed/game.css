@@ -15,7 +15,7 @@ button {
     cursor: pointer;
     margin: 4px;
 }
-button:hover {
+button:not(:disabled):hover {
     background-color: lightcoral;
 }
 
