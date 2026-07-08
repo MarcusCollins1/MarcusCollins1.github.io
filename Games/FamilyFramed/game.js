@@ -371,7 +371,7 @@ async function init() {
         if (snap.exists()) {
             if (snap.data().lastDateComplete === localDateKey()) {
                 // Already completed todays
-                gameArea.classList.add("hidden");
+                gameArea.style = "display: none;";
                 return;
             }
             currentMaxPicNum = snap.data().todaysMaxPicNum;
