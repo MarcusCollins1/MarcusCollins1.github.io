@@ -8,6 +8,34 @@
     <link rel="icon" type="image/ico" href="familyFramed.ico">
 </head>
 <body>
+    <h1 class="title">Family Framed Stats</h1>
 
+    <p id="statusText">Loading...</p>
+
+    <div id="statsGrid" class="stats-grid hidden">
+        <div class="stat-card">
+            <div class="stat-label">Played</div>
+            <div id="playedStat" class="stat-value">0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Won</div>
+            <div id="wonStat" class="stat-value">0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">% Won</div>
+            <div id="percentStat" class="stat-value">0%</div>
+        </div>
+
+        <div id="distributionSection" class="distribution-section hidden">
+            <h2 class="section-title">Win Distribution</h2>
+            <div id="distibutionBars" class="distribution-bars"></div>
+        </div>
+
+        <button id="logoutBtn">Logout</button>
+    </div>
+
+    <script type="module" src="stats.js"></script>
 </body>
 </html>
