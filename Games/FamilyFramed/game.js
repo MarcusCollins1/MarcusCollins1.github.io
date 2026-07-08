@@ -163,6 +163,7 @@ async function gameOver() {
 
 async function win(guess) {
     addPreviousGuess(guess, true);
+    addGuessToTodaysGuesses(guess);
     const ref = userDoc(currentUser.uid);
     await updateDoc(ref, {
         [`completedLevelIds.${todaysLevel}`]: currentMaxPicNum,
