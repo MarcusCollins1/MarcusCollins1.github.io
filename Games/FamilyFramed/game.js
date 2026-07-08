@@ -165,10 +165,12 @@ async function win(guess) {
 function updateImgBtns() {
     for (const child of imgBtnContainer.children) {
         child.disabled = true;
+        child.classList.remove("selected");
     }
     for (let i = 0; i < currentMaxPicNum; i++) {
         imgBtnContainer.children[i].disabled = false;
     }
+    imgBtnContainer.children[currentPicNum-1].classList.add("selected");
 }
 
 function submitGuess() {

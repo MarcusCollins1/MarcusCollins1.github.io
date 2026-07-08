@@ -65,6 +65,9 @@ button:hover {
 .correct {
     color: lightgreen;
 }
+.selected {
+    background: seagreen;
+}
 
 #gameArea {
     display: flex;
