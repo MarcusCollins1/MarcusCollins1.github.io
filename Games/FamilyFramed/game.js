@@ -367,10 +367,11 @@ async function init() {
         // Get current max pic num
         const ref = userDoc(currentUser.uid);
         const snap = await getDoc(ref);
-        if (snap.exists) {
+        if (snap.exists()) {
             if (snap.data().lastDateComplete === localDateKey()) {
                 // Already completed todays
                 gameArea.classList.add("hidden");
+                return;
             }
             currentMaxPicNum = snap.data().todaysMaxPicNum;
             currentPicNum = currentMaxPicNum;
