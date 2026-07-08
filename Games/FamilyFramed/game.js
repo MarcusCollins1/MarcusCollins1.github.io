@@ -170,6 +170,8 @@ async function win(guess) {
         lastDateComplete: localDateKey()
     });
     playing = false;
+    currentMaxPicNum = 6;
+    updateImgBtns();
 }
 
 function updateImgBtns() {
