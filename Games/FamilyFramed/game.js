@@ -349,7 +349,7 @@ async function init() {
         const ref = userDoc(currentUser.uid);
         const snap = await getDoc(ref);
         if (snap.exists) {
-            currentMaxPicNum = snap.todaysMaxPicNum;
+            currentMaxPicNum = snap.data().todaysMaxPicNum;
             currentPicNum = currentMaxPicNum;
             renderPicture();
         }
