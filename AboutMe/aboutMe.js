@@ -3,10 +3,53 @@ const navLinks = document.querySelectorAll("nav a");
 const carousel = document.getElementById("portraitCarousel");
 
 if (carousel) {
+    // repeat the first picture
+    const firstClone = carousel.firstElementChild.cloneNode(true);
+    carousel.appendChild(firstClone);
+
     const slides = carousel.querySelectorAll(".slide");
+    let current = 0;
+    let autoSlide;
+
+    function goToSlide(index) {
+        current = index % slides.length;
+        carousel.scrollTo({
+            left: current * carousel.clientWidth,
+            behavior: "smooth"
+        });
+    }
+
+    function nextSlide() {
+        current ++;
+        goToSlide(current);
+        // loop back to start
+        if (current === slides.length - 1) {
+            setTimeout(() => {
+                carousel.style.scrollBehavior = "auto";
+                current = 0;
+                carousel.scrollLeft = 0;
+                requestAnimationFrame(() => {
+                    carousel.style.scrollBehavior = "smooth";
+                });
+            }, 500);
+        }
+    }
+
+    function startAutoSlide() {
+        stopAutoSlide();
+        autoSlide = setInterval(nextSlide, 3000);
+    }
+    function stopAutoSlide() {
+        clearInterval(autoSlide);
+    }
+
+    carousel.addEventListener("pointerdown", stopAutoSlide);
+    carousel.addEventListener("pointerup", startAutoSlide);
+    carousel.addEventListener("pointerleave", startAutoSlide);
 
     carousel.addEventListener("scroll", () => {
         // optional: add subtle fade/scale logic here later
+        current = Math.round(carousel.scrollLeft / carousel.clientWidth);
     });
     
     // optional keyboard support
@@ -18,6 +61,7 @@ if (carousel) {
             carousel.scrollBy({ left: -carousel.clientWidth, behavior: "smooth" });
         }
     });
+    startAutoSlide();
 }
 
 const observer = new IntersectionObserver((entries) => {
