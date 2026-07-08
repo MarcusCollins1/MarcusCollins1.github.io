@@ -36,6 +36,15 @@ const gameArea = document.getElementById("gameArea");
 
 const timerText = document.getElementById("timerText");
 const imgBox = document.getElementById("imgBox");
+const imgBtnContainer = document.getElementById("imgBtnContainer");
+const imgBtns = {
+    b1: document.getElementById("imgBtn1"),
+    b2: document.getElementById("imgBtn2"),
+    b3: document.getElementById("imgBtn3"),
+    b4: document.getElementById("imgBtn4"),
+    b5: document.getElementById("imgBtn5"),
+    b6: document.getElementById("imgBtn6")
+}
 const guessInput = document.getElementById("guessInput");
 const suggestions = document.getElementById("suggestions");
 const submitBtn = document.getElementById("submitBtn");
@@ -147,8 +156,18 @@ async function win(guess) {
     addPreviousGuess(guess, true);
     const ref = userDoc(currentUser.uid);
     await updateDoc(ref, {
-        [`completedLevelIds.${todaysLevel}`]: currentMaxPicNum
+        [`completedLevelIds.${todaysLevel}`]: currentMaxPicNum,
+        lastDateComplete: localDateKey()
     });
+}
+
+function updateImgBtns() {
+    for (const child of imgBtnContainer.children) {
+        child.disabled = true;
+    }
+    for (let i = 0; i < currentMaxPicNum; i++) {
+        imgBtnContainer.children[i].disabled = false;
+    }
 }
 
 function submitGuess() {

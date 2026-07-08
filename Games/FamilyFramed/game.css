@@ -84,6 +84,17 @@ button:hover {
 
     margin: 0 0 20px 0;
 }
+#imgBtnContainer {
+    display: flex;
+    flex-direction: row;
+}
+#imgBtnContainer button {
+    margin: 5px;
+    background: white;
+    color: black;
+    border: 1px solid black;
+    border-radius: 3px;
+}
 #searchContainer {
     display: flex;
     align-items: center;
