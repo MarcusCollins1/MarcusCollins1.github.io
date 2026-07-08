@@ -13,9 +13,12 @@ button {
     border-radius: 6px;
     cursor: pointer;
     margin: 4px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 button:hover {
     background-color: lightcoral;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(57, 243, 20, 0.35);
 }
 
 .return-button {
