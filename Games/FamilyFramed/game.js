@@ -419,8 +419,9 @@ async function init() {
         // Load level
         await loadTodaysLevel();
         // Get current max pic num
-        if (snap.exists()) {
-            const guesses = snap.data().todaysGuesses;
+        const snap1 = await getDoc(ref);
+        if (snap1.exists()) {
+            const guesses = snap1.data().todaysGuesses;
             currentMaxPicNum = guesses.length+1;
             currentPicNum = currentMaxPicNum;
             renderPicture();
