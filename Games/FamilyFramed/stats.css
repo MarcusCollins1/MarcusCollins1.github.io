@@ -61,11 +61,15 @@ button:not(:disabled):hover {
 .stats-grid {
     width: min(900px, 92vw);
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
+    align-items: stretch;
 }
 
 .stat-card {
+    width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
     background: #111827;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
