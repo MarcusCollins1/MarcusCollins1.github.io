@@ -4,8 +4,7 @@ import {
     doc,
     getDoc,
     setDoc,
-    updateDoc,
-    arrayUnion
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 import {
     getAuth,
@@ -50,6 +49,11 @@ const suggestions = document.getElementById("suggestions");
 const submitBtn = document.getElementById("submitBtn");
 const previousGuessesContainer = document.getElementById("previousGuessesContainer");
 const guessesRemainingText = document.getElementById("guessesRemainingText");
+
+const resultBox = document.getElementById("resultBox");
+const resultTitle = document.getElementById("resultTitle");
+const resultText = document.getElementById("resultText");
+const resultCloseBtn = document.getElementById("resultCloseBtn");
 
 const LEVELS = await getLevels();
 
@@ -164,6 +168,7 @@ async function gameOver() {
         lastDateComplete: localDateKey()
     })
     playing = false;
+    showResultBox(false, todaysLevel);
 }
 
 async function win(guess) {
@@ -178,6 +183,7 @@ async function win(guess) {
     playing = false;
     currentMaxPicNum = 6;
     updateImgBtns();
+    showResultBox(true, todaysLevel);
 }
 
 function updateImgBtns() {
@@ -245,8 +251,11 @@ async function skipCurrentGuess() {
 
 async function addGuessToTodaysGuesses(guess) {
     const ref = userDoc(currentUser.uid);
+    const snap = await getDoc(ref);
+    const gs = snap.data().todaysGuesses || [];
+    gs.push(guess);
     await updateDoc(ref, {
-        todaysGuesses: arrayUnion(guess)
+        todaysGuesses: gs
     });
 }
 
@@ -284,17 +293,6 @@ function scheduleMidnightRefresh() {
     }, msUntilNextMidnight() + 1000);
 }
 
-async function completeCurrentLevel() {
-    if (!currentUser || !todaysLevel) return;
-
-    const ref = userDoc(currentUser.uid);
-    await updateDoc(ref, {
-        completedLevelIds: arrayUnion(todaysLevel)
-    });
-
-    statusText.textContent = "Level completed. Come back tomorrow for the next one.";
-}
-
 function updateTimerText() {
     timerText.textContent = `${guessTimeLeft}s`;
 }
@@ -321,6 +319,18 @@ function startGuessTimer() {
             await skipCurrentGuess();
         }
     }, 1000);
+}
+
+function showResultBox(isCorrect, correctAnswer) {
+    resultBox.classList.remove("hidden");
+
+    if (isCorrect) {
+        resultTitle.textContent = "Well done!";
+        resultText.textContent = "You got the correct answer.";
+    } else {
+        resultTitle.textContent = "Not quite!";
+        resultText.textContent = `The correct answer was: ${correctAnswer}`;
+    }
 }
 
 backBtn.addEventListener("click", () => {
@@ -390,6 +400,10 @@ imgBtns.b5.addEventListener("click", () => {
 imgBtns.b6.addEventListener("click", () => {
     currentPicNum = 6;
     renderPicture();
+});
+
+resultCloseBtn.addEventListener("click", () => {
+    resultBox.classList.add("hidden");
 });
 
 async function init() {
