@@ -15,7 +15,7 @@ button {
     margin: 4px;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-button:hover {
+button:hover:not(:disabled) {
     background-color: lightcoral;
     transform: translateY(-2px);
 }
@@ -81,16 +81,16 @@ button:hover {
     color: salmon;
 }
 
-#playBtn:hover {
+#playBtn:hover:not(:disabled) {
     box-shadow: 0 8px 12px rgba(57, 243, 20, 0.35);
 }
-#previousGamesBtn:hover {
+#previousGamesBtn:hover:not(:disabled) {
     box-shadow: 0 8px 12px rgba(36, 9, 239, 0.35);
 }
-#statsBtn:hover {
+#statsBtn:hover:not(:disabled) {
     box-shadow: 0 8px 12px rgba(252, 11, 188, 0.35);
 }
-#loginBtn:hover {
+#loginBtn:hover:not(:disabled) {
     box-shadow: 0 8px 12px rgba(252, 12, 12, 0.35);
 }
 
