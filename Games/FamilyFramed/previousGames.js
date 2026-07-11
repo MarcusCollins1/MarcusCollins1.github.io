@@ -59,7 +59,7 @@ backBtn.addEventListener("click", () => {
     location.href = "familyFramed.html";
 });
 
-logoutBtn.addEventListener("click", () => {
+logoutBtn.addEventListener("click", async () => {
     try {
         await signOut(auth);
         location.href = "familyFramed.html";
