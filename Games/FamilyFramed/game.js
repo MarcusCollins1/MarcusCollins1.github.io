@@ -57,7 +57,7 @@ const resultCloseBtn = document.getElementById("resultCloseBtn");
 
 const LEVELS = await getLevels();
 
-const GUESS_TIME_LIMIT = 15;
+const GUESS_TIME_LIMIT = 30;
 let guessTimerId = null;
 let guessTimeLeft = GUESS_TIME_LIMIT;
 
