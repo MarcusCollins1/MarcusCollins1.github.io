@@ -554,3 +554,10 @@ button:hover {
     color: #94a3b8;
     font-size: 0.95rem;
 }
+
+.contact-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 6px;
+}
