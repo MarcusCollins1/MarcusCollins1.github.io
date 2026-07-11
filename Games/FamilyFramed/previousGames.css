@@ -59,10 +59,12 @@ button:not(:disabled):hover {
 }
 
 .level-card {
+    width: min(600px, 90vw);
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 10px;
     background-color: #fff;
+    color: black;
 }
 
 .level-title {
