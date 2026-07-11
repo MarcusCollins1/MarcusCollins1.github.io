@@ -68,7 +68,7 @@ function usernameToEmail(username) {
 
 function setProtectedButtonsEnabled(enabled) {
     playBtn.disabled = !enabled;
-    // previousGamesBtn.disabled = !enabled;
+    previousGamesBtn.disabled = !enabled;
     statsBtn.disabled = !enabled;
 }
 
