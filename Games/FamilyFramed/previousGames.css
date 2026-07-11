@@ -58,7 +58,37 @@ button:not(:disabled):hover {
     margin: 0;
 }
 
+.level-card {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #fff;
+}
 
+.level-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.level-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.level-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+#prevGamesContainer {
+    max-height: min(600px, 80vh);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
 
 .hidden {
     display: none;

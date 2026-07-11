@@ -53,6 +53,30 @@ async function loadPrevGames(user) {
 
 function populatePrevGamesContainer(completedLevelIds) {
     prevGamesContainer.innerHTML = "";
+
+    Object.entries(completedLevelIds).forEach(([levelName, score]) => {
+        const levelCard = document.createElement("div");
+        levelCard.className = "level-card";
+
+        const title = document.createElement("div");
+        title.className = "level-title";
+        title.textContent = levelName;
+
+        const imagesWrap = document.createElement("div");
+        imagesWrap.className = "level-images";
+
+        for (let i = 1; i <= 6; i++) {
+            const img = document.createElement("img");
+            img.src = `Images/${levelName}/${i}.jpg`;
+            img.alt = levelName;
+            img.className = "level-image";
+            imagesWrap.appendChild(img);
+        }
+
+        levelCard.appendChild(title);
+        levelCard.appendChild(imagesWrap);
+        prevGamesContainer.appendChild(levelCard);
+    });
 }
 
 backBtn.addEventListener("click", () => {
