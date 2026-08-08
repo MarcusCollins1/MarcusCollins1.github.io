@@ -82,6 +82,8 @@ button:not(:disabled):hover {
     width: 80px;
     height: 80px;
     object-fit: cover;
+    cursor: pointer;
+    border-radius: 6px;
     transition: transform 0.2s ease;
 }
 
