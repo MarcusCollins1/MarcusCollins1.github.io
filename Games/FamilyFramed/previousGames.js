@@ -74,7 +74,9 @@ function populatePrevGamesContainer(completedLevelIds) {
             img.src = `Images/${levelName}/${i}.jpg`;
             img.alt = levelName;
             img.className = "level-image";
-            imagesWrap.appendChild(img);
+
+            imgWrapper.appendChild(img);
+            imagesWrap.appendChild(imgWrapper);
         }
 
         levelCard.appendChild(title);
