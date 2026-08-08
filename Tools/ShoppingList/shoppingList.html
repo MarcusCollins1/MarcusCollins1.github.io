@@ -10,8 +10,15 @@
 <body>
     <button id="return-button" class="return-button" onclick="location.href='../../tools.html'">← Return</button>
 
-    
+    <h1>Shopping List</h1>
 
-    <script src="shoppingList.js"></script>
+    <form id="itemForm">
+        <input id="itemInput" type="text" placeholder="Add an item..." autocomplete="off" />
+        <button type="submit">Add</button>
+    </form>
+
+    <ul id="itemsList"></ul>
+
+    <script src="shoppingList.js" type="module"></script>
 </body>
 </html>
