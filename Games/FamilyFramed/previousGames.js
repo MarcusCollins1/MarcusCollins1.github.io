@@ -68,7 +68,11 @@ function populatePrevGamesContainer(completedLevelIds) {
         for (let i = 1; i <= 6; i++) {
             const imgWrapper = document.createElement("div");
             imgWrapper.classList = "imgWrapper";
-            imgWrapper.style.setProperty("--filter-color", "#00ff88");
+            if (i < score) {
+                imgWrapper.style.setProperty("--filter-color", "#c92121");
+            } else if (i === score) {
+                imgWrapper.style.setProperty("--filter-color", "#00ff88");
+            }
 
             const img = document.createElement("img");
             img.src = `Images/${levelName}/${i}.jpg`;
