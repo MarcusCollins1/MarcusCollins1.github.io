@@ -183,7 +183,9 @@ async function updateTodaysScore() {
     // Check current score
     const snap = await getDoc(ref);
     if (snap.exists()) {
-        const currentScore = snap.data().completedLevelIds?.[todaysLevel] || 7;
+        const currentScore = snap.data().completedLevelIds?.[todaysLevel] ?? 7;
+    } else {
+        console.error("Snap not found");
     }
     if (currentMaxPicNum < currentScore) {
         await updateDoc(ref, {
