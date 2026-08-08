@@ -31,6 +31,10 @@ const logoutBtn = document.getElementById("logoutBtn");
 const statusText = document.getElementById("statusText");
 const prevGamesContainer = document.getElementById("prevGamesContainer");
 
+const popup = document.getElementById("imagePopup");
+const popupImg = document.getElementById("popupImage");
+const closePopup = document.getElementById("closePopup");
+
 function userDoc(uid) {
     return doc(db, "family-framed-users", uid);
 }
@@ -79,6 +83,11 @@ function populatePrevGamesContainer(completedLevelIds) {
             img.alt = levelName;
             img.className = "level-image";
 
+            img.addEventListener("click", () => {
+                popupImg.src = img.src;
+                popup.style.display = "flex";
+            });
+
             imgWrapper.appendChild(img);
             imagesWrap.appendChild(imgWrapper);
         }
@@ -88,6 +97,10 @@ function populatePrevGamesContainer(completedLevelIds) {
         prevGamesContainer.appendChild(levelCard);
     });
 }
+
+closePopup.addEventListener("click", () => {
+    popup.style.display = "none";
+});
 
 backBtn.addEventListener("click", () => {
     location.href = "familyFramed.html";

@@ -84,13 +84,13 @@ button:not(:disabled):hover {
     object-fit: cover;
     transition: transform 0.2s ease;
 }
-.level-image:hover {
-    transform: scale(1.05);
-}
 
 .imgWrapper {
     position: relative;
     display: inline-block;
+}
+.imgWrapper:hover {
+    transform: scale(1.05);
 }
 .imgWrapper::after {
     content: "";
@@ -107,6 +107,34 @@ button:not(:disabled):hover {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+#imagePopup {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.8);
+
+    justify-content: center;
+    align-items: center;
+}
+
+#popupImage {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+#closePopup {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
 }
 
 .hidden {
