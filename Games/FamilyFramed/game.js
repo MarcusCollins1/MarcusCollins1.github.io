@@ -182,8 +182,9 @@ async function updateTodaysScore() {
     const ref = userDoc(currentUser.uid);
     // Check current score
     const snap = await getDoc(ref);
+    let currentScore;
     if (snap.exists()) {
-        const currentScore = snap.data().completedLevelIds?.[todaysLevel] ?? 7;
+        currentScore = snap.data().completedLevelIds?.[todaysLevel] ?? 7;
     } else {
         console.error("Snap not found");
     }
