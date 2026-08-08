@@ -84,6 +84,19 @@ button:not(:disabled):hover {
     object-fit: cover;
 }
 
+.imgWrapper {
+    position: relative;
+    display: inline-block;
+}
+.imgWrapper::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--filter-color);
+    opacity: 0.4;
+    pointer-events: none;
+}
+
 #prevGamesContainer {
     max-height: min(600px, 80vh);
     overflow-y: auto;

@@ -66,6 +66,10 @@ function populatePrevGamesContainer(completedLevelIds) {
         imagesWrap.className = "level-images";
 
         for (let i = 1; i <= 6; i++) {
+            const imgWrapper = document.createElement("div");
+            imgWrapper.classList = "imgWrapper";
+            imgWrapper.style.setProperty("--filter-color", "#00ff88");
+
             const img = document.createElement("img");
             img.src = `Images/${levelName}/${i}.jpg`;
             img.alt = levelName;
