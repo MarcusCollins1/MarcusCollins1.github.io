@@ -90,6 +90,7 @@ button:not(:disabled):hover {
 .imgWrapper {
     position: relative;
     display: inline-block;
+    border-radius: 6px;
 }
 .imgWrapper:hover {
     transform: scale(1.05);
