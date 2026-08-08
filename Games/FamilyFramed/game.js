@@ -162,7 +162,7 @@ function addPreviousGuess(guess = null, isCorrect = false) {
 
 async function gameOver() {
     stopGuessTimer();
-    updateTodaysScore();
+    updateTodaysScore(currentMaxPicNum);
     playing = false;
     showResultBox(false, todaysLevel);
 }
@@ -171,14 +171,14 @@ async function win(guess) {
     stopGuessTimer();
     addPreviousGuess(guess, true);
     addGuessToTodaysGuesses(guess);
-    updateTodaysScore();
+    updateTodaysScore(currentMaxPicNum);
     playing = false;
     currentMaxPicNum = 6;
     updateImgBtns();
     showResultBox(true, todaysLevel);
 }
 
-async function updateTodaysScore() {
+async function updateTodaysScore(score) {
     const ref = userDoc(currentUser.uid);
     // Check current score
     const snap = await getDoc(ref);
@@ -190,7 +190,7 @@ async function updateTodaysScore() {
     }
     if (currentMaxPicNum < currentScore) {
         await updateDoc(ref, {
-            [`completedLevelIds.${todaysLevel}`]: currentMaxPicNum,
+            [`completedLevelIds.${todaysLevel}`]: score,
             lastDateComplete: localDateKey()
         });
     } else {
