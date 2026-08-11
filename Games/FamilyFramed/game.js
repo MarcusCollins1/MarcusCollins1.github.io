@@ -162,7 +162,7 @@ function addPreviousGuess(guess = null, isCorrect = false) {
 
 async function gameOver() {
     stopGuessTimer();
-    updateTodaysScore(currentMaxPicNum);
+    updateTodaysScore(7);
     playing = false;
     showResultBox(false, todaysLevel);
 }
