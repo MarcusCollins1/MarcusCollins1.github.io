@@ -136,7 +136,7 @@ function listenToGame() {
     // PLAYERS
     // -----------------------------------
 
-    const playersRef = collection(db, "universityChallengeGames", currentGameId, "players");
+    const playersRef = collection(db, "universityChallengeGames", currentGameId, "Players");
 
     onSnapshot(playersRef, (snapshot) => {
         teamAPlayers.innerHTML = "";
