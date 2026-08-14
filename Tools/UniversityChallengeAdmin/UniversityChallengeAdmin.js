@@ -125,7 +125,7 @@ function listenToGame() {
 
         if (game.winner) {
             winnerName.textContent = game.winner.name;
-            winnerTeam.textContent = game.winner.team;
+            winnerTeam.textContent = "Team " + game.winner.team;
         } else {
             winnerName.textContent = "Nobody";
             winnerTeam.textContent = "-";
