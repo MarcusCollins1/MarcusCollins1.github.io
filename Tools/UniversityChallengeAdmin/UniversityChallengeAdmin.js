@@ -100,8 +100,11 @@ createGameBtn.addEventListener("click", async () => {
             const players = snapshot.val();
             teamAPlayers.innerHTML = "";
             teamBPlayers.innerHTML = "";
-            players.forEach((player) => {
-                if (typeof player === "boolean") continue;
+
+            if (!players) return;
+
+            Object.values(players).forEach((player) => {
+                if (typeof player === "boolean") return;
                 const li = document.createElement("li");
                 li.textContent = player.name;
                 if (player.team === "A") {
