@@ -98,7 +98,7 @@ createGameBtn.addEventListener("click", async () => {
         currentGameId = gameRef.id;
 
         const presenceRef = ref(realtimeDb, `presence/${currentGameId}`);
-        onValue(presenceRef, (snapshot) => {
+        onValue(presenceRef, async (snapshot) => {
             const presence = snapshot.val() || {};
             
             const connectedPlayerIds = new Set(
