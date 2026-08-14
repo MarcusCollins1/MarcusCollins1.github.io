@@ -14,10 +14,18 @@ import {
     getDocs,
     addDoc,
     doc,
+    deleteDoc,
     onSnapshot,
     runTransaction,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+import {
+    getDatabase,
+    ref,
+    onDisconnect,
+    set
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 // ==========================================
 // FIREBASE CONFIG
@@ -35,6 +43,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const realtimeDb = getDatabase(app);
 
 // ==========================================
 // HTML ELEMENTS
@@ -108,6 +117,10 @@ joinBtn.addEventListener("click", async () => {
 
         return;
     }
+    if (name === "admin") {
+        errorMessage.textContent = "'admin' is not an allowed name";
+        return;
+    }
 
     joinBtn.disabled = true;
 
@@ -138,6 +151,15 @@ joinBtn.addEventListener("click", async () => {
         currentPlayerId = playerDoc.id;
         currentPlayerName = name;
         currentTeam = team;
+
+        // Update realtime database
+        const presenceRef = ref(realtimeDb, `presence/${currentGameId}/${currentPlayerId}`);
+        await onDisconnect(presenceRef).remove();
+
+        await set(presenceRef, {
+            name: currentPlayerName,
+            team: currentTeam
+        });
 
         // Update UI
         gameCodeDisplay.textContent = "Game: " + code;

@@ -9,7 +9,15 @@ import {
     onSnapshot,
     doc,
     serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+import {
+    getDatabase,
+    ref,
+    onDisconnect,
+    set,
+    onValue
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 // -----------------------------------
 // FIREBASE CONFIG
@@ -27,6 +35,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
+
+const realtimeDb = getDatabase(app);
 
 // -----------------------------------
 // HTML ELEMENTS
@@ -83,6 +93,15 @@ createGameBtn.addEventListener("click", async () => {
         );
 
         currentGameId = gameRef.id;
+
+        const presenceRef = ref(realtimeDb, `presence/${currentGameId}`);
+        onValue(presenceRef, (snapshot) => {
+            const players = snapshot.val();
+            console.log(players);
+        });
+        const adminPresenceRef = ref(realtimeDb, `presence/${currentGameId}/admin`);
+        await onDisconnect(adminPresenceRef).remove();
+        await set(adminPresenceRef, true);
 
         gameCode.textContent = code;
         createPanel.style.display = "none";
