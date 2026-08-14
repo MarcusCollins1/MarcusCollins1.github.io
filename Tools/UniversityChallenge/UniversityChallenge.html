@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>University Challenge</title>
+
+    <link rel="stylesheet" href="UniversityChallenge.css">
+</head>
+<body>
+    <div class="container">
+
+        <h1>University Challenge</h1>
+
+        <!-- ============================= -->
+        <!-- JOIN GAME -->
+        <!-- ============================= -->
+
+        <div id="joinPanel" class="panel">
+
+            <label for="gameCodeInput">
+                Game Code
+            </label>
+
+            <input
+                id="gameCodeInput"
+                type="text"
+                placeholder="123456"
+                maxlength="6">
+
+            <label for="nameInput">
+                Your Name
+            </label>
+
+            <input
+                id="nameInput",
+                type="text",
+                placeholder="Your name"
+            >
+
+            <label for="teamSelect">
+                Team
+            </label>
+            <select id="teamSelect">
+                <option value="A">Team A</option>
+                <option value="B">Team B</option>
+            </select>
+
+            <button id="joinBtn">Join Game</button>
+
+            <div id="errorMessage" class="error"></div>
+        </div>
+
+        <!-- ============================= -->
+        <!-- GAME -->
+        <!-- ============================= -->
+
+        <div id="gamePanel" class="panel">
+            <div id="gameCodeDisplay">
+                Game: ------
+            </div>
+
+            <div id="playerInfo">You</div>
+
+            <div id="status">Waiting...</div>
+
+            <button id="buzzBtn">BUZZ</button>
+
+            <div id="winner"></div>
+
+            <div id="winnerTeam"></div>
+        </div>
+    </div>
+
+    <script type="module" src="UniversityChallenge.js"></script>
+</body>
+</html>

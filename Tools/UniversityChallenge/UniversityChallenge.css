@@ -1,0 +1,144 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: white;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.panel {
+    background: #1f2937;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+#joinBtn {
+    width: 100%;
+    background: #2563eb;
+    color: white;
+}
+
+#joinBtn:hover {
+    background: #1d4ed8;
+}
+
+#joinPanel {
+    display: block;
+}
+
+#gamePanel {
+    display: none;
+    text-align: center;
+}
+
+#gameCodeDisplay {
+    font-size: 20px;
+    color: #9ca3af;
+    margin-bottom: 10px;
+}
+
+#playerInfo {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+#status {
+    min-height: 30px;
+    font-size: 20px;
+    margin-bottom: 25px;
+}
+
+#buzzBtn {
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+
+    background: #dc2626;
+    color: white;
+
+    font-size: 40px;
+    font-weight: bold;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+
+    transition: transform 0.1s ease, background 0.2s ease;
+}
+
+#buzzBtn:hover:not(:disabled) {
+    transform: scale(1.05);
+    background: #ef4444;
+}
+
+#buzzBtn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+#buzzBtn:disabled {
+    background: #4b5563;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+#winner {
+    font-size: 30px;
+    font-weight: bold;
+    margin-top: 30px;
+}
+
+#winnerTeam {
+    font-size: 20px;
+    color: #9ca3af;
+    margin-top: 8px;
+}
+
+.error {
+    color: #f87171;
+    margin-top: 10px;
+}
+
+@media (max-width: 500px) {
+    #buzzBtn {
+        width: 220px;
+        height: 220x;
+        font-size: 32px;
+    }
+}

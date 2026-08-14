@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>University Challenge - Admin</title>
+
+    <link rel="stylesheet" href="UniversityChallengeAdmin.css">
+</head>
+<body>
+    <div class="container">
+
+        <!-- Create game -->
+        <div id="createPanel" class="panel">
+            <button id="createGameBtn">
+                Create Game
+            </button>
+        </div>
+
+        <!-- Game information -->
+        <div id="gamePanel" class="panel game-code">
+            <p>Game Code</p>
+
+            <div id="gameCode"></div>
+
+            <p>Give this code to the players</p>
+          </div>
+
+        <!-- Players -->
+        <div id="playersPanel" class="panel">
+
+            <h2>Players</h2>
+
+            <div class="teams">
+                <div class="team">
+                    <h2>Team A</h2>
+
+                    <ul id="teamAPlayers">
+                        <!-- Players will appear here -->
+                    </ul>
+                </div>
+
+                <div class="team">
+                    <h2>Team B</h2>
+
+                    <ul id="teamBPlayers">
+                        <!-- Players will appear here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Winner -->
+         <div id="winnerPanel" class="panel winner">
+            <div>FIRST TO BUZZ</div>
+
+            <div id="winnerName">Nobody</div>
+
+            <div id="winnerTeam">-</div>
+
+            <button id="resetBtn">Reset Buzzers</button>
+         </div>
+    </div>
+
+    <script type="module" src="UniversityChallengeAdmin.js"></script>
+</body>
+</html>
