@@ -5,6 +5,8 @@ import {
     getFirestore,
     collection,
     addDoc,
+    getDocs,
+    deleteDoc,
     updateDoc,
     onSnapshot,
     doc,
@@ -97,26 +99,38 @@ createGameBtn.addEventListener("click", async () => {
 
         const presenceRef = ref(realtimeDb, `presence/${currentGameId}`);
         onValue(presenceRef, (snapshot) => {
-            const players = snapshot.val();
-            teamAPlayers.innerHTML = "";
-            teamBPlayers.innerHTML = "";
+            const presence = snapshot.val() || {};
+            
+            const connectedPlayerIds = new Set(
+                Object.keys(presence).filter(
+                    key => key !== "admin"
+                )
+            );
 
-            if (!players) return;
+            const playersRef = collection(db, "universityChallengeGames", currentGameId, "Players");
+            const firestorePlayers = await getDocs(playersRef);
+            for (const playerSnapshot of firestorePlayers.docs) {
+                const playerId = playerSnapshot.id;
 
-            Object.values(players).forEach((player) => {
-                if (typeof player === "boolean") return;
-                const li = document.createElement("li");
-                li.textContent = player.name;
-                if (player.team === "A") {
-                    teamAPlayers.appendChild(li);
-                } else if (player.team === "B") {
-                    teamBPlayers.appendChild(li);
+                if (!connectedPlayerIds.has(playerId)) {
+                    await deleteDoc(
+                        doc(
+                            db, "universityChallengeGames", currentGameId, "Players", playerId
+                        )
+                    );
                 }
-            });
+            }
         });
         const adminPresenceRef = ref(realtimeDb, `presence/${currentGameId}/admin`);
         await onDisconnect(adminPresenceRef).remove();
         await set(adminPresenceRef, true);
+        
+        onValue(adminPresenceRef, async (snapshot) => {
+            if (snapshot.exists()) {
+                return;
+            }
+            await deleteGame(currentGameId);
+        })
 
         gameCode.textContent = code;
         createPanel.style.display = "none";
@@ -207,3 +221,21 @@ resetBtn.addEventListener("click", async () => {
         console.error("Error resetting buzzers:", error);
     }
 });
+
+// -----------------------------------
+// DELETE GAME
+// -----------------------------------
+
+async function deleteGame(gameId) {
+    try {
+        const playersRef = collection(db, "universityChallengeGames", gameId, "Players");
+        const playersSnapshot = await getDocs(playersRef);
+        for (const playerSnapshot of playerSnapshot.docs) {
+            await deleteDoc(playerSnapshot.ref);
+        }
+        const gameRef = doc(db, "universityChallengeGames", gameId);
+        await deleteDoc(gameRef);
+    } catch (error) {
+        console.error("Error deleting game:", error);
+    }
+}
