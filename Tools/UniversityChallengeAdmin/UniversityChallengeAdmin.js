@@ -98,7 +98,18 @@ createGameBtn.addEventListener("click", async () => {
         const presenceRef = ref(realtimeDb, `presence/${currentGameId}`);
         onValue(presenceRef, (snapshot) => {
             const players = snapshot.val();
-            console.log(players);
+            teamAPlayers.innerHTML = "";
+            teamBPlayers.innerHTML = "";
+            players.forEach((player) => {
+                if (typeof player === "boolean") continue;
+                const li = document.createElement("li");
+                li.textContent = player.name;
+                if (player.team === "A") {
+                    teamAPlayers.appendChild(li);
+                } else if (player.team === "B") {
+                    teamBPlayers.appendChild(li);
+                }
+            });
         });
         const adminPresenceRef = ref(realtimeDb, `presence/${currentGameId}/admin`);
         await onDisconnect(adminPresenceRef).remove();

@@ -118,10 +118,6 @@ joinBtn.addEventListener("click", async () => {
 
         return;
     }
-    if (name === "admin") {
-        errorMessage.textContent = "'admin' is not an allowed name";
-        return;
-    }
 
     joinBtn.disabled = true;
 
