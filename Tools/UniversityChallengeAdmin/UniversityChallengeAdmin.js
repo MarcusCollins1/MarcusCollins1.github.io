@@ -32,7 +32,7 @@ const db = getFirestore(app);
 // HTML ELEMENTS
 // -----------------------------------
 
-const createGameBtn = document.getElementById("createElementBtn");
+const createGameBtn = document.getElementById("createGameBtn");
 const gameCode = document.getElementById("gameCode");
 const createPanel = document.getElementById("createPanel");
 const gamePanel = document.getElementById("gamePanel");
