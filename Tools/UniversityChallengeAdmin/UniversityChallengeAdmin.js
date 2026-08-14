@@ -113,7 +113,7 @@ function listenToGame() {
     const gameRef = doc(db, "universityChallengeGames", currentGameId);
 
     onSnapshot(gameRef, (snapshot) => {
-        if (!snapshot.exisits()) {
+        if (!snapshot.exists()) {
             return;
         }
 
