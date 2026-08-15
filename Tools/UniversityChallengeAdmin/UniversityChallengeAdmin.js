@@ -51,7 +51,7 @@ const gameCode = document.getElementById("gameCode");
 const hideGameCodeBtn = document.getElementById("hideGameCodeBtn");
 const createPanel = document.getElementById("createPanel");
 const gamePanel = document.getElementById("gamePanel");
-const playersPanel = document.getElementById("playersPanel");
+const teamsPanel = document.getElementById("teamsPanel");
 const winnerPanel = document.getElementById("winnerPanel");
 const winnerName = document.getElementById("winnerName");
 const winnerTeam = document.getElementById("winnerTeam");
@@ -135,7 +135,7 @@ createGameBtn.addEventListener("click", async () => {
         gameCode.textContent = code;
         createPanel.style.display = "none";
         gamePanel.style.display = "block";
-        playersPanel.style.display = "block";
+        teamsPanel.style.display = "block";
         winnerPanel.style.display = "block";
 
         listenToGame();
