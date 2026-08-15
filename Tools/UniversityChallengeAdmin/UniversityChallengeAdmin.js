@@ -56,6 +56,8 @@ const winnerName = document.getElementById("winnerName");
 const winnerTeam = document.getElementById("winnerTeam");
 const resetBtn = document.getElementById("resetBtn");
 const deleteGameBtn = document.getElementById("deleteGameBtn");
+const teamAName = document.getElementById("teamAName");
+const teamBName = document.getElementById("teamBName");
 const teamAPlayers = document.getElementById("teamAPlayers");
 const teamBPlayers = document.getElementById("teamBPlayers");
 
@@ -93,6 +95,8 @@ createGameBtn.addEventListener("click", async () => {
                 code: code,
                 status: "waiting",
                 winner: null,
+                teamAName: "Team A",
+                teamBName: "Team B",
                 createdAt: serverTimestamp()
             }
         );
@@ -198,6 +202,22 @@ function listenToGame() {
 }
 
 // -----------------------------------
+// CHANGE TEAM NAMES
+// -----------------------------------
+
+teamAName.addEventListener("change", async () => {
+    await updateDoc(doc(db, "universityChallengeGames", currentGameId), {
+        teamAName: teamAName.value
+    });
+});
+
+teamBName.addEventListener("change", async () => {
+    await updateDoc(doc(db, "universityChallengeGames", currentGameId), {
+        teamBName: teamBName.value
+    });
+});
+
+// -----------------------------------
 // RESET BUZZERS
 // -----------------------------------
 
@@ -234,6 +254,8 @@ async function deleteGame() {
         await deleteDoc(gameRef);
         // Delete from realtime database
         remove(ref(realtimeDb, `presence/${currentGameId}`));
+        // Reload the page
+        window.location.reload();
     } catch (error) {
         console.error("Error deleting game:", error);
     }
