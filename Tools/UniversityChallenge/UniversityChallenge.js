@@ -25,7 +25,8 @@ import {
     ref,
     onDisconnect,
     set,
-    onValue
+    onValue,
+    remove
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
 // ==========================================
@@ -293,6 +294,7 @@ buzzBtn.addEventListener("click", async () => {
 
 async function deleteGame(gameId) {
     try {
+        // Delete from firestore
         const playersRef = collection(db, "universityChallengeGames", gameId, "Players");
         const playersSnapshot = await getDocs(playersRef);
         for (const playerSnapshot of playersSnapshot.docs) {
@@ -300,6 +302,8 @@ async function deleteGame(gameId) {
         }
         const gameRef = doc(db, "universityChallengeGames", gameId);
         await deleteDoc(gameRef);
+        // Delete from realtime database
+        remove(ref(realtimeDb, `presence/${gameId}`));
     } catch (error) {
         console.error("Error deleting game:", error);
     }
