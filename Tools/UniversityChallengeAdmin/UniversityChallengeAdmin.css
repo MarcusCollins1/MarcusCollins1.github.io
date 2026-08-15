@@ -117,6 +117,21 @@ button {
     margin-bottom: 8px;
 }
 
+.score {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 20px;
+
+    background: #374151;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.score span {
+    font-size: 32px;
+}
+
 .winner {
     text-align: center;
     padding: 40px 20px;
@@ -157,17 +172,6 @@ button {
 
 #teamsPanel {
     display: none;
-}
-
-.score {
-    text-align: center;
-    font-size: 24px;
-    font-weight: bold;
-    margin-top: 20px;
-}
-
-.score span {
-    font-size: 32px;
 }
 
 #gamePanel {
