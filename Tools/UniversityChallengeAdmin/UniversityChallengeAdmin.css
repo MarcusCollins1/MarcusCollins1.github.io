@@ -155,8 +155,19 @@ button {
     display: none;
 }
 
-#playersPanel {
+#teamsPanel {
     display: none;
+}
+
+.score {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+.score span {
+    font-size: 32px;
 }
 
 #gamePanel {
