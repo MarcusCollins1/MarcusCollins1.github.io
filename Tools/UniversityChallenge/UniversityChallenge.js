@@ -295,7 +295,7 @@ async function deleteGame(gameId) {
     try {
         const playersRef = collection(db, "universityChallengeGames", gameId, "Players");
         const playersSnapshot = await getDocs(playersRef);
-        for (const playerSnapshot of playerSnapshot.docs) {
+        for (const playerSnapshot of playersSnapshot.docs) {
             await deleteDoc(playerSnapshot.ref);
         }
         const gameRef = doc(db, "universityChallengeGames", gameId);
