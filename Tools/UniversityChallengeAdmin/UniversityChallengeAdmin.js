@@ -124,13 +124,6 @@ createGameBtn.addEventListener("click", async () => {
         const adminPresenceRef = ref(realtimeDb, `presence/${currentGameId}/admin`);
         await onDisconnect(adminPresenceRef).remove();
         await set(adminPresenceRef, true);
-        
-        onValue(adminPresenceRef, async (snapshot) => {
-            if (snapshot.exists()) {
-                return;
-            }
-            await deleteGame(currentGameId);
-        })
 
         gameCode.textContent = code;
         createPanel.style.display = "none";
@@ -221,21 +214,3 @@ resetBtn.addEventListener("click", async () => {
         console.error("Error resetting buzzers:", error);
     }
 });
-
-// -----------------------------------
-// DELETE GAME
-// -----------------------------------
-
-async function deleteGame(gameId) {
-    try {
-        const playersRef = collection(db, "universityChallengeGames", gameId, "Players");
-        const playersSnapshot = await getDocs(playersRef);
-        for (const playerSnapshot of playerSnapshot.docs) {
-            await deleteDoc(playerSnapshot.ref);
-        }
-        const gameRef = doc(db, "universityChallengeGames", gameId);
-        await deleteDoc(gameRef);
-    } catch (error) {
-        console.error("Error deleting game:", error);
-    }
-}

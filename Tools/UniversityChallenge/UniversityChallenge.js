@@ -158,6 +158,15 @@ joinBtn.addEventListener("click", async () => {
             team: currentTeam
         });
 
+        const adminPresenceRef = ref(realtimeDb, `presence/${currentGameId}/admin`);
+
+        onValue(adminPresenceRef, async (snapshot) => {
+            if (snapshot.exists()) {
+                return;
+            }
+            await deleteGame(currentGameId);
+        });
+
         // Update UI
         gameCodeDisplay.textContent = "Game: " + code;
 
@@ -276,3 +285,21 @@ buzzBtn.addEventListener("click", async () => {
         status.textContent = "There was an error."
     }
 });
+
+// -----------------------------------
+// DELETE GAME
+// -----------------------------------
+
+async function deleteGame(gameId) {
+    try {
+        const playersRef = collection(db, "universityChallengeGames", gameId, "Players");
+        const playersSnapshot = await getDocs(playersRef);
+        for (const playerSnapshot of playerSnapshot.docs) {
+            await deleteDoc(playerSnapshot.ref);
+        }
+        const gameRef = doc(db, "universityChallengeGames", gameId);
+        await deleteDoc(gameRef);
+    } catch (error) {
+        console.error("Error deleting game:", error);
+    }
+}
