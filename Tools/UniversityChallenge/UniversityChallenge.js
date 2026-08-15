@@ -74,6 +74,8 @@ let currentGameId = null;
 let currentPlayerId = null;
 let currentPlayerName = null;
 let currentTeam = null;
+let teamAName;
+let teamBName;
 let gameUnsubscribe = null;
 
 // ==========================================
@@ -169,10 +171,14 @@ joinBtn.addEventListener("click", async () => {
             await deleteGame(currentGameId);
         });
 
+        // Update team names
+        teamAName = game.data.teamAName;
+        teamBName = game.data.teamBName;
+
         // Update UI
         gameCodeDisplay.textContent = "Game: " + code;
 
-        playerInfo.textContent = name + " - Team " + team;
+        playerInfo.textContent = name + " - Team " + (team === "Team A" ? teamAName : teamBName);
 
         joinPanel.style.display = "none";
 
@@ -218,7 +224,7 @@ function listenToGame() {
 
                 winner.textContent = game.winner.name;
 
-                winnerTeam.textContent = "Team " + game.winner.team + " buzzed first";
+                winnerTeam.textContent = "Team " + (game.winner.team === "Team A" ? teamAName : teamBName) + " buzzed first";
 
                 if (game.winner.playerId === currentPlayerId) {
                     status.textContent = "YOU BUZZED FIRST!";
@@ -239,6 +245,12 @@ function listenToGame() {
 
                 buzzBtn.disabled = false;
             }
+
+            // ==========================================
+            // UPDATE TEAM NAMES
+            // ==========================================
+            teamAName = game.teamAName;
+            teamBName = game.teamBName;
         }
     );
 }
