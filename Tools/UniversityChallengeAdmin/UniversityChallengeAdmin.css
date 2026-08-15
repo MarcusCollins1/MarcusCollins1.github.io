@@ -117,15 +117,33 @@ button {
     margin-bottom: 8px;
 }
 
+.score-container {
+    background: #374151;
+    padding: 10px;
+    border-radius: 6px;
+}
+
 .score {
     text-align: center;
     font-size: 24px;
     font-weight: bold;
     margin-top: 20px;
+}
 
+.score-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.scoreBtn {
     background: #374151;
-    padding: 10px;
-    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+}
+.scoreBtn:hover {
+    background: #4b5563;
 }
 
 .score span {

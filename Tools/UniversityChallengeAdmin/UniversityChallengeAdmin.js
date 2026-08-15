@@ -52,6 +52,7 @@ const hideGameCodeBtn = document.getElementById("hideGameCodeBtn");
 const createPanel = document.getElementById("createPanel");
 const gamePanel = document.getElementById("gamePanel");
 const teamsPanel = document.getElementById("teamsPanel");
+const scoreButtons = document.querySelectorAll(".scoreBtn");
 const winnerPanel = document.getElementById("winnerPanel");
 const winnerName = document.getElementById("winnerName");
 const winnerTeam = document.getElementById("winnerTeam");
@@ -229,6 +230,25 @@ teamAName.addEventListener("change", async () => {
 teamBName.addEventListener("change", async () => {
     await updateDoc(doc(db, "universityChallengeGames", currentGameId), {
         teamBName: teamBName.value
+    });
+});
+
+// -----------------------------------
+// SCORE BUTTONS
+// -----------------------------------
+
+scoreButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        const team = button.dataset.team;
+        const amount = Number(button.dataset.amount);
+
+        const scoreElement = document.getElementById(`team${team}Score`);
+
+        let currentScore = Number(scoreElement.textContent);
+
+        currentScore += amount;
+
+        scoreElement.textContent = currentScore;
     });
 });
 
