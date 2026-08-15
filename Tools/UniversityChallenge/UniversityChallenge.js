@@ -178,7 +178,7 @@ joinBtn.addEventListener("click", async () => {
         // Update UI
         gameCodeDisplay.textContent = "Game: " + code;
 
-        playerInfo.textContent = name + " - Team " + (team === "Team A" ? teamAName : teamBName);
+        playerInfo.textContent = name + " - " + (team === "A" ? teamAName : teamBName);
 
         joinPanel.style.display = "none";
 
@@ -224,7 +224,7 @@ function listenToGame() {
 
                 winner.textContent = game.winner.name;
 
-                winnerTeam.textContent = "Team " + (game.winner.team === "Team A" ? teamAName : teamBName) + " buzzed first";
+                winnerTeam.textContent = "Team " + (game.winner.team === "A" ? teamAName : teamBName) + " buzzed first";
 
                 if (game.winner.playerId === currentPlayerId) {
                     status.textContent = "YOU BUZZED FIRST!";
@@ -251,6 +251,7 @@ function listenToGame() {
             // ==========================================
             teamAName = game.teamAName;
             teamBName = game.teamBName;
+            playerInfo.textContent = currentPlayerName + " - " + (currentTeam === "A" ? teamAName : teamBName);
         }
     );
 }
