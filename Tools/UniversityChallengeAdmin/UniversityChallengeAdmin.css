@@ -44,6 +44,15 @@ h1 {
     letter-spacing: 8px;
 }
 
+#hideGameCodeBtn {
+    background: #374151;
+    color: white;
+    margin-top: 10px;
+}
+#hideGameCodeBtn:hover {
+    background: #4b5563;
+}
+
 button {
     border: none;
     border-radius: 8px;

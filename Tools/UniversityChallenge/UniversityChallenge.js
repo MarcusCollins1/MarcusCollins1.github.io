@@ -224,7 +224,7 @@ function listenToGame() {
 
                 winner.textContent = game.winner.name;
 
-                winnerTeam.textContent = "Team " + (game.winner.team === "A" ? teamAName : teamBName) + " buzzed first";
+                winnerTeam.textContent = (game.winner.team === "A" ? teamAName : teamBName) + " buzzed first";
 
                 if (game.winner.playerId === currentPlayerId) {
                     status.textContent = "YOU BUZZED FIRST!";

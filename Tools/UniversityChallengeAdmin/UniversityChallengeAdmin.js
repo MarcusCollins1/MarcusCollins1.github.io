@@ -48,6 +48,7 @@ const realtimeDb = getDatabase(app);
 
 const createGameBtn = document.getElementById("createGameBtn");
 const gameCode = document.getElementById("gameCode");
+const hideGameCodeBtn = document.getElementById("hideGameCodeBtn");
 const createPanel = document.getElementById("createPanel");
 const gamePanel = document.getElementById("gamePanel");
 const playersPanel = document.getElementById("playersPanel");
@@ -200,6 +201,20 @@ function listenToGame() {
         });
     });
 }
+
+// -----------------------------------
+// SHOW/HIDE GAME CODE
+// -----------------------------------
+
+hideGameCodeBtn.addEventListener("click", () => {
+    if (gameCode.style.visibility === "hidden") {
+        gameCode.style.visibility = "visible";
+        hideGameCodeBtn.textContent = "Hide Game Code";
+    } else {
+        gameCode.style.visibility = "hidden";
+        hideGameCodeBtn.textContent = "Show Game Code";
+    }
+})
 
 // -----------------------------------
 // CHANGE TEAM NAMES
