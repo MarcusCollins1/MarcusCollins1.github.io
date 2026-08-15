@@ -54,6 +54,7 @@ const winnerPanel = document.getElementById("winnerPanel");
 const winnerName = document.getElementById("winnerName");
 const winnerTeam = document.getElementById("winnerTeam");
 const resetBtn = document.getElementById("resetBtn");
+const deleteGameBtn = document.getElementById("deleteGameBtn");
 const teamAPlayers = document.getElementById("teamAPlayers");
 const teamBPlayers = document.getElementById("teamBPlayers");
 
@@ -214,3 +215,25 @@ resetBtn.addEventListener("click", async () => {
         console.error("Error resetting buzzers:", error);
     }
 });
+
+// -----------------------------------
+// DELETE GAME
+// -----------------------------------
+deleteGameBtn.addEventListener("click", deleteGame);
+
+async function deleteGame() {
+    try {
+        // Delete from firestore
+        const playersRef = collection(db, "universityChallengeGames", currentGameId, "Players");
+        const playersSnapshot = await getDocs(playersRef);
+        for (const playerSnapshot of playersSnapshot.docs) {
+            await deleteDoc(playerSnapshot.ref);
+        }
+        const gameRef = doc(db, "universityChallengeGames", currentGameId);
+        await deleteDoc(gameRef);
+        // Delete from realtime database
+        remove(ref(realtimeDb, `presence/${currentGameId}`));
+    } catch (error) {
+        console.error("Error deleting game:", error);
+    }
+}

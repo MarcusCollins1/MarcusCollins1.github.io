@@ -116,6 +116,15 @@ button {
     background: #b91c1c;
 }
 
+#deleteGameBtn {
+    background: #470a0a;
+    color: black;
+    margin-top: 20px;
+}
+#deleteGameBtn:hover {
+    background: #891111;
+}
+
 #winnerPanel {
     display: none;
 }
