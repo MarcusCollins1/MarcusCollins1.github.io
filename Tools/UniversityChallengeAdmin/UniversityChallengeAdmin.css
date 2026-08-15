@@ -75,8 +75,25 @@ button {
     padding: 20px;
 }
 
-.team h2 {
-    margin-top: 0;
+.team-name {
+    font-size: 1.5em;
+    font-weight: bold;
+    font-family: inherit;
+
+    text-align: center;
+    color: inherit;
+
+    background: transparent;
+    border: none;
+    outline: none;
+
+    width: 100%;
+    margin: 0.83em 0;
+    padding: 0;
+}
+.team-name:focus {
+    outline: 1px solid currentColor;
+    border-radius: 4px;
 }
 
 .team ul {
