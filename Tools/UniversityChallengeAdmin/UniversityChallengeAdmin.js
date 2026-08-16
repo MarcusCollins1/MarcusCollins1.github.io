@@ -15,6 +15,7 @@ import {
 
 import {
     getDatabase,
+    get,
     ref,
     onDisconnect,
     set,
@@ -295,3 +296,27 @@ async function deleteGame() {
         console.error("Error deleting game:", error);
     }
 }
+
+// -----------------------------------
+// CHECK ALL GAMES IN FIRESTORE ARE ACTIVE
+// -----------------------------------
+
+const firestoreSnapshot = await getDocs(
+    collection(db, "universityChallengeGames")
+);
+
+await Promise.all(
+    firestoreSnapshot.docs.map(async (docSnapshot) => {
+        const id = docSnapshot.id;
+
+        const rtdbSnapshot = await get(
+            ref(realtimeDb, `presence/${id}`)
+        );
+
+        if (!rtdbSnapshot.exists()) {
+            await deleteDoc(
+                doc(db, "universityChallengeGames", id)
+            );
+        }
+    })
+);
