@@ -13,5 +13,70 @@
     <button id="return-button" onclick="location.href='UniversityChallengeQuestions.html'">← Return</button>
 
     <h1>University Challenge - Add Questions</h1>
+
+    <form id="questionForm">
+
+        <label for="questionType">Question Type</label>
+        <select name="questionType" id="questionType">
+            <option value="starter">Starter</option>
+            <option value="set">Set of 3</option>
+        </select>
+
+        <!-- Starter -->
+        <div id="starterFields">
+            <label for="starterQuestion">Question</label>
+            <textarea name="starterQuestion" id="starterQuestion"></textarea>
+
+            <label for="starterAnswer">Answer</label>
+            <input type="text" name="starterAnswer" id="starterAnswer">
+        </div>
+
+        <!-- Set -->
+        <div id="setFields" hidden>
+            <div class="set-question">
+                <h2>Question 1</h2>
+                <textarea name="setQuestion1" id="setQuestion1" placeholder="Question"></textarea>
+                <input type="text" name="setAnswer1" id="setAnswer1" placeholder="Answer">
+            </div>
+            
+            <div class="set-question">
+                <h2>Question 2</h2>
+                <textarea name="setQuestion2" id="setQuestion2" placeholder="Question"></textarea>
+                <input type="text" name="setAnswer2" id="setAnswer2" placeholder="Answer">
+            </div>
+            
+            <div class="set-question">
+                <h2>Question 3</h2>
+                <textarea name="setQuestion3" id="setQuestion1" placeholder="Question"></textarea>
+                <input type="text" name="setAnswer1" id="setAnswer3" placeholder="Answer">
+            </div>
+        </div>
+
+        <label for="category">Category</label>
+        <select name="category" id="category">
+            <option value="history">History</option>
+            <option value="geography">Geography</option>
+            <option value="literature">Literature</option>
+            <option value="science">Science</option>
+            <option value="mathematics">Mathematics</option>
+            <option value="art">Art & Architecture</option>
+            <option value="music">Music</option>
+            <option value="film">Film & Television</option>
+            <option value="philosophy">Philosophy</option>
+            <option value="politics">Politics</option>
+            <option value="computing">Computing</option>
+            <option value="sport">Sport</option>
+            <option value="general">General Knowledge</option>
+            <option value="other">Other</option>
+        </select>
+        <input
+            type="text"
+            id="otherCategory"
+            placeholder="Enter category"
+            hidden
+        >
+
+        <button type="submit">Add Question</button>
+    </form>
 </body>
 </html>
