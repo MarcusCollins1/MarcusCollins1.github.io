@@ -35,3 +35,8 @@ button:hover:not(:disabled) {
     background-color: hotpink;
     color: lightblue;
 }
+
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+}
