@@ -10,6 +10,7 @@ html, body {
 body {
     height: 100vh;
     display: flex;
+    align-items: start;
     flex-direction: column;
 }
 button {
@@ -82,7 +83,8 @@ li {
 #clearAllBtn {
     color: red;
     background: black;
-    transition: color 1s ease, background 1s ease;
+    transition: color 0.5s ease, background 0.5s ease;
+    margin-bottom: 10px;
 }
 #clearAllBtn:hover {
     color: black;

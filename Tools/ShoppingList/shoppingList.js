@@ -33,6 +33,7 @@ const analytics = getAnalytics(app);
 
 const form = document.getElementById("itemForm");
 const input = document.getElementById("itemInput");
+const clearAllBtn = document.getElementById("clearAllBtn");
 const list = document.getElementById("itemsList");
 
 const itemsRef = collection(db, "shoppingItems");
@@ -77,6 +78,18 @@ onSnapshot(itemsQuery, (snapshot) => {
     snapshot.forEach((docSnap) => {
         renderItem(docSnap.id, docSnap.data());
     });
+});
+
+async function clearAll() {
+    const snapshot = await getDocs(collection(db, "shoppingItems"));
+    const deletePromises = snapshot.docs.map(document => 
+        deleteDoc(doc(db, "shoppingItems", document.id))
+    );
+    await Promise.all(deletePromises);
+}
+
+clearAllBtn.addEventListener("click", () => {
+    clearAll();
 });
 
 form.addEventListener("submit", async (e) => {
