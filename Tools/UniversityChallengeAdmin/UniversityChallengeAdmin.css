@@ -115,11 +115,15 @@ button {
     padding: 10px;
     border-radius: 6px;
     margin-bottom: 8px;
+    display: flex;
+    align-items: center;
 }
 
 .remove-button {
     background: black;
     color: red;
+    margin-left: auto;
+    padding: 5px;
     transition: color 0.5s ease, background 0.5s ease;
 }
 .remove-button:hover {
