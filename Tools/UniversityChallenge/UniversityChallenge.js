@@ -192,8 +192,10 @@ joinBtn.addEventListener("click", async () => {
 
         gamePanel.style.display = "block";
 
-        // Start listing to game
+        // Start listening to game
         listenToGame();
+        // Start listening to player doc
+        listenToPlayerDoc();
     } catch(error) {
         console.error(error);
 
@@ -260,6 +262,27 @@ function listenToGame() {
             teamAName = game.teamAName;
             teamBName = game.teamBName;
             playerInfo.textContent = currentPlayerName + " - " + (currentTeam === "A" ? teamAName : teamBName);
+        }
+    );
+}
+
+// ==========================================
+// LISTEN TO PLAYER DOC
+// ==========================================
+
+function listenToPlayerDoc() {
+    if (!currentGameId) return;
+    if (!currentPlayerId) return;
+
+    const playerRef = doc(db, "universityChallengeGames", currentGameId, "Players", currentPlayerId);
+    
+    onSnapshot(playerRef,
+        (snapshot) => {
+            if (!snapshot.exists()) {
+                status.textContent = "You have been removed.";
+                buzzBtn.disabled = true;
+                return;
+            }
         }
     );
 }

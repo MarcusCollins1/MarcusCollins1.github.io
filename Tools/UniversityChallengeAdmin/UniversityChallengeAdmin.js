@@ -198,7 +198,9 @@ function listenToGame() {
             const removeBtn = document.createElement("button");
             removeBtn.textContent = "Remove";
             removeBtn.className = "remove-button";
-            removeBtn.addEventListener("click", removePlayer(playerSnapshot.id));
+            removeBtn.addEventListener("click", () => {
+                removePlayer(playerSnapshot.id)
+            });
             li.appendChild(removeBtn);
             if (player.team === "A") {
                 teamAPlayers.appendChild(li);
@@ -210,7 +212,7 @@ function listenToGame() {
 }
 
 // -----------------------------------
-// SHOW/HIDE GAME CODE
+// REMOVE PLAYER
 // -----------------------------------
 
 async function removePlayer(playerId) {
