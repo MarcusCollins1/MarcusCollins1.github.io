@@ -195,6 +195,11 @@ function listenToGame() {
             const player = playerSnapshot.data();
             const li = document.createElement("li");
             li.textContent = player.name;
+            const removeBtn = document.createElement("button");
+            removeBtn.textContent = "Remove";
+            removeBtn.className = "remove-button";
+            removeBtn.addEventListener("click", removePlayer(playerSnapshot.id));
+            li.appendChild(removeBtn);
             if (player.team === "A") {
                 teamAPlayers.appendChild(li);
             } else if (player.team === "B") {
@@ -202,6 +207,15 @@ function listenToGame() {
             }
         });
     });
+}
+
+// -----------------------------------
+// SHOW/HIDE GAME CODE
+// -----------------------------------
+
+async function removePlayer(playerId) {
+    const playerRef = doc(db, "universityChallengeGames", currentGameId, "Players", playerId);
+    await deleteDoc(playerRef);
 }
 
 // -----------------------------------
