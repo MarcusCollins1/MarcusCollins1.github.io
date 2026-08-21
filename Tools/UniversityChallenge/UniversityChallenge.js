@@ -142,6 +142,8 @@ joinBtn.addEventListener("click", async () => {
         const playersNames = playersSnapshot.docs.filter(doc => doc.data().team === team).map(doc => doc.data().name);
         if (playersNames.includes(name)) {
             alert(`Name (${name}) is taken in team ${team}`);
+            joinBtn.disabled = false;
+            joinBtn.textContent = "Join Game";
             return;
         }
         const playerDoc = await addDoc(
