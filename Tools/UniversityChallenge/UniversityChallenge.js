@@ -138,6 +138,12 @@ joinBtn.addEventListener("click", async () => {
 
         // Save player
         const playersRef = collection(db, "universityChallengeGames", game.id, "Players");
+        const playersSnapshot = await getDocs(playersRef);
+        const playersNames = playersSnapshot.docs.filter(doc => doc.data().team === team).map(doc => doc.data().name);
+        if (playersNames.includes(name)) {
+            alert(`Name (${name}) is taken in team ${team}`);
+            return;
+        }
         const playerDoc = await addDoc(
             playersRef,
             {
