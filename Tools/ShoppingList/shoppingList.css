@@ -7,15 +7,23 @@ html, body {
     color: white;
     overflow: hidden;
 }
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 button {
     padding: 5px 10px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 6px;
     cursor: pointer;
     margin: 4px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 button:hover {
     background-color: lightcoral;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(139, 92, 246, 0.35);
 }
 form {
     display: flex;
@@ -69,4 +77,20 @@ li {
     color: white;
     border: none;
     border-radius: 6px;
+}
+
+#clearAllBtn {
+    color: red;
+    background: black;
+    transition: color 1s ease, background 1s ease;
+}
+#clearAllBtn:hover {
+    color: black;
+    background: red;
+    box-shadow: 0 8px 12px rgba(77, 8, 4, 0.579);
+}
+#itemsList {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
