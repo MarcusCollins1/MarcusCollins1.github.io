@@ -56,6 +56,7 @@ h1 {
 label {
     font-weight: bold;
     margin-top: 8px;
+    color: black;
 }
 input,
 select,
