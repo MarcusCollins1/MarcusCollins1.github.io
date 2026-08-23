@@ -13,5 +13,35 @@
     <button id="return-button" onclick="location.href='UniversityChallengeQuestions.html'">← Return</button>
 
     <h1>University Challenge - Get Questions</h1>
+
+    <main class="question-page">
+        <section class="controls-card">
+            <label for="questionType">Question type</label>
+            <select name="questionType" id="questionType">
+                <option value="starter">Starter</option>
+                <option value="set">Set of 3</option>
+            </select>
+
+            <button id="getQuestionBtn" type="button">Get Question</button>
+        </section>
+
+        <p id="status" class="status" aria-live="polite"></p>
+
+        <section id="questionCard" class="question-card hidden">
+            <div class="question-header">
+                <span id="questionTypeLabel" class="question-type-label"></span>
+                <span id="categoryLabel" class="category-label"></span>
+            </div>
+
+            <div id="questionContent"></div>
+
+            <div class="actions">
+                <button id="skipBtn" type="button">Skip</button>
+                <button id="nextBtn" type="button">Next</button>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="UniversityChallengeGetQuestions.js"></script>
 </body>
 </html>
