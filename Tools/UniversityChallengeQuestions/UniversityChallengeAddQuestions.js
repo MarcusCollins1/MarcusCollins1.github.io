@@ -171,7 +171,7 @@ questionForm.addEventListener("submit", async (e) => {
             collection(db, "universityChallenge", "questions", "sets"),
             {
                 category: category,
-                timesUsed, minTimesUsed
+                timesUsed: minTimesUsed
             }
         );
         await addDoc(collection(docRef, "questions"), {
