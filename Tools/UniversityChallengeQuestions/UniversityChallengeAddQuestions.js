@@ -165,7 +165,7 @@ questionForm.addEventListener("submit", async (e) => {
             return;
         }
 
-        const minTimesUsed = getMinimumTimesUsedSets();
+        const minTimesUsed = await getMinimumTimesUsedSets();
 
         const docRef = await addDoc(
             collection(db, "universityChallenge", "questions", "sets"),
