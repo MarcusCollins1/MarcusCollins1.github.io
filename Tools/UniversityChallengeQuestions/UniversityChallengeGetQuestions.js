@@ -274,7 +274,7 @@ nextBtn.addEventListener("click", async () => {
                 db,
                 "universityChallenge",
                 "questions",
-                currentQuestion === "starter" ? "starters" : "sets",
+                currentQuestionType === "starter" ? "starters" : "sets",
                 currentQuestion.id
             ),
             {
