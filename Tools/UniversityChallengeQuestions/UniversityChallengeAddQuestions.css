@@ -124,3 +124,6 @@ textarea:focus {
     margin-top: 6px;
     margin-bottom: 12px;
 }
+#status {
+    color: purple;
+}
