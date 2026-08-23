@@ -122,8 +122,8 @@ questionForm.addEventListener("submit", async (e) => {
             }
         );
 
-        starterQuestion.textContent = "";
-        starterAnswer.textContent = "";
+        starterQuestion.value = "";
+        starterAnswer.value = "";
         status.textContent = "Starter question added";
 
     } else if (questionType === "set") {
@@ -186,12 +186,12 @@ questionForm.addEventListener("submit", async (e) => {
             question: question3,
             answer: answer3
         });
-        setQuestion1.textContent = "";
-        setAnswer1.textContent = "";
-        setQuestion2.textContent = "";
-        setAnswer2.textContent = "";
-        setQuestion3.textContent = "";
-        setAnswer3.textContent = "";
+        setQuestion1.value = "";
+        setAnswer1.value = "";
+        setQuestion2.value = "";
+        setAnswer2.value = "";
+        setQuestion3.value = "";
+        setAnswer3.value = "";
         status.textContent = "Set questions added";
     } else {
         throw new Error(`Question type (${questionType}) is not valid`);
