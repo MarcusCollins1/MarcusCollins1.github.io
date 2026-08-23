@@ -1,0 +1,47 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: white;
+    min-height: 100vh;
+}
+
+button {
+    padding: 8px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 4px;
+
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+button:hover:not(:disabled) {
+    background-color: lightcoral;
+
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(139, 92, 246, 0.35);
+}
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.return-button {
+    background-color: lightblue;
+    color: hotpink;
+    font-size: large;
+    font-weight: bold;
+}
+.return-button:hover {
+    background-color: hotpink;
+    color: lightblue;
+}
+
+h1 {
+    text-align: center;
+    margin: 0 20px 40px;
+}
