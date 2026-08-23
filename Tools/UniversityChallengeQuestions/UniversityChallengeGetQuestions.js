@@ -157,6 +157,7 @@ async function displayQuestion(type, questionDocument) {
         questionContent.appendChild(questionElement);
     } else {
         const questions = await loadSetQuestions(questionDocument.id);
+        questions.sort((a, b) => a.data.number - b.data.number);
 
         if (questions.length === 0) {
             throw new Error("This set does not contain any questions.");
@@ -164,8 +165,8 @@ async function displayQuestion(type, questionDocument) {
 
         questions.forEach((question, index) => {
             const questionElement = createQuestionElement(
-                question.question,
-                question.answer,
+                question.data.question,
+                question.data.answer,
                 index+1
             );
 
