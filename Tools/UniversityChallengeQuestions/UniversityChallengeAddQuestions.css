@@ -117,6 +117,7 @@ textarea:focus {
 .set-question h2 {
     margin-top: 0;
     font-size: 18px;
+    color: black;
 }
 .set-question textarea,
 .set-question input {
