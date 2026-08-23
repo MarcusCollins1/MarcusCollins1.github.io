@@ -175,14 +175,17 @@ questionForm.addEventListener("submit", async (e) => {
             }
         );
         await addDoc(collection(docRef, "questions"), {
+            number: 1,
             question: question1,
             answer: answer1
         });
         await addDoc(collection(docRef, "questions"), {
+            number: 2,
             question: question2,
             answer: answer2
         });
         await addDoc(collection(docRef, "questions"), {
+            number: 3,
             question: question3,
             answer: answer3
         });
