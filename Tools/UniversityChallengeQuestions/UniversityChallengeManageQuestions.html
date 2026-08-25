@@ -10,8 +10,234 @@
     <link rel="icon" type="image/ico" href="universityChallengeQuestions.ico">
 </head>
 <body>
-    <button id="return-button" onclick="location.href='UniversityChallengeQuestions.html'">← Return</button>
+    <button id="return-button" class="return-button" onclick="location.href='UniversityChallengeQuestions.html'">← Return</button>
 
     <h1>University Challenge - Manage Questions</h1>    
+
+    <main class="manage-page">
+        
+        <!-- ========================================== -->
+        <!-- STATISTICS -->
+        <!-- ========================================== -->
+
+        <section class="stats">
+
+            <div class="stat-card">
+                <h2>Starters</h2>
+                <p id="starterCount">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h2>Sets</h2>
+                <p id="setCount">0</p>
+            </div>
+
+            <div class="stat-card">
+                <h2>Total Questions</h2>
+                <p id="questionCount">0</p>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- CATEGORY BREAKDOWN -->
+        <!-- ========================================== -->
+
+        <section class="panel">
+
+            <h2>Categories</h2>
+
+            <div class="category-columns">
+
+                <div>
+                    <h3>Starters</h3>
+                    <div id="starterCategories"></div>
+                </div>
+
+                <div>
+                    <h3>Sets</h3>
+                    <div id="setCategories"></div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- QUESTION LIST -->
+        <!-- ========================================== -->
+
+        <section class="panel">
+
+            <div class="list-header">
+
+                <div>
+                    <h2>Questions</h2>
+                </div>
+
+                <div class="list-controls">
+
+                    <select id="questionType">
+                        <option value="starter">Starters</option>
+                        <option value="set">Sets</option>
+                    </select>
+
+                    <input
+                        id="searchInput"
+                        type="text"
+                        placeholder="Search..."
+                    >
+
+                </div>
+
+            </div>
+
+            <div id="questionList" class="question-list"></div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- EDIT PANEL -->
+        <!-- ========================================== -->
+
+        <section
+            id="editPanel"
+            class="panel edit-panel hidden"
+        >
+            <div class="edit-header">
+                <h2 id="editTitle">Edit Question</h2>
+
+                <button
+                    id="closeEditBtn"
+                    type="button"
+                >
+                    Close
+                </button>
+            </div>
+
+            <!-- STARTER EDIT -->
+
+            <div id="starterEdit">
+
+                <label for="editStarterQuestion">
+                    Question
+                </label>
+
+                <textarea
+                    name="editStarterQuestion" id="editStarterQuestion"
+                ></textarea>
+
+                <label for="editStarterAnswer">
+                    Answer
+                </label>
+
+                <input
+                    type="text" name="editStarterAnswer" id="editStarterAnswer"
+                >
+
+            </div>
+
+            <!-- SET EDIT -->
+
+            <div
+                id="setEdit"
+                class="hidden"
+            >
+                <div class="set-edit-question">
+
+                    <h3>Question 1</h3>
+
+                    <label for="editSetQuestion1">
+                        Question
+                    </label>
+
+                    <textarea name="editSetQuestion1" id="editSetQuestion1"></textarea>
+
+                    <label for="editSetAnswer1">
+                        Answer
+                    </label>
+
+                    <input id="editSetAnswer1" name="editSetAnswer1" type="text">
+
+                </div>
+
+                <div class="set-edit-question">
+
+                    <h3>Question 2</h3>
+
+                    <label for="editSetQuestion2">
+                        Question
+                    </label>
+
+                    <textarea name="editSetQuestion2" id="editSetQuestion2"></textarea>
+
+                    <label for="editSetAnswer2">
+                        Answer
+                    </label>
+
+                    <input id="editSetAnswer2" name="editSetAnswer2" type="text">
+                    
+                </div>
+
+                <div class="set-edit-question">
+
+                    <h3>Question 3</h3>
+
+                    <label for="editSetQuestion3">
+                        Question
+                    </label>
+
+                    <textarea name="editSetQuestion3" id="editSetQuestion3"></textarea>
+
+                    <label for="editSetAnswer3">
+                        Answer
+                    </label>
+
+                    <input id="editSetAnswer3" name="editSetAnswer3" type="text">
+                    
+                </div>
+
+
+            </div>
+
+            <!-- COMMON FIELDS -->
+
+            <label for="editCategory">
+                Category
+            </label>
+
+            <input id="editCategory" name="editCategory" type="text">
+
+            <p class="times-used">
+                Times Used:
+                <span id="editTimesUsed">0</span>
+            </p>
+
+            <p id="editStatus"></p>
+
+            <div class="editActions">
+
+                <button
+                    id="saveBtn"
+                    type="button"
+                >
+                    Save Changes
+                </button>
+
+                <button
+                    id="deleteBtn"
+                    type="button"
+                    class="delete-button"
+                >
+                    Delete
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script type="module" src="UniversityChallengeManageQuestions.js"></script>
 </body>
 </html>
