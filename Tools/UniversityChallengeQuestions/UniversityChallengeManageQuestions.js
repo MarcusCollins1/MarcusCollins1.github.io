@@ -739,7 +739,7 @@ resetStarterButton.addEventListener("click", async () => {
 
     try {
         resetStatus.textContent = "Resetting...";
-        await resetStarterButton();
+        await resetStartersUsage();
         resetStatus.textContent = "Starter usage reset.";
         await loadData();
     } catch (error) {
@@ -753,7 +753,7 @@ resetSetButton.addEventListener("click", async () => {
 
     try {
         resetStatus.textContent = "Resetting...";
-        await resetSetButton();
+        await resetSetsUsage();
         resetStatus.textContent = "Set usage reset.";
         await loadData();
     } catch (error) {
