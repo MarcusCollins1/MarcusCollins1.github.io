@@ -310,7 +310,7 @@ function createQuestionListItem(item, type) {
     let preview = "";
 
     if (type === "starter") {
-        preview = `${item.question}<br>Answer: $${item.answer}`;
+        preview = `${item.question}<br>Answer: ${item.answer}`;
     } else {
         preview = item.questions.map((question) => {
             return `${question.number ?? ""}. ${question.question}`;
@@ -383,12 +383,12 @@ function openEditPanel(type, item)  {
         const q2 = questions[1];
         const q3 = questions[2];
 
-        editSetQuestion1.textContent = q1?.question || "";
-        editSetAnswer1.textContent = q1?.answer || "";
-        editSetQuestion2.textContent = q2?.question || "";
-        editSetAnswer2.textContent = q2?.answer || "";
-        editSetQuestion3.textContent = q3?.question || "";
-        editSetAnswer3.textContent = q3?.answer || "";
+        editSetQuestion1.value = q1?.question || "";
+        editSetAnswer1.value = q1?.answer || "";
+        editSetQuestion2.value = q2?.question || "";
+        editSetAnswer2.value = q2?.answer || "";
+        editSetQuestion3.value = q3?.question || "";
+        editSetAnswer3.value = q3?.answer || "";
     }
 
     editPanel.scrollIntoView({
