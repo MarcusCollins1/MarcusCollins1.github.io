@@ -51,12 +51,12 @@
 
                 <div>
                     <h3>Starters</h3>
-                    <div id="starterCategories"></div>
+                    <div id="starterCategories" class="category-chart"></div>
                 </div>
 
                 <div>
                     <h3>Sets</h3>
-                    <div id="setCategories"></div>
+                    <div id="setCategories" class="category-chart"></div>
                 </div>
 
             </div>
@@ -208,10 +208,8 @@
 
             <input id="editCategory" name="editCategory" type="text">
 
-            <p class="times-used">
-                Times Used:
-                <span id="editTimesUsed">0</span>
-            </p>
+            <label for="editTimesUsed">Times Used</label>
+            <input id="editTimesUsed" name="editTimesUsed" type="text" min="0" step="1">
 
             <p id="editStatus"></p>
 
@@ -233,6 +231,28 @@
                 </button>
 
             </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- RESET TIMES USED PANEL -->
+        <!-- ========================================== -->
+
+        <section class="panel">
+
+            <h2>Usage</h2>
+
+            <p>
+                Resetting usage sets the <code>timesUsed</code> value back to 0.
+            </p>
+
+            <div class="reset-buttons">
+                <button id="resetStarterBtn" type="button">Reset Starter Usage</button>
+                <button id="resetSetBtn" type="button">Reset Set Usage</button>
+                <button id="resetAllBtn" type="button">Reset All Usage</button>
+            </div>
+
+            <p id="resetStatus"></p>
 
         </section>
 

@@ -20,7 +20,8 @@ import {
     updateDoc,
     onSnapshot,
     runTransaction,
-    serverTimestamp
+    serverTimestamp,
+    writeBatch
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 // ==========================================
@@ -72,6 +73,10 @@ const editTimesUsed = document.getElementById("editTimesUsed");
 const editStatus = document.getElementById("editStatus");
 const saveButton = document.getElementById("saveBtn");
 const deleteButton = document.getElementById("deleteBtn");
+const resetStarterButton = document.getElementById("resetStarterBtn");
+const resetSetButton = document.getElementById("resetSetBtn");
+const resetAllButton = document.getElementById("resetAllBtn");
+const resetStatus = document.getElementById("resetStatus");
 
 // ==========================================
 // STATE
@@ -221,23 +226,33 @@ function displayCategoryBreakdown() {
 function displayCategoryList(container, categories) {
     container.innerHTML = "";
 
-    const sortedCategories = Object.entries(categories).sort((a, b) => {
-        return a[0].localeCompare(b[0]);
-    });
+    const sortedCategories = Object.entries(categories).sort((a, b) => b[1] - a[1]);
 
     if (sortedCategories.length === 0) {
         container.innerHTML = "<p>No questions.</p>";
         return;
     }
 
+    const maximum = sortedCategories[0][1];
+
     for (const [category, count] of sortedCategories) {
         const row = document.createElement("div");
 
         row.className = "category-row";
+
+        const percentage = maximum === 0 ? 0 : (count / maximum) * 100;
+        
         row.innerHTML = `
             <span class="category-name">
                 ${escapeHTML(category)}
             </span>
+
+            <div class="category-bar-container">
+                <div
+                    class="category-bar"
+                    style="width: ${percentage}%"
+                ></div>
+            </div>
 
             <span class="category-count">
                 ${count}
@@ -360,7 +375,7 @@ function openEditPanel(type, item)  {
 
     editCategory.value = item.category || "";
 
-    editTimesUsed.textContent = item.timesUsed ?? 0;
+    editTimesUsed.value = item.timesUsed ?? 0;
 
     if (type === "starter") {
         editTitle.textContent = "Edit Starter";
@@ -424,6 +439,12 @@ async function saveStarter() {
         return;
     }
 
+    const timesUsed = Number(editTimesUsed.value);
+    if (!Number.isInteger(timesUsed) || timesUsed < 0) {
+        editStatus.textContent = "Times used must be a whole number of 0 or greater";
+        return;
+    }
+
     const starterRef = doc(db, "universityChallenge", "questions", "starters", currentId);
 
     await updateDoc(
@@ -431,7 +452,8 @@ async function saveStarter() {
         {
             question: editStarterQuestion.value.trim(),
             answer: editStarterAnswer.value.trim(),
-            category: editCategory.value.trim()
+            category: editCategory.value.trim(),
+            timesUsed: timesUsed
         });
 }
 
@@ -459,9 +481,18 @@ async function saveSet(params) {
         return;
     }
 
+    const timesUsed = Number(editTimesUsed.value);
+    if (!Number.isInteger(timesUsed) || timesUsed < 0) {
+        editStatus.textContent = "Times used must be a whole number of 0 or greater";
+        return;
+    }
+
     const setRef = doc(db, "universityChallenge", "questions", "sets", currentId);
 
-    await updateDoc(setRef, {category: editCategory.value.trim()});
+    await updateDoc(setRef, {
+        category: editCategory.value.trim(),
+        timesUsed: timesUsed
+    });
 
     const currentSet = sets.find(
         (set) => set.id === currentId
@@ -658,6 +689,88 @@ deleteButton.addEventListener(
         }
     }
 );
+
+// ==========================================
+// RESET BUTTONS
+// ==========================================
+
+async function resetUsage(collectionRef) {
+    const snapshot = await getDocs(collectionRef);
+    const documents = snapshot.docs;
+    const batchSize = 500;
+
+    for (let i = 0; i < documents.length; i += batchSize) {
+        const batch = writeBatch(db);
+
+        const chunk = documents.slice(i, i+batchSize);
+
+        chunk.forEach((d) => {
+            batch.update(
+                d.ref,
+                {
+                    timesUsed: 0
+                }
+            );
+        });
+        await batch.commit();
+    }
+}
+
+async function resetStartersUsage() {
+    await resetUsage(getStartersCollection());
+}
+
+async function resetSetsUsage() {
+    await resetUsage(getSetsCollection());
+}
+
+async function resetAllUsage() {
+    await resetStartersUsage();
+    await resetSetsUsage();
+}
+
+resetStarterButton.addEventListener("click", async () => {
+    const confirmed = confirm("Reset times used for ALL starters to 0?");
+    if (!confirmed) return;
+
+    try {
+        resetStatus.textContent = "Resetting...";
+        await resetStarterButton();
+        resetStatus.textContent = "Starter usage reset.";
+        await loadData();
+    } catch (error) {
+        console.error(error);
+        resetStatus.textContent = "There was a problem resetting starter usage.";
+    }
+});
+resetSetButton.addEventListener("click", async () => {
+    const confirmed = confirm("Reset times used for ALL sets to 0?");
+    if (!confirmed) return;
+
+    try {
+        resetStatus.textContent = "Resetting...";
+        await resetSetButton();
+        resetStatus.textContent = "Set usage reset.";
+        await loadData();
+    } catch (error) {
+        console.error(error);
+        resetStatus.textContent = "There was a problem resetting Set usage.";
+    }
+});
+resetAllButton.addEventListener("click", async () => {
+    const confirmed = confirm("Reset times used for ALL starters AND sets to 0?");
+    if (!confirmed) return;
+
+    try {
+        resetStatus.textContent = "Resetting...";
+        await resetAllUsage();
+        resetStatus.textContent = "All usage has been reset.";
+        await loadData();
+    } catch (error) {
+        console.error(error);
+        resetStatus.textContent = "There was a problem resetting usage.";
+    }
+});
 
 // ==========================================
 // FILTERS
