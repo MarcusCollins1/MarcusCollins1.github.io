@@ -70,8 +70,8 @@ const editSetAnswer3 = document.getElementById("editSetAnswer3");
 const editCategory = document.getElementById("editCategory");
 const editTimesUsed = document.getElementById("editTimesUsed");
 const editStatus = document.getElementById("editStatus");
-const saveButton = document.getElementById("saveButton");
-const deleteButton = document.getElementById("deleteButton");
+const saveButton = document.getElementById("saveBtn");
+const deleteButton = document.getElementById("deleteBtn");
 
 // ==========================================
 // STATE
