@@ -56,7 +56,7 @@ const searchInput = document.getElementById("searchInput");
 const questionList = document.getElementById("questionList");
 const editPanel = document.getElementById("editPanel");
 const editTitle = document.getElementById("editTitle");
-const closeEditButton = document.getElementById("closeEditButton");
+const closeEditBtn = document.getElementById("closeEditBtn");
 const starterEdit = document.getElementById("starterEdit");
 const setEdit = document.getElementById("setEdit");
 const editStarterQuestion = document.getElementById("editStarterQuestion");
@@ -401,7 +401,7 @@ function openEditPanel(type, item)  {
 // CLOSE EDIT
 // ==========================================
 
-closeEditButton.addEventListener("click", () => {
+closeEditBtn.addEventListener("click", () => {
     editPanel.classList.add("hidden");
 
     currentType = null;
