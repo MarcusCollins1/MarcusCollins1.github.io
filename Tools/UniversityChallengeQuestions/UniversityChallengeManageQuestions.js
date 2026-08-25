@@ -46,6 +46,7 @@ const db = getFirestore(app);
 // HTML ELEMENTS
 // ==========================================
 
+const loadingStatus = document.getElementById("loadingStatus");
 const starterCount = document.getElementById("starterCount");
 const setCount = document.getElementById("setCount");
 const questionCount = document.getElementById("questionCount");
@@ -163,6 +164,7 @@ async function loadSets() {
 // ==========================================
 
 async function loadData() {
+    loadingStatus.classList.remove("hidden");
     try {
         questionList.innerHTML = "";
 
@@ -181,6 +183,8 @@ async function loadData() {
 
         questionList.innerHTML = "<p>There was a problem loading the questions.</p>";
         
+    } finally {
+        loadingStatus.classList.add("hidden");
     }
 }
 
