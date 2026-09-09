@@ -36,13 +36,25 @@ const visitedCountriesRing = document.getElementById("visitedCountriesRing");
 const visitedCountriesPercentage = document.getElementById("visitedCountriesPercentage");
 const visitedCountriesCount = document.getElementById("visitedCountriesCount");
 
-let percentage = Math.round(visitedCountries.length / allCountries.length * 100);
-if (visitedCountries.length > 0 && percentage === 0) {
-    percentage = 1;
+let countriesPercentage = Math.round(visitedCountries.length / allCountries.length * 100);
+if (visitedCountries.length > 0 && countriesPercentage === 0) {
+    countriesPercentage = 1;
 }
-if (visitedCountries < allCountries.length && percentage === 100) {
-    percentage = 99;
+if (visitedCountries < allCountries.length && countriesPercentage === 100) {
+    countriesPercentage = 99;
 }
-visitedCountriesRing.style = `--percent: ${percentage};`;
-visitedCountriesPercentage.textContent = `${percentage}%`;
+visitedCountriesRing.style = `--percent: ${countriesPercentage};`;
+visitedCountriesPercentage.textContent = `${countriesPercentage}%`;
 visitedCountriesCount.textContent = `${visitedCountries.length}/${allCountries.length}`;
+
+const visitedContinentsRing = document.getElementById("visitedContinentsRing");
+const visitedContinentsPercentage = document.getElementById("visitedContinentsPercentage");
+const visitedContinentsCount = document.getElementById("visitedContinentsCount");
+
+const numVisitedContinents = 5;
+const totalContinents = 7;
+
+let continentsPercentage = Math.round(numVisitedContinents / totalContinents * 100);
+visitedContinentsRing.style = `--percent: ${continentsPercentage};`;
+visitedContinentsPercentage.textContent = `${continentsPercentage}%`;
+visitedContinentsCount.textContent = `${numVisitedContinents}/${totalContinents}`;
