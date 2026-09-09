@@ -470,10 +470,6 @@ button:hover {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.08);
     overflow: hidden;
-
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
 }
 #svgMap {
     width: 100%;
