@@ -470,6 +470,10 @@ button:hover {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.08);
     overflow: hidden;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
 }
 #svgMap {
     width: 100%;
@@ -480,6 +484,13 @@ button:hover {
 }
 .visited-country:hover {
     fill: #22d3ee !important;
+}
+.completion-row {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 18px;
+    flex-wrap: wrap;
 }
 
 #returnBtn {
@@ -506,6 +517,9 @@ button:hover {
     border: 1px solid rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(16px);
     width: fit-content;
+
+    flex: 1;
+    min-width: 280px;
 }
 .ring {
     --size: 92px;
