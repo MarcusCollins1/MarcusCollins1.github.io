@@ -12,8 +12,12 @@ async function getFileNames(owner, repo, path="") {
     return files.map(file => file.name);
 }
 
-getFileNames("MarcusCollins1", "advent-of-code")
-    .then(names => console.log(names));
+async function getStars(year) {
+    const fileNames = await getFileNames("MarcusCollins1", "advent-of-code", `AOC ${year}`);
+    const pattern = /^Day \d+ Part \d+ \d{4}\.py$/
+    const count = fileNames.filter(name => pattern.test(name)).length;
+    return count;
+}
 
 function createProgress(year, stars, maxStars) {
     const percentage = Math.min(
@@ -51,4 +55,20 @@ function createProgress(year, stars, maxStars) {
     document.getElementById("progress-container").appendChild(card);
 }
 
-createProgress(2017, 36, 50);
+const years = [
+    {year: 2015, stars: await getStars(2015), maxStars: 50},
+    {year: 2016, stars: await getStars(2016), maxStars: 50},
+    {year: 2017, stars: await getStars(2017), maxStars: 50},
+    {year: 2018, stars: await getStars(2018), maxStars: 50},
+    {year: 2019, stars: await getStars(2019), maxStars: 50},
+    {year: 2020, stars: await getStars(2020), maxStars: 50},
+    {year: 2021, stars: await getStars(2021), maxStars: 50},
+    {year: 2022, stars: await getStars(2022), maxStars: 50},
+    {year: 2023, stars: await getStars(2023), maxStars: 50},
+    {year: 2024, stars: await getStars(2024), maxStars: 50},
+    {year: 2025, stars: await getStars(2025), maxStars: 24}
+];
+
+years.forEach(({year, stars, maxStars}) => {
+    createProgress(year, stars, maxStars);
+});
