@@ -46,7 +46,7 @@ function createProgress(year, stars, maxStars) {
         </div>
     `;
 
-    const progressBar = card.querySelector(".progress.bar");
+    const progressBar = card.querySelector(".progress-bar");
 
     requestAnimationFrame(() => {
         progressBar.style.width = `${percentage}%`;
