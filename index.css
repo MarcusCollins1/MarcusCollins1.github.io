@@ -17,3 +17,68 @@ button:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 12px rgba(139, 92, 246, 0.35);
 }
+
+
+#progress-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.aoc-card {
+    width: 280px;
+    padding: 20px;
+    border-radius: 14px;
+    background: #171a21;
+    border: 1px solid #2b313c;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.aoc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.aoc-year {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.aoc-tag {
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background: #2b313c;
+    color: #fff;
+}
+
+.aoc-stars {
+    margin-bottom: 10px;
+    color: #d9a441;
+    font-size: 1rem;
+}
+
+.progress-track {
+    height: 10px;
+    background: #2b313c;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #d65a31, #e7b341);
+    transition: width 0.8s ease;
+}
+
+.aoc-percentage {
+    margin-top: 10px;
+    text-align: right;
+    font-size: 0.85rem;
+    color: #9da7b3;
+}
