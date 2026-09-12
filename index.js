@@ -14,8 +14,9 @@ async function getFileNames(owner, repo, path="") {
 
 async function getStars(year) {
     const fileNames = await getFileNames("MarcusCollins1", "advent-of-code", `AOC ${year}`);
-    const pattern = /^Day \d+ Part \d+ \d{4}\.py$/
-    const count = fileNames.filter(name => pattern.test(name)).length;
+    const pattern = /^Day \d+ Part \d+ \d{4}\.py$/;
+    const pattern1 = /^Day 25 Part 1 \d{4}\.py$/;
+    const count = fileNames.filter(name => pattern.test(name)).length + fileNames.filter(name => pattern1.test(name)).length;
     return count;
 }
 
