@@ -17,6 +17,7 @@ async function getStars(year) {
     const pattern = /^Day \d+ Part \d+ \d{4}\.py$/;
     const pattern1 = /^Day 25 Part 1 \d{4}\.py$/;
     const count = fileNames.filter(name => pattern.test(name)).length + fileNames.filter(name => pattern1.test(name)).length;
+    console.log(fileNames.filter(name => pattern.test(name)));
     return count;
 }
 
@@ -73,3 +74,5 @@ const years = [
 years.forEach(({year, stars, maxStars}) => {
     createProgress(year, stars, maxStars);
 });
+
+document.getElementById("progress-loading").style.display = "none";
