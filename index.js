@@ -13,11 +13,32 @@ async function getFileNames(owner, repo, path="") {
 }
 
 async function getStars(year) {
-    const fileNames = await getFileNames("MarcusCollins1", "advent-of-code", `AOC ${year}`);
+    const fileNames = await getFileNames(
+        "MarcusCollins1",
+        "advent-of-code",
+        `AOC ${year}`
+    );
+
     const pattern = /^Day \d+ Part \d+ \d{4}\.py$/;
-    const pattern1 = /^Day 25 Part 1 \d{4}\.py$/;
-    const count = fileNames.filter(name => pattern.test(name)).length + fileNames.filter(name => pattern1.test(name)).length;
-    console.log(fileNames.filter(name => pattern.test(name)));
+
+    const matchingFiles = fileNames.filter(name => pattern.test(name));
+    let count = matchingFiles.length;
+
+    console.log(year, matchingFiles);
+
+    // AoC 2015-2024 has 50 stars.
+    // AoC 2025 has 24 stars.
+    const finalDay = year <= 2024 ? 25 : 12;
+    const maxStars = year <= 2024 ? 50 : 24;
+
+    const lastFile = `Day ${finalDay} Part 1 ${year}.py`;
+
+    // Your repository apparently only has one of the two files
+    // for the final day, so account for that here.
+    if (count === maxStars - 1 && fileNames.includes(lastFile)) {
+        count = maxStars;
+    }
+
     return count;
 }
 
