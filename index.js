@@ -27,7 +27,7 @@ async function getStars(year) {
     const matchingFiles = fileNames.filter(name => pattern.test(name));
     let count = matchingFiles.length;
 
-    console.log(year, matchingFiles);
+    // console.log(year, matchingFiles);
 
     // AoC 2015-2024 has 50 stars.
     // AoC 2025 has 24 stars.
