@@ -1,3 +1,6 @@
+const toggleButton = document.getElementById("progressToggle");
+const progressContainer = document.getElementById("progressContainer")
+
 async function getFileNames(owner, repo, path="") {
     const response = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/contents/${path}`
@@ -75,7 +78,7 @@ function createProgress(year, stars, maxStars) {
         progressBar.style.width = `${percentage}%`;
     });
 
-    document.getElementById("progress-container").appendChild(card);
+    progressContainer.appendChild(card);
 }
 
 const years = [
@@ -96,4 +99,12 @@ years.forEach(({year, stars, maxStars}) => {
     createProgress(year, stars, maxStars);
 });
 
-document.getElementById("progress-loading").style.display = "none";
+toggleButton.addEventListener("click", () => {
+    const collapsed = progressContainer.classList.toggle("collapsed");
+
+    toggleButton.textContent = collapsed
+        ? "Show yearly progress ▼"
+        : "Hide yearly progress ▲";
+});
+
+document.getElementById("progressLoading").style.display = "none";
