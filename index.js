@@ -107,4 +107,5 @@ toggleButton.addEventListener("click", () => {
         : "Hide yearly progress ▲";
 });
 
+toggleButton.classList.remove("hidden");
 document.getElementById("progressLoading").style.display = "none";

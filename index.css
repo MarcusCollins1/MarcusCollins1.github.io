@@ -110,3 +110,7 @@ button:hover {
     font-size: 0.85rem;
     color: #9da7b3;
 }
+
+.hidden {
+    display: none;
+}
