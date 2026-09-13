@@ -67,13 +67,19 @@ toggleButton.addEventListener("click", () => {
     toggleButton.textContent = collapsed
         ? "Show yearly progress ▼"
         : "Hide yearly progress ▲";
+    
+    const bars = progressContainer.querySelectorAll(".progress-bar");
 
-    if (!collapsed) {
-        // Start the progress bar animations after the container opens
+    if (collapsed) {
+        // Reset all bars to 0 when closing
+        bars.forEach(bar => {
+            bar.style.width = "0%";
+        });
+    } else {
+        // Let the container open first, then animate bars
         requestAnimationFrame(() => {
-            progressContainer.querySelectorAll(".progress-bar").forEach(bar => {
-                const percentage = bar.dataset.percentage;
-                bar.style.width = `${percentage}%`;
+            bars.forEach(bar => {
+                bar.style.width = `${bar.dataset.percentage}%`;
             });
         });
     }
