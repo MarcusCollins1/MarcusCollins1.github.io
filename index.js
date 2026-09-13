@@ -21,19 +21,13 @@ function createProgress(year, stars, maxStars) {
         </div>
 
         <div class="progress-track">
-            <div class="progress-bar"></div>
+            <div class="progress-bar" data-percentage="${percentage}"></div>
         </div>
 
         <div class="aoc-percentage">
             ${percentage.toFixed(1)}% complete
         </div>
     `;
-
-    const progressBar = card.querySelector(".progress-bar");
-
-    requestAnimationFrame(() => {
-        progressBar.style.width = `${percentage}%`;
-    });
 
     progressContainer.appendChild(card);
 }
@@ -73,6 +67,16 @@ toggleButton.addEventListener("click", () => {
     toggleButton.textContent = collapsed
         ? "Show yearly progress ▼"
         : "Hide yearly progress ▲";
+
+    if (!collapsed) {
+        // Start the progress bar animations after the container opens
+        requestAnimationFrame(() => {
+            progressContainer.querySelectorAll(".progress-bar").forEach(bar => {
+                const percentage = bar.dataset.percentage;
+                bar.style.width = `${percentage}%`;
+            });
+        });
+    }
 });
 
 toggleButton.classList.remove("hidden");

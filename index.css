@@ -101,7 +101,7 @@ button:hover {
     width: 0%;
     border-radius: 999px;
     background: linear-gradient(90deg, #d65a31, #e7b341);
-    transition: width 0.8s ease;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .aoc-percentage {
