@@ -226,6 +226,24 @@ function getFound() {
     return [...found];
 }
 
+function reloadAtNextMidnightUTC() {
+    const now = new Date();
+
+    // Next midnight UTC
+    const nextMidnight = new Date(
+        Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate() + 1,
+            0, 0, 0, 0
+        )
+    );
+
+    const millisecondsUntilMidnight = nextMidnight.getTime() - now.getTime();
+    console.log(`Next puzzle in ${Math.round(millisecondsUntilMidnight / 1000)} seconds`);
+    setTimeout(() => {window.location.reload();}, millisecondsUntilMidnight);
+}
+
 backSpaceBtn.addEventListener("click", () => {
     wordInput.value = wordInput.value.slice(0, -1);
 });
@@ -248,6 +266,18 @@ buildBoard();
 renderFoundWords();
 updateStats();
 loadUserWords();
+
+reloadAtNextMidnightUTC();
+
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState ==="visible") {
+        const currentDate = dateKeyUTC();
+        
+        if (currentDate !== today) {
+            window.location.reload();
+        }
+    }
+});
 
 window.loadUserWords = loadUserWords;
 window.getFound = getFound;
