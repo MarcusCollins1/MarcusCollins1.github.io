@@ -490,3 +490,32 @@ export async function getWordsForToday() {
 
     return data.words || [];
 }
+
+export async function getPuzzleForDate(date) {
+    const puzzleRef = doc(db, "polygon-answers", date);
+    const snapshot = await getDoc(puzzleRef);
+
+    if (!snapshot.exists()) {
+        return null;
+    }
+
+    return snapshot.data();
+}
+
+export async function savePuzzleForDate(date, puzzle) {
+    const puzzleRef = doc(db, "polygon-answers", date);
+    await setDoc(puzzleRef, {
+        ...puzzle,
+        createdAt: serverTimestamp()
+    });
+}
+
+export async function getPuzzleForToday() {
+    const today = getLocalDayStr();
+    return getPuzzleForDate(today);
+}
+
+export async function savePuzzleForToday(puzzle) {
+    const today = getLocalDayStr();
+    await savePuzzleForDate(today, puzzle);
+}

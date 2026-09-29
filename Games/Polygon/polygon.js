@@ -1,6 +1,10 @@
 import {
     addWordForToday,
-    getWordsForToday
+    getWordsForToday,
+    getPuzzleForToday,
+    getPuzzleForDate,
+    savePuzzleForToday,
+    savePuzzleForDate
 } from "./polygonFireBase.js";
 
 function dateKeyUTC(date = new Date()) {
@@ -20,23 +24,33 @@ async function loadValidWords() {
     const VALID_ENGLISH_WORDS = text.split("\n").map(w => w.trim().toLowerCase()).filter(w => w.length >= 4);
     return VALID_ENGLISH_WORDS;
 }
-function getPuzzle(validWords) {
+function getPuzzle(validWords, date) {
     const candidates = validWords.filter(w => w.length >= 7 && new Set(w).size === 7);
-    const key = dateKeyUTC();
-    const seed = hashStringToInt(key);
+
+    const seed = hashStringToInt(date);
     const index = seed % candidates.length;
-    const puzzleWord = candidates[index];
-    const center = puzzleWord[seed % puzzleWord.length].toUpperCase();
-    const outer = [...new Set(puzzleWord)].filter(l => l.toUpperCase() !== center).map(l => l.toUpperCase());
-    const answers = validWords.filter(w => {
+    const answer = candidates[index];
+    
+    const center = answer[seed % answer.length].toUpperCase();
+    const outer = [...new Set(answer)].filter(l => l.toUpperCase() !== center).map(l => l.toUpperCase());
+    const words = validWords.filter(w => {
         const letters = new Set(w.toUpperCase());
         return w.length >= 4 && letters.has(center) && [...letters].every(l => outer.includes(l) || l === center);
     });
-    return {center, outer, answers};
+    return {center, outer, words, answer};
 }
 
-const VALID_ENGLISH_WORDS = await loadValidWords();
-const puzzle = getPuzzle(VALID_ENGLISH_WORDS);
+const today = dateKeyUTC();
+let puzzle = await getPuzzleForDate(today);
+if (puzzle) {
+    console.log(`Loaded puzzle for ${today} from Firestore`);
+} else {
+    console.log(`No puzzle found for ${today}. Generating...`);
+    const validWords = await loadValidWords();
+    puzzle = getPuzzle(validWords, today);
+    await savePuzzleForDate(today, puzzle);
+    console.log(`Saved puzzle ${today} to Firestore`);
+}
 
 const isPhone = window.matchMedia("(max-width: 768px)").matches;
 
