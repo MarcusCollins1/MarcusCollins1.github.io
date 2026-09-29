@@ -100,7 +100,7 @@ function buildBoard() {
         }
     });
 
-    totalCount.textContent = puzzle.answers.length;
+    totalCount.textContent = puzzle.words.length;
 }
 
 function updateStats() {
@@ -155,7 +155,7 @@ function submitWord(word = null) {
         return;
     }
 
-    const answerSet = new Set(puzzle.answers.map(normalize));
+    const answerSet = new Set(puzzle.words.map(normalize));
     if (!answerSet.has(word)) {
         setMessage("Not in the answer list for this puzzle.", "bad");
         return;
@@ -192,7 +192,7 @@ function revealAnswers() {
         if (prompt("Enter password to reaveal answers:") !== "polygon") {
             return;
         }
-        found = new Set(puzzle.answers.map(normalize));
+        found = new Set(puzzle.words.map(normalize));
         showingAnswers = true;
         renderFoundWords();
         updateStats();
@@ -206,8 +206,8 @@ function revealAnswers() {
 
 function share() {
     const date = new Date();
-    const maxScore = puzzle.answers.reduce((sum, w) => sum + scoreForWord(w), 0);
-    const string = `Polygon Puzzle - ${date.toDateString()}\nFound ${found.size}/${puzzle.answers.length}\nScore: ${scoreEl.textContent}/${maxScore}\nhttps://marcuscollins1.github.io/Games/Polygon/polygon.html`;
+    const maxScore = puzzle.words.reduce((sum, w) => sum + scoreForWord(w), 0);
+    const string = `Polygon Puzzle - ${date.toDateString()}\nFound ${found.size}/${puzzle.words.length}\nScore: ${scoreEl.textContent}/${maxScore}\nhttps://marcuscollins1.github.io/Games/Polygon/polygon.html`;
     navigator.clipboard.writeText(string).then(() => {
         setMessage("Results copied to clipboard!", "good");
     }).catch(() => {
