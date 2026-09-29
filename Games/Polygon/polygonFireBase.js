@@ -35,8 +35,8 @@ async function addDocument(collectionName, fields) {
     });
 }
 
-function getLocalDayStr(date = new Date()) {
-    return new Intl.DateTimeFormat("en-CA").format(date);
+function getDayStr(date = new Date()) {
+    return date.toISOString().slice(0, 10);
 }
 
 function scoreFromWords(words = []) {
@@ -207,7 +207,7 @@ async function deleteAccount() {
 
 async function loadLeaderboard(view = currentLeaderboardView) {
     const querySnapshot = await getDocs(collection(db, "polygon-users"));
-    const dayStr = getLocalDayStr();
+    const dayStr = getDayStr();
 
     const userPromises = querySnapshot.docs.map(async (docSnap) => {
         const userData = docSnap.data();
@@ -450,7 +450,7 @@ if (loginSubmitBtn) {
 export async function addWordForToday(word) {
     if (!currentUser) return;
 
-    const today = getLocalDayStr();
+    const today = getDayStr();
 
     const dayRef = doc(
         db,
@@ -472,7 +472,7 @@ export async function addWordForToday(word) {
 export async function getWordsForToday() {
     if (!currentUser) return [];
 
-    const today = getLocalDayStr();
+    const today = getDayStr();
 
     const dayRef = doc(
         db,
@@ -511,11 +511,11 @@ export async function savePuzzleForDate(date, puzzle) {
 }
 
 export async function getPuzzleForToday() {
-    const today = getLocalDayStr();
+    const today = getDayStr();
     return getPuzzleForDate(today);
 }
 
 export async function savePuzzleForToday(puzzle) {
-    const today = getLocalDayStr();
+    const today = getDayStr();
     await savePuzzleForDate(today, puzzle);
 }
