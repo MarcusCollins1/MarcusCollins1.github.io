@@ -53,7 +53,7 @@ async function getUserDays(user) {
     const username = user?.username || user?.id;
     if (!username) return [];
 
-    const daysRef = collection(db, "users", username, "days");
+    const daysRef = collection(db, "polygon-users", username, "days");
     const snapshot = await getDocs(daysRef);
 
     return snapshot.docs.map((docSnap) => ({
@@ -199,14 +199,14 @@ async function deleteAccount() {
 
     if (!confirmed) return;
 
-    await deleteDoc(doc(db, "users", currentUser.username));
+    await deleteDoc(doc(db, "polygon-users", currentUser.username));
 
     clearLoggedInUser();
     closeAccountBox();
 }
 
 async function loadLeaderboard(view = currentLeaderboardView) {
-    const querySnapshot = await getDocs(collection(db, "users"));
+    const querySnapshot = await getDocs(collection(db, "polygon-users"));
     const dayStr = getLocalDayStr();
 
     const userPromises = querySnapshot.docs.map(async (docSnap) => {
@@ -365,7 +365,7 @@ async function signup() {
         return;
     }
 
-    const userRef = doc(db, "users", username);
+    const userRef = doc(db, "polygon-users", username);
     const userSnap = await getDoc(userRef);
 
     if (userSnap.exists()) {
@@ -404,7 +404,7 @@ async function login() {
         return;
     }
 
-    const userRef = doc(db, "users", username);
+    const userRef = doc(db, "polygon-users", username);
     const userSnap = await getDoc(userRef);
 
     if (!userSnap.exists()) {
@@ -454,7 +454,7 @@ export async function addWordForToday(word) {
 
     const dayRef = doc(
         db,
-        "users",
+        "polygon-users",
         currentUser.username,
         "days",
         today
@@ -476,7 +476,7 @@ export async function getWordsForToday() {
 
     const dayRef = doc(
         db,
-        "users",
+        "polygon-users",
         currentUser.username,
         "days",
         today
