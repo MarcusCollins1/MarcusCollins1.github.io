@@ -23,6 +23,7 @@ import {
     setPersistence,
     browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { useRef } from "react";
 
 const firebaseConfig = {
     apiKey: "AIzaSyA_CXSZVz6meJgcJyktktWNmPtLmeFNXn0",
@@ -56,6 +57,7 @@ const closeAuthBtn = document.getElementById("closeAuthBtn");
 
 let loggedIn = false;
 let authMode = "login"; // "login" or "signup"
+let explicitlyCreatingAccount = false;
 
 function normalizeUsername(username) {
     return username.trim().toLowerCase().replace(/\s+/g, "").replace(/[^a-z0-9._-]/g, "")
@@ -64,6 +66,36 @@ function normalizeUsername(username) {
 function usernameToEmail(username) {
     const clean = normalizeUsername(username);
     return `${clean}@familyframed.local`;
+}
+
+const USER_COLLECTION = "family-framed-users";
+
+async function getFamilyFramedAccount(uid) {
+    const userRef = doc(db, USER_COLLECTION, uid);
+    const snapshot = await getDoc(userRef);
+
+    if (!snapshot.exists()) {
+        return null;
+    }
+
+    return snapshot.data();
+}
+
+async function createFamilyFramedAccount(user, username) {
+    const userRef = doc(db, USER_COLLECTION, user.uid);
+    const snapshot = await getDoc(userRef);
+
+    if (snapshot.exists()) {
+        return snapshot.data();
+    }
+
+    const data = {
+        username,
+        createdAt: serverTimestamp()
+    };
+    
+    await setDoc(useRef, data);
+    return data;
 }
 
 function setProtectedButtonsEnabled(enabled) {
@@ -111,15 +143,18 @@ async function handleAuthSubmit() {
         const email = usernameToEmail(username);
 
         if (authMode === "signup") {
+            explicitlyCreatingAccount = true;
             const cred = await createUserWithEmailAndPassword(auth, email, password);
             await updateProfile(cred.user, { displayName: username });
+            await createFamilyFramedAccount(cred.user, username);
         } else {
+            explicitlyCreatingAccount = false;
             await signInWithEmailAndPassword(auth, email, password);
         }
 
         hideLogin();
     } catch (error) {
-        if (error.code === "auth/email-already-in-us") {
+        if (error.code === "auth/email-already-in-use") {
             authError.textContent = "That username is already taken.";
         } else if (error.code === "auth/invalid-credential") {
             authError.textContent = "Wrong username or password.";
@@ -131,10 +166,56 @@ async function handleAuthSubmit() {
     }
 }
 
-onAuthStateChanged(auth, (user) => {
-    loggedIn = !!user;
-    setProtectedButtonsEnabled(loggedIn);
-    loginBtn.textContent = loggedIn ? `Logout${user?.displayName ? ` (${user.displayName})` : ""}` : "Login / Sign up";
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        loggedIn = false;
+        setProtectedButtonsEnabled(false);
+        loginBtn.textContent = "Login / Sign up";
+        return;
+    }
+
+    try {
+        // Firebase has remembered a user.
+        // Check that this user actually belongs to Family Framed.
+        const account = await getFamilyFramedAccount(user.uid);
+
+        if (!account) {
+            console.log(
+                "Authenticated Firebase user does not have a Family Framed account."
+            );
+
+            loggedIn = false;
+            setProtectedButtonsEnabled(false);
+            loginBtn.textContent = "Login / Sign up";
+
+            // Remove the Firebase session from this page.
+            await signOut(auth);
+
+            return;
+        }
+
+        // They have a Family Framed document,
+        // so they're allowed into the game.
+        loggedIn = true;
+        setProtectedButtonsEnabled(true);
+
+        const username =
+            account.username ||
+            user.displayName ||
+            "User";
+
+        loginBtn.textContent = `Logout (${username})`;
+
+    } catch (error) {
+        console.error(
+            "Failed to check Family Framed account:",
+            error
+        );
+
+        loggedIn = false;
+        setProtectedButtonsEnabled(false);
+        loginBtn.textContent = "Login / Sign up";
+    }
 });
 
 playBtn.addEventListener("click", () => {
