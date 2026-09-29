@@ -23,7 +23,6 @@ import {
     setPersistence,
     browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-import { useRef } from "react";
 
 const firebaseConfig = {
     apiKey: "AIzaSyA_CXSZVz6meJgcJyktktWNmPtLmeFNXn0",
@@ -94,7 +93,7 @@ async function createFamilyFramedAccount(user, username) {
         createdAt: serverTimestamp()
     };
     
-    await setDoc(useRef, data);
+    await setDoc(userRef, data);
     return data;
 }
 
