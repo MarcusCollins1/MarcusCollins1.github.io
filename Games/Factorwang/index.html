@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Factorwang</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <a href="../../games.html" class="return-btn">← Return</a>
+    <h1>FACTORWANG</h1>
+  </header>
+
+  <main class="game-container">
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">SCORE</span>
+        <span id="score">0</span>
+      </div>
+
+      <div class="stat">
+        <span class="stat-label">STREAK</span>
+        <span id="streak">0</span>
+      </div>
+
+      <div class="stat">
+        <span class="stat-label">BEST</span>
+        <span id="best">0</span>
+      </div>
+    </div>
+
+    <section class="game-card">
+
+      <p class="question-label">
+        FIND THE PRIME FACTORS OF
+      </p>
+
+      <div id="number" class="number">60</div>
+
+      <form id="answer-form">
+        <label for="answer">
+          Enter the prime factors:
+        </label>
+
+        <input
+          type="text"
+          id="answer"
+          placeholder="e.g. 2 × 2 × 3 × 5"
+          autocomplete="off"
+          spellcheck="false"
+          required
+        >
+
+        <p class="input-help">
+          Separate factors using spaces, commas,
+          or multiplication signs.
+        </p>
+
+        <button type="submit" class="submit-btn">
+          CHECK ANSWER
+        </button>
+      </form>
+
+      <div id="feedback" class="feedback"
+           aria-live="polite"></div>
+
+      <div class="extra-buttons">
+        <button id="hint-btn" type="button">
+          Hint
+        </button>
+
+        <button id="skip-btn" type="button">
+          Skip
+        </button>
+
+        <button id="next-btn" type="button" hidden>
+          Next Number →
+        </button>
+      </div>
+
+    </section>
+
+    <div class="difficulty-container">
+      <label for="difficulty">Difficulty</label>
+
+      <select id="difficulty">
+        <option value="easy">Easy (2–100)</option>
+        <option value="medium" selected>
+          Medium (2–500)
+        </option>
+        <option value="hard">Hard (2–2000)</option>
+        <option value="expert">Expert (2–10000)</option>
+      </select>
+    </div>
+
+    <section class="instructions">
+      <h2>How to Play</h2>
+      <p>
+        Break the number into its prime factors.
+        Every factor must be a prime number.
+      </p>
+      <p>
+        For example, the prime factors of
+        <strong>60</strong> are
+        <strong>2 × 2 × 3 × 5</strong>.
+      </p>
+      <p>
+        The order doesn't matter. Get answers
+        right to build your streak!
+      </p>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>FACTORWANG • A Prime Factorisation Game</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
