@@ -44,6 +44,59 @@ const db = getFirestore(app);
 const realtimeDb = getDatabase(app);
 
 // ==========================================
+// BUZZER SOUND
+// ==========================================
+
+let audioContext = null;
+
+function playBuzzSound() {
+    try {
+        if (!audioContext) {
+            audioContext = new AudioContext();
+        }
+
+        if (audioContext.state !== "running") return;
+
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(
+            880,
+            audioContext.currentTime
+        );
+
+        gain.gain.setValueAtTime(
+            0.3,
+            audioContext.currentTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioContext.currentTime + 0.4
+        );
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.4);
+
+    } catch (error) {
+        console.error("Could not play buzzer sound:", error);
+    }
+}
+
+// Browsers require user interaction before audio can play.
+document.addEventListener("click", () => {
+    if (!audioContext) {
+        audioContext = new AudioContext();
+    }
+
+    audioContext.resume().catch(console.error);
+}, { once: true });
+
+// ==========================================
 // HTML ELEMENTS
 // ==========================================
 
@@ -212,17 +265,17 @@ async function createGame() {
 // ==========================================
 
 function listenToGame() {
+    let previousWinnerId = null;
+    let initialized = false;
+
     addListener(onSnapshot(gameDocument(), snapshot => {
-        if (!snapshot.exists()) {
-            return;
-        }
+        if (!snapshot.exists()) return;
 
         const game = snapshot.data();
 
         state.teamAName = game.teamAName || "Team A";
         state.teamBName = game.teamBName || "Team B";
 
-        // Do not overwrite team names while being edited.
         if (document.activeElement !== elements.teamAName) {
             elements.teamAName.value = state.teamAName;
         }
@@ -234,6 +287,27 @@ function listenToGame() {
         elements.teamAScore.textContent = game.teamAScore ?? 0;
         elements.teamBScore.textContent = game.teamBScore ?? 0;
 
+        // ==========================================
+        // DETECT NEW BUZZ
+        // ==========================================
+
+        const currentWinnerId = game.winner?.playerId ?? null;
+
+        if (
+            initialized &&
+            currentWinnerId !== null &&
+            previousWinnerId === null
+        ) {
+            playBuzzSound();
+        }
+
+        previousWinnerId = currentWinnerId;
+        initialized = true;
+
+        // ==========================================
+        // DISPLAY WINNER
+        // ==========================================
+
         if (game.winner) {
             elements.winnerName.textContent = game.winner.name;
             elements.winnerTeam.textContent =
@@ -242,6 +316,7 @@ function listenToGame() {
             elements.winnerName.textContent = "Nobody";
             elements.winnerTeam.textContent = "-";
         }
+
     }, error => {
         reportError("Could not update game information.", error);
     }));
