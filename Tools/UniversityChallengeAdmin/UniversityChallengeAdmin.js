@@ -1,31 +1,33 @@
-import { initializeApp }
-    from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 
 import {
     getFirestore,
     collection,
-    addDoc,
+    doc,
+    setDoc,
+    getDoc,
     getDocs,
     deleteDoc,
     updateDoc,
     onSnapshot,
-    doc,
-    serverTimestamp
+    increment,
+    serverTimestamp,
+    writeBatch
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 import {
     getDatabase,
-    get,
     ref,
-    onDisconnect,
     set,
-    onValue,
-    remove
+    remove,
+    onDisconnect
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-// -----------------------------------
-// FIREBASE CONFIG
-// -----------------------------------
+// ==========================================
+// FIREBASE CONFIGURATION
+// ==========================================
+
 const firebaseConfig = {
     apiKey: "AIzaSyA_CXSZVz6meJgcJyktktWNmPtLmeFNXn0",
     authDomain: "marcus-collins-github-website.firebaseapp.com",
@@ -38,301 +40,426 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getFirestore(app);
-
 const realtimeDb = getDatabase(app);
 
-// -----------------------------------
+// ==========================================
 // HTML ELEMENTS
-// -----------------------------------
+// ==========================================
 
-const createGameBtn = document.getElementById("createGameBtn");
-const gameCode = document.getElementById("gameCode");
-const hideGameCodeBtn = document.getElementById("hideGameCodeBtn");
-const createPanel = document.getElementById("createPanel");
-const gamePanel = document.getElementById("gamePanel");
-const teamsPanel = document.getElementById("teamsPanel");
+const elements = {
+    createGameBtn: document.getElementById("createGameBtn"),
+    createPanel: document.getElementById("createPanel"),
+    gamePanel: document.getElementById("gamePanel"),
+    teamsPanel: document.getElementById("teamsPanel"),
+    winnerPanel: document.getElementById("winnerPanel"),
+    gameCode: document.getElementById("gameCode"),
+    hideGameCodeBtn: document.getElementById("hideGameCodeBtn"),
+    teamAName: document.getElementById("teamAName"),
+    teamBName: document.getElementById("teamBName"),
+    teamAPlayers: document.getElementById("teamAPlayers"),
+    teamBPlayers: document.getElementById("teamBPlayers"),
+    teamAScore: document.getElementById("teamAScore"),
+    teamBScore: document.getElementById("teamBScore"),
+    winnerName: document.getElementById("winnerName"),
+    winnerTeam: document.getElementById("winnerTeam"),
+    resetBtn: document.getElementById("resetBtn"),
+    deleteGameBtn: document.getElementById("deleteGameBtn")
+};
+
 const scoreButtons = document.querySelectorAll(".scoreBtn");
-const winnerPanel = document.getElementById("winnerPanel");
-const winnerName = document.getElementById("winnerName");
-const winnerTeam = document.getElementById("winnerTeam");
-const resetBtn = document.getElementById("resetBtn");
-const deleteGameBtn = document.getElementById("deleteGameBtn");
-const teamAName = document.getElementById("teamAName");
-const teamBName = document.getElementById("teamBName");
-const teamAPlayers = document.getElementById("teamAPlayers");
-const teamBPlayers = document.getElementById("teamBPlayers");
 
-// -----------------------------------
-// CURRENT GAME
-// -----------------------------------
+// ==========================================
+// ADMIN STATE
+// ==========================================
 
-let currentGameId = null;
+const state = {
+    gameId: null,
+    gameCode: null,
+    teamAName: "Team A",
+    teamBName: "Team B",
+    creating: false,
+    deleting: false,
+    resetting: false,
+    unsubscribers: [],
+    adminPresenceRef: null
+};
 
-// -----------------------------------
-// CREATE GAME CODE
-// -----------------------------------
+// ==========================================
+// HELPERS
+// ==========================================
 
-function generateGameCode() {
-    const characters = "1234567890";
-    let code = "";
-    for (let i = 0; i < 6; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        code += characters[randomIndex];
-    }
-    return code;
+function gameDocument() {
+    return doc(db, "universityChallengeGames", state.gameId);
 }
 
-// -----------------------------------
-// CREATE GAME
-// -----------------------------------
+function playersCollection() {
+    return collection(
+        db,
+        "universityChallengeGames",
+        state.gameId,
+        "Players"
+    );
+}
 
-createGameBtn.addEventListener("click", async () => {
-    const code = generateGameCode();
+function getTeamName(team) {
+    return team === "A" ? state.teamAName : state.teamBName;
+}
+
+function addListener(unsubscribe) {
+    state.unsubscribers.push(unsubscribe);
+}
+
+function cleanupListeners() {
+    state.unsubscribers.forEach(unsubscribe => unsubscribe());
+    state.unsubscribers = [];
+}
+
+function reportError(message, error) {
+    console.error(message, error);
+    alert(message);
+}
+
+// ==========================================
+// GENERATE GAME CODE
+// ==========================================
+
+function generateGameCode() {
+    const numbers = new Uint32Array(6);
+    crypto.getRandomValues(numbers);
+
+    return Array.from(numbers, number => number % 10).join("");
+}
+
+// ==========================================
+// CREATE GAME
+// ==========================================
+
+elements.createGameBtn.addEventListener("click", createGame);
+
+async function createGame() {
+    if (state.creating || state.gameId) return;
+
+    state.creating = true;
+    elements.createGameBtn.disabled = true;
+    elements.createGameBtn.textContent = "Creating...";
 
     try {
-        const gameRef = await addDoc(
-            collection(db, "universityChallengeGames"),
-            {
-                code: code,
-                status: "waiting",
-                winner: null,
-                teamAName: "Team A",
-                teamBName: "Team B",
-                createdAt: serverTimestamp()
+        // Use the six-digit code as the document ID.
+        // This prevents ambiguous code lookups.
+        // A transaction or create-only backend operation
+        // is still needed for guaranteed collision safety.
+        let code;
+        let gameRef;
+
+        for (let attempt = 0; attempt < 10; attempt++) {
+            code = generateGameCode();
+
+            gameRef = doc(db, "universityChallengeGames", code);
+
+            const existing = await getDoc(gameRef);
+
+            if (!existing.exists()) break;
+
+            if (attempt === 9) {
+                throw new Error("Could not generate a unique game code.");
             }
+        }
+
+        await setDoc(gameRef, {
+            code,
+            status: "waiting",
+            winner: null,
+            teamAName: "Team A",
+            teamBName: "Team B",
+            teamAScore: 0,
+            teamBScore: 0,
+            createdAt: serverTimestamp()
+        });
+
+        state.gameId = gameRef.id;
+        state.gameCode = code;
+
+        state.adminPresenceRef = ref(
+            realtimeDb,
+            `presence/${state.gameId}/admin`
         );
 
-        currentGameId = gameRef.id;
+        await onDisconnect(state.adminPresenceRef).remove();
+        await set(state.adminPresenceRef, true);
 
-        const presenceRef = ref(realtimeDb, `presence/${currentGameId}`);
-        onValue(presenceRef, async (snapshot) => {
-            const presence = snapshot.val() || {};
-            
-            const connectedPlayerIds = new Set(
-                Object.keys(presence).filter(
-                    key => key !== "admin"
-                )
-            );
+        elements.gameCode.textContent = code;
 
-            const playersRef = collection(db, "universityChallengeGames", currentGameId, "Players");
-            const firestorePlayers = await getDocs(playersRef);
-            for (const playerSnapshot of firestorePlayers.docs) {
-                const playerId = playerSnapshot.id;
-
-                if (!connectedPlayerIds.has(playerId)) {
-                    await deleteDoc(
-                        doc(
-                            db, "universityChallengeGames", currentGameId, "Players", playerId
-                        )
-                    );
-                }
-            }
-        });
-        const adminPresenceRef = ref(realtimeDb, `presence/${currentGameId}/admin`);
-        await onDisconnect(adminPresenceRef).remove();
-        await set(adminPresenceRef, true);
-
-        gameCode.textContent = code;
-        createPanel.style.display = "none";
-        gamePanel.style.display = "block";
-        teamsPanel.style.display = "block";
-        winnerPanel.style.display = "block";
+        elements.createPanel.style.display = "none";
+        elements.gamePanel.style.display = "block";
+        elements.teamsPanel.style.display = "block";
+        elements.winnerPanel.style.display = "block";
 
         listenToGame();
+        listenToPlayers();
+
     } catch (error) {
-        console.error(
-            "Error creating game:",
-            error
-        );
-
-        alert(
-            "Could not create game."
-        );
+        reportError("Could not create game.", error);
+    } finally {
+        state.creating = false;
+        elements.createGameBtn.disabled = false;
+        elements.createGameBtn.textContent = "Create Game";
     }
-});
+}
 
-// -----------------------------------
+// ==========================================
 // LISTEN TO GAME
-// -----------------------------------
+// ==========================================
 
 function listenToGame() {
-    if (!currentGameId) return;
-
-    const gameRef = doc(db, "universityChallengeGames", currentGameId);
-
-    onSnapshot(gameRef, (snapshot) => {
+    addListener(onSnapshot(gameDocument(), snapshot => {
         if (!snapshot.exists()) {
             return;
         }
 
-        const game = snapshot.data()
+        const game = snapshot.data();
 
-        // -----------------------------------
-        // WINNER
-        // -----------------------------------
+        state.teamAName = game.teamAName || "Team A";
+        state.teamBName = game.teamBName || "Team B";
+
+        // Do not overwrite team names while being edited.
+        if (document.activeElement !== elements.teamAName) {
+            elements.teamAName.value = state.teamAName;
+        }
+
+        if (document.activeElement !== elements.teamBName) {
+            elements.teamBName.value = state.teamBName;
+        }
+
+        elements.teamAScore.textContent = game.teamAScore ?? 0;
+        elements.teamBScore.textContent = game.teamBScore ?? 0;
 
         if (game.winner) {
-            winnerName.textContent = game.winner.name;
-            winnerTeam.textContent = "Team " + game.winner.team;
+            elements.winnerName.textContent = game.winner.name;
+            elements.winnerTeam.textContent =
+                getTeamName(game.winner.team);
         } else {
-            winnerName.textContent = "Nobody";
-            winnerTeam.textContent = "-";
+            elements.winnerName.textContent = "Nobody";
+            elements.winnerTeam.textContent = "-";
         }
-    });
+    }, error => {
+        reportError("Could not update game information.", error);
+    }));
+}
 
-    // -----------------------------------
-    // PLAYERS
-    // -----------------------------------
+// ==========================================
+// LISTEN TO PLAYERS
+// ==========================================
 
-    const playersRef = collection(db, "universityChallengeGames", currentGameId, "Players");
+function listenToPlayers() {
+    addListener(onSnapshot(playersCollection(), snapshot => {
+        elements.teamAPlayers.replaceChildren();
+        elements.teamBPlayers.replaceChildren();
 
-    onSnapshot(playersRef, (snapshot) => {
-        teamAPlayers.innerHTML = "";
-        teamBPlayers.innerHTML = "";
-        snapshot.forEach((playerSnapshot) => {
+        snapshot.forEach(playerSnapshot => {
             const player = playerSnapshot.data();
-            const li = document.createElement("li");
-            li.textContent = player.name;
-            const removeBtn = document.createElement("button");
-            removeBtn.textContent = "Remove";
-            removeBtn.className = "remove-button";
-            removeBtn.addEventListener("click", () => {
-                removePlayer(playerSnapshot.id)
+
+            if (!["A", "B"].includes(player.team)) return;
+
+            const listItem = document.createElement("li");
+            const name = document.createElement("span");
+            const removeButton = document.createElement("button");
+
+            name.textContent = player.name;
+
+            removeButton.type = "button";
+            removeButton.className = "remove-button";
+            removeButton.textContent = "Remove";
+            removeButton.setAttribute(
+                "aria-label",
+                `Remove ${player.name}`
+            );
+
+            removeButton.addEventListener("click", async () => {
+                removeButton.disabled = true;
+
+                try {
+                    await deleteDoc(playerSnapshot.ref);
+                } catch (error) {
+                    reportError("Could not remove player.", error);
+                    removeButton.disabled = false;
+                }
             });
-            li.appendChild(removeBtn);
-            if (player.team === "A") {
-                teamAPlayers.appendChild(li);
-            } else if (player.team === "B") {
-                teamBPlayers.appendChild(li);
-            }
+
+            listItem.append(name, removeButton);
+
+            const list = player.team === "A"
+                ? elements.teamAPlayers
+                : elements.teamBPlayers;
+
+            list.appendChild(listItem);
         });
-    });
+    }, error => {
+        reportError("Could not update player list.", error);
+    }));
 }
 
-// -----------------------------------
-// REMOVE PLAYER
-// -----------------------------------
+// ==========================================
+// SHOW / HIDE GAME CODE
+// ==========================================
 
-async function removePlayer(playerId) {
-    const playerRef = doc(db, "universityChallengeGames", currentGameId, "Players", playerId);
-    await deleteDoc(playerRef);
-}
+elements.hideGameCodeBtn.addEventListener("click", () => {
+    const hidden = elements.gameCode.style.visibility === "hidden";
 
-// -----------------------------------
-// SHOW/HIDE GAME CODE
-// -----------------------------------
+    elements.gameCode.style.visibility =
+        hidden ? "visible" : "hidden";
 
-hideGameCodeBtn.addEventListener("click", () => {
-    if (gameCode.style.visibility === "hidden") {
-        gameCode.style.visibility = "visible";
-        hideGameCodeBtn.textContent = "Hide Game Code";
-    } else {
-        gameCode.style.visibility = "hidden";
-        hideGameCodeBtn.textContent = "Show Game Code";
-    }
-})
+    elements.hideGameCodeBtn.textContent =
+        hidden ? "Hide Game Code" : "Show Game Code";
+});
 
-// -----------------------------------
+// ==========================================
 // CHANGE TEAM NAMES
-// -----------------------------------
+// ==========================================
 
-teamAName.addEventListener("change", async () => {
-    await updateDoc(doc(db, "universityChallengeGames", currentGameId), {
-        teamAName: teamAName.value
-    });
+async function updateTeamName(team, input) {
+    if (!state.gameId) return;
+
+    const name = input.value.trim();
+
+    if (!name || name.length > 40) {
+        alert("Team names must contain 1 to 40 characters.");
+        input.value = getTeamName(team);
+        return;
+    }
+
+    input.disabled = true;
+
+    try {
+        await updateDoc(gameDocument(), {
+            [`team${team}Name`]: name
+        });
+    } catch (error) {
+        reportError("Could not update team name.", error);
+        input.value = getTeamName(team);
+    } finally {
+        input.disabled = false;
+    }
+}
+
+elements.teamAName.addEventListener("change", () => {
+    updateTeamName("A", elements.teamAName);
 });
 
-teamBName.addEventListener("change", async () => {
-    await updateDoc(doc(db, "universityChallengeGames", currentGameId), {
-        teamBName: teamBName.value
-    });
+elements.teamBName.addEventListener("change", () => {
+    updateTeamName("B", elements.teamBName);
 });
 
-// -----------------------------------
+// ==========================================
 // SCORE BUTTONS
-// -----------------------------------
+// ==========================================
 
 scoreButtons.forEach(button => {
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
+        if (!state.gameId) return;
+
         const team = button.dataset.team;
         const amount = Number(button.dataset.amount);
 
-        const scoreElement = document.getElementById(`team${team}Score`);
+        if (
+            !["A", "B"].includes(team) ||
+            !Number.isFinite(amount)
+        ) {
+            return;
+        }
 
-        let currentScore = Number(scoreElement.textContent);
+        button.disabled = true;
 
-        currentScore += amount;
-
-        scoreElement.textContent = currentScore;
+        try {
+            await updateDoc(gameDocument(), {
+                [`team${team}Score`]: increment(amount)
+            });
+        } catch (error) {
+            reportError("Could not update score.", error);
+        } finally {
+            button.disabled = false;
+        }
     });
 });
 
-// -----------------------------------
+// ==========================================
 // RESET BUZZERS
-// -----------------------------------
+// ==========================================
 
-resetBtn.addEventListener("click", async () => {
+elements.resetBtn.addEventListener("click", async () => {
+    if (!state.gameId || state.resetting) return;
 
-    if (!currentGameId) return;
+    state.resetting = true;
+    elements.resetBtn.disabled = true;
 
     try {
-        const gameRef = doc(db, "universityChallengeGames", currentGameId);
-
-        await updateDoc(gameRef, {
+        await updateDoc(gameDocument(), {
             winner: null,
             status: "waiting"
         });
     } catch (error) {
-        console.error("Error resetting buzzers:", error);
+        reportError("Could not reset buzzers.", error);
+    } finally {
+        state.resetting = false;
+        elements.resetBtn.disabled = false;
     }
 });
 
-// -----------------------------------
+// ==========================================
 // DELETE GAME
-// -----------------------------------
-deleteGameBtn.addEventListener("click", deleteGame);
+// ==========================================
 
-async function deleteGame() {
+elements.deleteGameBtn.addEventListener("click", async () => {
+    if (!state.gameId || state.deleting) return;
+
+    const confirmed = confirm(
+        "Delete this game and remove all players? This cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    state.deleting = true;
+    elements.deleteGameBtn.disabled = true;
+
     try {
-        // Delete from firestore
-        const playersRef = collection(db, "universityChallengeGames", currentGameId, "Players");
-        const playersSnapshot = await getDocs(playersRef);
-        for (const playerSnapshot of playersSnapshot.docs) {
-            await deleteDoc(playerSnapshot.ref);
+        // Delete player documents in batches.
+        // Firestore batches have a write limit.
+        const players = await getDocs(playersCollection());
+
+        const batchSize = 400;
+
+        for (let i = 0; i < players.docs.length; i += batchSize) {
+            const batch = writeBatch(db);
+
+            players.docs
+                .slice(i, i + batchSize)
+                .forEach(player => batch.delete(player.ref));
+
+            await batch.commit();
         }
-        const gameRef = doc(db, "universityChallengeGames", currentGameId);
-        await deleteDoc(gameRef);
-        // Delete from realtime database
-        remove(ref(realtimeDb, `presence/${currentGameId}`));
-        // Reload the page
+
+        await deleteDoc(gameDocument());
+
+        if (state.adminPresenceRef) {
+            await remove(ref(
+                realtimeDb,
+                `presence/${state.gameId}`
+            ));
+        }
+
+        cleanupListeners();
+
         window.location.reload();
+
     } catch (error) {
-        console.error("Error deleting game:", error);
+        reportError("Could not delete game completely.", error);
+        state.deleting = false;
+        elements.deleteGameBtn.disabled = false;
     }
-}
+});
 
-// -----------------------------------
-// CHECK ALL GAMES IN FIRESTORE ARE ACTIVE
-// -----------------------------------
+// ==========================================
+// CLEANUP
+// ==========================================
 
-const firestoreSnapshot = await getDocs(
-    collection(db, "universityChallengeGames")
-);
-
-await Promise.all(
-    firestoreSnapshot.docs.map(async (docSnapshot) => {
-        const id = docSnapshot.id;
-
-        const rtdbSnapshot = await get(
-            ref(realtimeDb, `presence/${id}`)
-        );
-
-        if (!rtdbSnapshot.exists()) {
-            await deleteDoc(
-                doc(db, "universityChallengeGames", id)
-            );
-        }
-    })
-);
+window.addEventListener("pagehide", cleanupListeners);

@@ -26,18 +26,21 @@
 
             <input
                 id="gameCodeInput"
-                type="number"
+                type="text"
+                inputmode="numeric"
                 placeholder="123456"
-                maxlength="6">
+                maxlength="6"
+                pattern="[0-9]{6}">
 
             <label for="nameInput">
                 Your Name
             </label>
 
             <input
-                id="nameInput",
-                type="text",
+                id="nameInput"
+                type="text"
                 placeholder="Your name"
+                maxlength="20"
             >
 
             <label for="teamSelect">
@@ -48,9 +51,9 @@
                 <option value="B">Team B</option>
             </select>
 
-            <button id="joinBtn">Join Game</button>
+            <button id="joinBtn" type="button">Join Game</button>
 
-            <div id="errorMessage" class="error"></div>
+            <div id="errorMessage" class="error" aria-live="polite"></div>
         </div>
 
         <!-- ============================= -->
@@ -64,9 +67,9 @@
 
             <div id="playerInfo">You</div>
 
-            <div id="status">Waiting...</div>
+            <div id="status" aria-live="polite">Waiting...</div>
 
-            <button id="buzzBtn">BUZZ</button>
+            <button id="buzzBtn" type="button">BUZZ</button>
 
             <div id="winner"></div>
 
