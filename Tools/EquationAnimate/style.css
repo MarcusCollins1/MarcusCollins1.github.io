@@ -22,7 +22,7 @@ body {
         radial-gradient(ellipse at 50% 0%, #20234b, transparent 60%),
         var(--bg);
     color: var(--text);
-    font-family: 'DM sans', sans-serif;
+    font-family: 'DM Sans', sans-serif;
 }
 
 .container {
@@ -38,6 +38,7 @@ body {
     padding: 10px 0;
     transition: color 0.2s;
 }
+
 .return-btn:hover {
     color: var(--blue);
 }
@@ -63,6 +64,7 @@ h1 {
     margin: 12px 0;
     letter-spacing: -2px;
 }
+
 h1 span {
     background: linear-gradient(100deg, var(--blue), var(--purple));
     background-clip: text;
@@ -90,6 +92,11 @@ label {
 }
 
 .input-row {
+    display: flex;
+    gap: 12px;
+}
+
+input {
     flex: 1;
     min-width: 0;
     padding: 16px;
@@ -112,14 +119,16 @@ button {
     padding: 14px 20px;
     background: linear-gradient(110deg, #6cbcff, #a58bff);
     color: #091122;
-    font: 700 15px 'DM sans', sans-serif;
+    font: 700 15px 'DM Sans', sans-serif;
     cursor: pointer;
     transition: transform 0.2s, filter 0.2s;
 }
+
 button:hover:not(:disabled) {
     transform: translateY(-2px);
     filter: brightness(1.1);
 }
+
 button:disabled {
     opacity: 0.4;
     cursor: not-allowed;
@@ -132,15 +141,18 @@ button:disabled {
     gap: 9px;
     margin-top: 20px;
 }
+
 .examples span {
     color: var(--muted);
     font-size: 13px;
 }
+
 .examples button, .secondary {
     background: #202b45;
     color: #cbd8f5;
     border: 1px solid #354462;
 }
+
 .examples button {
     font-size: 12px;
     padding: 9px 12px;
@@ -150,6 +162,7 @@ button:disabled {
     color: #ff929e;
     margin: 12px 0 0;
 }
+
 #error:empty {
     display: none;
 }
@@ -175,44 +188,117 @@ h2 {
     font-size: 13px;
 }
 
+/* Equation display */
+
 .equation-display {
-    min-height: 170px;
+    min-height: 190px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 9px;
-    padding: 35px 10px;
+    gap: 0.16em;
+    padding: 40px 10px;
     font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(27px, 6vw, 48px);
+    font-size: clamp(24px, 5.5vw, 44px);
     font-weight: 600;
-    overflow-wrap: anywhere;
+    position: relative;
+    overflow: visible;
+    isolation: isolate;
 }
 
-.token {
-    display: inline-block;
-    transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.45s, color 0.45s;
+.math-token {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    white-space: nowrap;
+    line-height: 1.25;
+    transform-origin: center;
 }
-.token.variable {
+
+.math-token.variable {
     color: var(--blue);
 }
-.token.operator {
-    color: var(--muted);
-}
-.token.number {
+
+.math-token.number {
     color: var(--text);
 }
-.token.equals {
-    color: var(--purple);
+
+.math-token.operator {
+    color: var(--muted);
 }
-.token.answer {
+
+.math-token.equals {
+    color: var(--purple);
+    padding: 0 0.12em;
+}
+
+.math-token.bracket {
+    color: #d1d9ef;
+}
+
+/* Fractions */
+
+.math-fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    vertical-align: middle;
+    min-width: 1.2em;
+    padding: 0 0.08em;
+    font-size: 0.86em;
+    line-height: 1.15;
+}
+
+.fraction-top, .fraction-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.04em;
+    padding: 0.12em 0.18em;
+    white-space: nowrap;
+}
+
+.fraction-top {
+    border-bottom: 2px solid currentColor;
+    padding-bottom: 0.18em;
+}
+
+.fraction-bottom {
+    padding-top: 0.18em;
+}
+
+.math-fraction .math-token {
+    font-size: 1em;
+}
+
+/* Animation elements */
+
+.animation-ghost {
+    position: fixed;
+    z-index: 100;
+    pointer-events: none;
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    white-space: nowrap;
+    transform-origin: top left;
+}
+
+.equation-display.is-answer .math-token {
     color: var(--green);
+}
+
+.equation-display.is-answer {
     text-shadow: 0 0 24px #70e2b150;
 }
 
+/* Explanations and controls */
+
 .explanation {
     text-align: center;
-    min-height: 50px;
+    min-height: 55px;
     color: #c5d1eb;
     font-size: 16px;
     line-height: 1.6;
@@ -258,6 +344,21 @@ footer {
 
     .input-row button {
         width: 100%;
+    }
+
+    .equation-display {
+        font-size: clamp(21px, 5.8vw, 32px);
+        min-height: 170px;
+        padding: 35px 8px;
+        gap: 0.12em;
+    }
+
+    .math-fraction {
+        font-size: 0.82em;
+    }
+
+    .fraction-top {
+        border-bottom-width: 1.5px;
     }
 
     header {

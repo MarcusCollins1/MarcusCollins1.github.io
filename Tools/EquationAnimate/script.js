@@ -1,3 +1,4 @@
+
 const $ = (id) => document.getElementById(id);
 
 const input = $("equation");
@@ -13,17 +14,53 @@ const previousBtn = $("previousBtn");
 const nextBtn = $("nextBtn");
 const playBtn = $("playBtn");
 
+const EPS = 1e-9;
+const DURATION = 900;
+const STEP_DELAY = 2800;
+
 let steps = [];
 let currentStep = 0;
 let playing = false;
 let timer = null;
-
-const EPS = 1e-9;
+let animations = [];
+let ghosts = [];
 
 // Format numbers neatly
 function fmt(n) {
     if (Math.abs(n) < EPS) return "0";
-    return String(Number(n.toFixed(6)));
+    return String(Number(n.toFixed(8)));
+}
+
+function gcd(a, b) {
+    while (b !== 0) {
+        const remainder = a % b;
+        a = b;
+        b = remainder;
+    }
+
+    return a;
+}
+
+// Convert a decimal into a fraction where possible
+function rational(n) {
+    if (Math.abs(n - Math.round(n)) < EPS) {
+        return fmt(Math.round(n));
+    }
+
+    for (let denominator = 1; denominator <= 10000; denominator++) {
+        const numerator = Math.round(n * denominator);
+
+        if (Math.abs(n - numerator / denominator) < EPS) {
+            const divisor = gcd(Math.abs(numerator), denominator);
+
+            return fraction(
+                fmt(numerator / divisor),
+                fmt(denominator / divisor)
+            );
+        }
+    }
+
+    return fmt(n);
 }
 
 // Represent a linear expression as ax + b
@@ -41,10 +78,13 @@ function scale(p, n) {
 
 function multiply(p, q) {
     if (Math.abs(p.a * q.a) > EPS) {
-        throw Error("This equation is not linear.");
+        throw Error("Only linear equations are currently supported.");
     }
 
-    return linear(p.a * q.b + p.b * q.a, p.b * q.b)
+    return linear(
+        p.a * q.b + p.b * q.a,
+        p.b * q.b
+    );
 }
 
 function divide(p, q) {
@@ -76,14 +116,23 @@ function tokenize(source) {
         throw Error("The equation contains unsupported characters.");
     }
 
-    // Insert implicit multiplication: 3x, 2(x+1), (x+1)2
+    // Insert implicit multiplication
     const result = [];
 
     for (const token of tokens) {
         const prev = result[result.length - 1];
 
-        const leftEnd = prev && (/^(?:\d|\.)/.test(prev) || prev === "x" || prev === ")");
-        const rightStart = (/^(?:\d|\.)/.test(token) || token === "x" || token === "(");
+        const leftEnd = prev && (
+            /^(?:\d|\.)/.test(prev) ||
+            prev === "x" ||
+            prev === ")"
+        );
+
+        const rightStart = (
+            /^(?:\d|\.)/.test(token) ||
+            token === "x" ||
+            token === "("
+        );
 
         if (leftEnd && rightStart) {
             result.push("*");
@@ -95,7 +144,7 @@ function tokenize(source) {
     return result;
 }
 
-// Recursive parser: supports +, -, *, / and brackets
+// Parse expressions containing brackets and fractions
 function parseExpression(source) {
     const tokens = tokenize(source);
     let pos = 0;
@@ -107,20 +156,20 @@ function parseExpression(source) {
     function primary() {
         const t = tokens[pos++];
 
-        if (t == "+") return primary();
-        if (t == "-") return scale(primary, -1);
+        if (t === "+") return primary();
+        if (t === "-") return scale(primary(), -1);
 
-        if (t == "(") {
+        if (t === "(") {
             const value = expression();
 
             if (tokens[pos++] !== ")") {
                 throw Error("Missing closing bracket.");
             }
-            
+
             return value;
         }
 
-        if (t == "x") return linear(1, 0);
+        if (t === "x") return linear(1, 0);
 
         if (t !== undefined && !isNaN(Number(t))) {
             return linear(0, Number(t));
@@ -136,7 +185,9 @@ function parseExpression(source) {
             const op = tokens[pos++];
             const right = primary();
 
-            value = op === "*" ? multiply(value, right) : divide(value, right);
+            value = op === "*"
+                ? multiply(value, right)
+                : divide(value, right);
         }
 
         return value;
@@ -149,7 +200,9 @@ function parseExpression(source) {
             const op = tokens[pos++];
             const right = term();
 
-            value = op === "+" ? add(value, right) : add(value, scale(right, -1));
+            value = op === "+"
+                ? add(value, right)
+                : add(value, scale(right, -1));
         }
 
         return value;
@@ -165,13 +218,19 @@ function parseExpression(source) {
 }
 
 // Display ax + b in readable form
+function xTerm(a) {
+    if (Math.abs(a) < EPS) return "0";
+    if (Math.abs(a - 1) < EPS) return "x";
+    if (Math.abs(a + 1) < EPS) return "-x";
+
+    return fmt(a) + "x";
+}
+
 function formatLinear(a, b) {
     let output = "";
 
     if (Math.abs(a) > EPS) {
-        if (Math.abs(a - 1) < EPS) output = "x";
-        else if (Math.abs(a + 1) < EPS) output = "-x";
-        else output = fmt(a) + "x";
+        output = xTerm(a);
     }
 
     if (Math.abs(b) > EPS) {
@@ -179,14 +238,46 @@ function formatLinear(a, b) {
             output += b > 0 ? " + " : " - ";
             output += fmt(Math.abs(b));
         } else {
-            output += fmt(b);
+            output = fmt(b);
         }
     }
 
     return output || "0";
 }
 
+function appendConstant(expr, n) {
+    if (Math.abs(n) < EPS) return expr;
+
+    return expr +
+        (n > 0 ? " + " : " - ") +
+        fmt(Math.abs(n));
+}
+
+function appendX(expr, coefficient) {
+    if (Math.abs(coefficient) < EPS) return expr;
+
+    return expr +
+        (coefficient > 0 ? " + " : " - ") +
+        xTerm(Math.abs(coefficient));
+}
+
+// Fraction notation for the renderer
+function fraction(top, bottom) {
+    return `[[${top}|${bottom}]]`;
+}
+
 function addStep(equation, message, answer = false) {
+    const previous = steps[steps.length - 1];
+
+    if (previous && previous.equation === equation) {
+        if (answer) {
+            previous.answer = true;
+            previous.message = message;
+        }
+
+        return;
+    }
+
     steps.push({ equation, message, answer });
 }
 
@@ -211,43 +302,84 @@ function buildSteps(source) {
     const L = parseExpression(sides[0]);
     const R = parseExpression(sides[1]);
 
-    if (![L.a, L.b, R.a, R.b].every(Number.isFinite)) {
-        throw Error("The numbers are too large.");
-    }
-
-    addStep(source.replace(/\s+/g, " ").trim(), "Start with the original equation.");
-
     let a = L.a;
     let b = L.b;
     let c = R.a;
     let d = R.b;
 
+    if (![a, b, c, d].every(Number.isFinite)) {
+        throw Error("The numbers are too large.");
+    }
+
+    const original = source
+        .replace(/−/g, "-")
+        .replace(/×/g, "*")
+        .replace(/÷/g, "/")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    addStep(original, "Start with the original equation.");
+
     const simplified = formatLinear(a, b) + " = " + formatLinear(c, d);
 
-    if (simplified.replace(/\s/g, "") !== source.replace(/\s/g, "").replace(/−/g, "-")) {
+    if (original.replace(/\s/g, "") !== simplified.replace(/\s/g, "")) {
         addStep(simplified, "Expand brackets and simplify both sides.");
     }
 
-    // Move x terms to the left
+    // Add or subtract x terms from both sides
     if (Math.abs(c) > EPS) {
+        const left = formatLinear(a, b);
+        const right = formatLinear(c, d);
+
+        addStep(
+            appendX(left, -c) + " = " + appendX(right, -c),
+            (c > 0 ? "Subtract " : "Add ") +
+            xTerm(Math.abs(c)) + " on both sides."
+        );
+
         a -= c;
-        addStep(formatLinear(a, b) + " = " + fmt(d), "Subtract " + formatLinear(c, 0) + " from both sides to collect the x terms.");
+        c = 0;
+
+        addStep(
+            formatLinear(a, b) + " = " + fmt(d),
+            "Combine the x terms on both sides."
+        );
     }
 
-    // Move constants to the right
+    // Add or subtract constants from both sides
     if (Math.abs(b) > EPS) {
-        const oldB = b;
+        const left = formatLinear(a, b);
+        const right = fmt(d);
+
+        addStep(
+            appendConstant(left, -b) + " = " + appendConstant(right, -b),
+            (b > 0 ? "Subtract " : "Add ") +
+            fmt(Math.abs(b)) + " on both sides."
+        );
+
         d -= b;
         b = 0;
-        addStep(formatLinear(a, 0) + " = " + fmt(d), (oldB > 0 ? "Subtract " : "Add ") + fmt(Math.abs(oldB)) + " on both sides.");
+
+        addStep(
+            xTerm(a) + " = " + fmt(d),
+            "Combine the constants and simplify."
+        );
     }
 
     // Check special cases
     if (Math.abs(a) < EPS) {
         if (Math.abs(d) < EPS) {
-            addStep("0 = 0", "Both sides are identical. Every real value of x is a solution.", true);
+            addStep(
+                "0 = 0",
+                "Both sides are identical. Every real value of x is a solution.",
+                true
+            );
         } else {
-            addStep("0 = " + fmt(d), "This is a contradiction. There is no solution.", true);
+            addStep(
+                "0 = " + fmt(d),
+                "This is a contradiction. There is no solution.",
+                true
+            );
         }
 
         return;
@@ -259,87 +391,311 @@ function buildSteps(source) {
         throw Error("The answer is outside the supported range.");
     }
 
+    // Divide both sides using proper fractions
     if (Math.abs(a - 1) > EPS) {
-        addStep("x = " + fmt(d) + " / " + fmt(a), "Divide both sides by " + fmt(a) + ".");
+        addStep(
+            fraction(xTerm(a), fmt(a)) + " = " + fraction(fmt(d), fmt(a)),
+            "Divide both sides by " + fmt(a) + "."
+        );
     }
 
-    addStep("x = " + fmt(answer), "Solved! The value of x is " + fmt(answer) + ".", true);
+    addStep(
+        "x = " + rational(answer),
+        "Solved! The value of x is " + fmt(answer) + ".",
+        true
+    );
 }
 
-// Break equation into animated pieces
-function splitTokens(equation) {
-    return equation.match(/(?:\d+(?:\.\d+)?|\.\d+)|[a-zA-Z]+|[=+\-*/()]|[^\s]/g) || [];
+// Create individual mathematical tokens
+function makeToken(text, type = "number") {
+    const el = document.createElement("span");
+
+    el.className = "math-token " + type;
+    el.textContent = text;
+    el.dataset.value = text;
+
+    return el;
 }
 
-function tokenClass(token, isAnswer) {
-    if (isAnswer) return "answer";
+function tokenClass(token) {
     if (token === "x") return "variable";
     if (token === "=") return "equals";
-    if ("+-*/()".includes(token)) return "operator";
+    if (["+", "-", "*", "/"].includes(token)) return "operator";
+    if (token === "(" || token === ")") return "bracket";
+
     return "number";
 }
 
-// Animate between equation states
-function animateEquation(equation, isAnswer) {
-    const oldTokens = [...display.querySelectorAll(".token")];
+// Render ordinary mathematical terms
+function renderTextTokens(text, container) {
+    const tokens = text.match(
+        /(?:\d+(?:\.\d+)?|\.\d+)|x|[=+\-*/()]|[^\s]/g
+    ) || [];
 
-    const oldPositions = oldTokens.map(el => ({
-        text: el.textContent,
-        rect: el.getBoundingClientRect()
-    }));
+    for (const token of tokens) {
+        container.appendChild(
+            makeToken(token, tokenClass(token))
+        );
+    }
+}
 
-    const newTokens = splitTokens(equation);
-    display.innerHTML = "";
+// Create a vertically stacked fraction
+function renderFraction(top, bottom) {
+    const wrapper = document.createElement("span");
+    wrapper.className = "math-token math-fraction";
+    wrapper.dataset.value = `frac:${top}/${bottom}`;
 
+    const numerator = document.createElement("span");
+    numerator.className = "fraction-top";
+
+    const denominator = document.createElement("span");
+    denominator.className = "fraction-bottom";
+
+    renderTextTokens(top, numerator);
+    renderTextTokens(bottom, denominator);
+
+    wrapper.appendChild(numerator);
+    wrapper.appendChild(denominator);
+
+    return wrapper;
+}
+
+// Render the complete equation
+function renderEquation(equation) {
+    const fragment = document.createDocumentFragment();
+    const parts = equation.split(/(\[\[[^\]]+\]\])/g);
+
+    for (const part of parts) {
+        if (!part) continue;
+
+        if (part.startsWith("[[") && part.endsWith("]]")) {
+            const contents = part.slice(2, -2);
+            const separator = contents.indexOf("|");
+
+            if (separator === -1) continue;
+
+            const top = contents.slice(0, separator);
+            const bottom = contents.slice(separator + 1);
+
+            fragment.appendChild(renderFraction(top, bottom));
+        } else {
+            renderTextTokens(part, fragment);
+        }
+    }
+
+    return fragment;
+}
+
+// Get the main tokens without including fraction children
+function getTokens() {
+    return [...display.children].filter(
+        el => el.classList.contains("math-token")
+    );
+}
+
+// Stop animations before changing steps
+function clearAnimations() {
+    for (const animation of animations) {
+        animation.cancel();
+    }
+
+    for (const ghost of ghosts) {
+        ghost.remove();
+    }
+
+    animations = [];
+    ghosts = [];
+}
+
+// Match terms based on their value and position
+function matchTokens(oldItems, newItems) {
+    const matches = new Map();
     const used = new Set();
 
-    newTokens.forEach((token, index) => {
-        const el = document.createElement("span");
+    // Match identical terms first
+    newItems.forEach((item, newIndex) => {
+        let bestIndex = -1;
+        let bestDistance = Infinity;
 
-        el.className = "token " + tokenClass(token, isAnswer);
-        el.textContent = token;
+        oldItems.forEach((old, oldIndex) => {
+            if (used.has(oldIndex)) return;
+            if (old.value !== item.value) return;
 
-        display.appendChild(el);
+            const distance =
+                Math.abs(old.rect.left - item.rect.left) +
+                Math.abs(old.rect.top - item.rect.top) * 2;
 
-        // Match the same token from the previous equation
-        let match = oldPositions.findIndex((item, i) => !used.has(i) && item.text === token);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestIndex = oldIndex;
+            }
+        });
 
-        // If a number changed, match a nearby old number
-        if (match === -1 && /^\d/.test(token)) {
-            match = oldPositions.findIndex((item, i) => !used.has(i) && /^\d/.test(item.text));
+        if (bestIndex !== -1) {
+            matches.set(newIndex, bestIndex);
+            used.add(bestIndex);
+        }
+    });
+
+    // Match changed numbers only when they are nearby
+    newItems.forEach((item, newIndex) => {
+        if (matches.has(newIndex)) return;
+        if (!/^\d/.test(item.value)) return;
+
+        let bestIndex = -1;
+        let bestDistance = Infinity;
+
+        oldItems.forEach((old, oldIndex) => {
+            if (used.has(oldIndex)) return;
+            if (!/^\d/.test(old.value)) return;
+
+            const distance =
+                Math.abs(old.rect.left - item.rect.left) +
+                Math.abs(old.rect.top - item.rect.top) * 2;
+
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestIndex = oldIndex;
+            }
+        });
+
+        if (bestIndex !== -1 && bestDistance < 90) {
+            matches.set(newIndex, bestIndex);
+            used.add(bestIndex);
+        }
+    });
+
+    return { matches, used };
+}
+
+// Animate terms from their previous positions
+function animateEquation(equation, isAnswer) {
+    clearAnimations();
+
+    const oldItems = getTokens().map(el => ({
+        value: el.dataset.value,
+        rect: el.getBoundingClientRect(),
+        element: el
+    }));
+
+    // Create copies of the previous terms
+    for (const item of oldItems) {
+        const ghost = item.element.cloneNode(true);
+        const rect = item.rect;
+
+        ghost.classList.add("animation-ghost");
+
+        Object.assign(ghost.style, {
+            left: rect.left + "px",
+            top: rect.top + "px",
+            width: rect.width + "px",
+            height: rect.height + "px",
+            fontSize: getComputedStyle(item.element).fontSize,
+            color: getComputedStyle(item.element).color
+        });
+
+        document.body.appendChild(ghost);
+        ghosts.push(ghost);
+    }
+
+    display.replaceChildren(renderEquation(equation));
+    display.classList.toggle("is-answer", isAnswer);
+
+    const newItems = getTokens().map(el => ({
+        value: el.dataset.value,
+        rect: el.getBoundingClientRect(),
+        element: el
+    }));
+
+    // First equation appears in place
+    if (!oldItems.length) {
+        for (const item of newItems) {
+            animations.push(item.element.animate([
+                { opacity: 0 },
+                { opacity: 1 }
+            ], {
+                duration: 450,
+                easing: "ease-out"
+            }));
         }
 
-        if (match !== -1) {
-            used.add(match);
+        return;
+    }
 
-            const oldRect = oldPositions[match].rect;
-            const newRect = el.getBoundingClientRect();
+    const { matches, used } = matchTokens(oldItems, newItems);
 
-            const dx = oldRect.left - newRect.left;
-            const dy = oldRect.top - newRect.top;
+    newItems.forEach((item, newIndex) => {
+        const oldIndex = matches.get(newIndex);
 
-            el.animate([
+        // New terms appear at their destination
+        if (oldIndex === undefined) {
+            animations.push(item.element.animate([
                 {
-                    transform: `translate(${dx}px, ${dy}px) scale(.94)`,
-                    opacity: .6
+                    opacity: 0,
+                    transform: "scale(0.9)"
                 },
                 {
-                    transform: "translate(0, 0) scale(1)",
-                    opacity: 1
+                    opacity: 1,
+                    transform: "scale(1)"
                 }
             ], {
-                duration: 750,
-                easing: "cubic-bezier(.2,.8,.2,1)"
-            });
-        } else {
-            el.animate([
-                { opacity: 0, transform: "translateY(16px) scale(.8)" },
-                { opacity: 1, transform: "translateY(0) scale(1)" }
-            ], {
-                duration: 650,
+                duration: DURATION * 0.7,
                 easing: "ease-out"
-            });
+            }));
+
+            return;
         }
+
+        const old = oldItems[oldIndex];
+
+        const dx = old.rect.left - item.rect.left;
+        const dy = old.rect.top - item.rect.top;
+
+        // Move from the old position to the new position
+        animations.push(item.element.animate([
+            {
+                transform: `translate(${dx}px, ${dy}px)`,
+                opacity: 1
+            },
+            {
+                transform: "translate(0px, 0px)",
+                opacity: 1
+            }
+        ], {
+            duration: DURATION,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)"
+        }));
+
+        ghosts[oldIndex].style.opacity = "0";
+    });
+
+    // Removed terms disappear at their original positions
+    ghosts.forEach((ghost, index) => {
+        if (used.has(index)) return;
+
+        animations.push(ghost.animate([
+            {
+                opacity: 1,
+                transform: "scale(1)"
+            },
+            {
+                opacity: 0,
+                transform: "scale(0.85)"
+            }
+        ], {
+            duration: DURATION * 0.65,
+            easing: "ease-in",
+            fill: "forwards"
+        }));
+    });
+
+    // Remove old copies after the transition finishes
+    const currentGhosts = [...ghosts];
+
+    Promise.all(
+        animations.map(animation => animation.finished.catch(() => {}))
+    ).then(() => {
+        currentGhosts.forEach(ghost => ghost.remove());
     });
 }
 
@@ -347,15 +703,16 @@ function animateEquation(equation, isAnswer) {
 function showStep() {
     const step = steps[currentStep];
 
-    animateEquation(step.equation, steps.answer);
+    animateEquation(step.equation, step.answer);
 
     explanation.textContent = step.message;
     stepCount.textContent = `Step ${currentStep + 1} of ${steps.length}`;
     progressBar.style.width = ((currentStep + 1) / steps.length * 100) + "%";
+
     previousBtn.disabled = currentStep === 0;
     nextBtn.disabled = currentStep === steps.length - 1;
 
-    if (currentStep == steps.length - 1) {
+    if (currentStep === steps.length - 1) {
         stopPlaying();
     }
 }
@@ -385,7 +742,7 @@ function startPlaying() {
         } else {
             stopPlaying();
         }
-    }, 2200);
+    }, STEP_DELAY);
 }
 
 // Solve button
@@ -397,7 +754,8 @@ function solve() {
         buildSteps(input.value);
 
         currentStep = 0;
-        display.innerHTML = "";
+        clearAnimations();
+        display.replaceChildren();
         workspace.hidden = false;
 
         showStep();
