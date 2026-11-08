@@ -294,6 +294,37 @@ h2 {
     text-shadow: 0 0 24px #70e2b150;
 }
 
+/* Like-term merging */
+
+.math-token.merging {
+    z-index: 10;
+    color: var(--purple);
+    text-shadow: 0 0 18px rgba(174, 140, 255, 0.5);
+}
+
+.math-token.merge-target {
+    z-index: 9;
+    text-shadow: 0 0 22px rgba(101, 183, 255, 0.5);
+}
+
+@keyframes merge-pulse {
+    0% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(1.6);
+    }
+
+    100% {
+        filter: brightness(1);
+    }
+}
+
+.merge-target {
+    animation: merge-pulse 0.85s ease-in-out;
+}
+
 /* Explanations and controls */
 
 .explanation {

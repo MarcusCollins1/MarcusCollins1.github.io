@@ -266,7 +266,7 @@ function fraction(top, bottom) {
     return `[[${top}|${bottom}]]`;
 }
 
-function addStep(equation, message, answer = false) {
+function addStep(equation, message, answer = false, merges = []) {
     const previous = steps[steps.length - 1];
 
     if (previous && previous.equation === equation) {
@@ -278,7 +278,7 @@ function addStep(equation, message, answer = false) {
         return;
     }
 
-    steps.push({ equation, message, answer });
+    steps.push({ equation, message, answer, merges });
 }
 
 // Build algebra steps
@@ -337,13 +337,16 @@ function buildSteps(source) {
             xTerm(Math.abs(c)) + " on both sides."
         );
 
+        const oldA = a;
+        const oldC = c;
+
         a -= c;
         c = 0;
 
-        addStep(
-            formatLinear(a, b) + " = " + fmt(d),
-            "Combine the x terms on both sides."
-        );
+        addStep(formatLinear(a, b) + " = " + fmt(d), "Combine the x terms on both sides.", false, [
+            { side: "left", type: "variable", values: [oldA, -oldC] },
+            { side: "right", type: "variable", values: [oldC, -oldC] }
+        ]);
     }
 
     // Add or subtract constants from both sides
@@ -357,13 +360,16 @@ function buildSteps(source) {
             fmt(Math.abs(b)) + " on both sides."
         );
 
+        const oldB = b;
+        const oldD = d;
+
         d -= b;
         b = 0;
 
-        addStep(
-            xTerm(a) + " = " + fmt(d),
-            "Combine the constants and simplify."
-        );
+        addStep(xTerm(a) + " = " + fmt(d), "Combine the constants and simplify.", false, [
+            { side: "left", type: "constant", values: [oldB, -oldB] },
+            { side: "right", type: "constant", values: [oldD, -oldB] }
+        ]);
     }
 
     // Check special cases
@@ -568,8 +574,74 @@ function matchTokens(oldItems, newItems) {
     return { matches, used };
 }
 
-// Animate terms from their previous positions
-function animateEquation(equation, isAnswer) {
+// Find the terms belonging to each side of the equation
+function getSideTokens(items, side) {
+    const equalsIndex = items.findIndex(item => item.value === "=");
+
+    if (equalsIndex === -1) return [];
+
+    return side === "left"
+        ? items.slice(0, equalsIndex)
+        : items.slice(equalsIndex + 1);
+}
+
+// Find the mathematical terms to combine
+function findMergeTerms(items, merge) {
+    const sideItems = getSideTokens(items, merge.side);
+    const candidates = [];
+
+    for (let i = 0; i < sideItems.length; i++) {
+        const item = sideItems[i];
+
+        if (merge.type === "variable" && item.value === "x") {
+            candidates.push(item);
+        }
+
+        if (merge.type === "constant" && /^\d/.test(item.value)) {
+            candidates.push(item);
+        }
+    }
+
+    return candidates.slice(-2);
+}
+
+// Animate one term moving on top of another
+function animateMerge(source, target) {
+    if (!source || !target) return Promise.resolve();
+
+    const sourceRect = source.element.getBoundingClientRect();
+    const targetRect = target.element.getBoundingClientRect();
+
+    const dx = targetRect.left + targetRect.width / 2 - (sourceRect.left + sourceRect.width / 2);
+    const dy = targetRect.top + targetRect.height / 2 - (sourceRect.top + sourceRect.height / 2);
+
+    const animation = source.element.animate([
+        {
+            transform: "translate(0px, 0px) scale(1)",
+            opacity: 1
+        },
+        {
+            transform: `translate(${dx}px, ${dy}px) scale(1.1)`,
+            opacity: 1,
+            offset: 0.75
+        },
+        {
+            transform: `translate(${dx}px, ${dy}px) scale(0.4)`,
+            opacity: 0
+        }
+    ], {
+        duration: 850,
+        easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        fill: "forwards"
+    });
+
+    animations.push(animation);
+
+    return animation.finished.catch(() => {});
+}
+
+// Animate the equation and merge like terms
+async function animateEquation(equation, isAnswer, merges = []) {
     clearAnimations();
 
     const oldItems = getTokens().map(el => ({
@@ -578,8 +650,32 @@ function animateEquation(equation, isAnswer) {
         element: el
     }));
 
-    // Create copies of the previous terms
-    for (const item of oldItems) {
+    // Merge terms before changing the equation
+    if (merges.length > 0) {
+        const mergeAnimations = [];
+
+        for (const merge of merges) {
+            const terms = findMergeTerms(oldItems, merge);
+
+            if (terms.length === 2) {
+                mergeAnimations.push(
+                    animateMerge(terms[1], terms[0])
+                );
+            }
+        }
+
+        await Promise.all(mergeAnimations);
+    }
+
+    // Record positions after the merge
+    const previousItems = getTokens().map(el => ({
+        value: el.dataset.value,
+        rect: el.getBoundingClientRect(),
+        element: el
+    }));
+
+    // Create visual copies of the previous equation
+    for (const item of previousItems) {
         const ghost = item.element.cloneNode(true);
         const rect = item.rect;
 
@@ -607,8 +703,7 @@ function animateEquation(equation, isAnswer) {
         element: el
     }));
 
-    // First equation appears in place
-    if (!oldItems.length) {
+    if (!previousItems.length) {
         for (const item of newItems) {
             animations.push(item.element.animate([
                 { opacity: 0 },
@@ -622,12 +717,11 @@ function animateEquation(equation, isAnswer) {
         return;
     }
 
-    const { matches, used } = matchTokens(oldItems, newItems);
+    const { matches, used } = matchTokens(previousItems, newItems);
 
     newItems.forEach((item, newIndex) => {
         const oldIndex = matches.get(newIndex);
 
-        // New terms appear at their destination
         if (oldIndex === undefined) {
             animations.push(item.element.animate([
                 {
@@ -646,12 +740,11 @@ function animateEquation(equation, isAnswer) {
             return;
         }
 
-        const old = oldItems[oldIndex];
+        const old = previousItems[oldIndex];
 
         const dx = old.rect.left - item.rect.left;
         const dy = old.rect.top - item.rect.top;
 
-        // Move from the old position to the new position
         animations.push(item.element.animate([
             {
                 transform: `translate(${dx}px, ${dy}px)`,
@@ -669,7 +762,6 @@ function animateEquation(equation, isAnswer) {
         ghosts[oldIndex].style.opacity = "0";
     });
 
-    // Removed terms disappear at their original positions
     ghosts.forEach((ghost, index) => {
         if (used.has(index)) return;
 
@@ -689,7 +781,6 @@ function animateEquation(equation, isAnswer) {
         }));
     });
 
-    // Remove old copies after the transition finishes
     const currentGhosts = [...ghosts];
 
     Promise.all(
@@ -703,7 +794,7 @@ function animateEquation(equation, isAnswer) {
 function showStep() {
     const step = steps[currentStep];
 
-    animateEquation(step.equation, step.answer);
+    animateEquation(step.equation, step.answer, step.merges || []);
 
     explanation.textContent = step.message;
     stepCount.textContent = `Step ${currentStep + 1} of ${steps.length}`;
