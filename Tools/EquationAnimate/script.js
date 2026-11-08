@@ -1,4 +1,3 @@
-
 const $ = (id) => document.getElementById(id);
 
 const input = $("equation");
@@ -9,14 +8,15 @@ const display = $("equationDisplay");
 const explanation = $("explanation");
 const stepCount = $("stepCount");
 const progressBar = $("progressBar");
+const solutionNote = $("solutionNote");
 
 const previousBtn = $("previousBtn");
 const nextBtn = $("nextBtn");
 const playBtn = $("playBtn");
 
 const EPS = 1e-9;
-const DURATION = 900;
-const STEP_DELAY = 2800;
+const DURATION = 850;
+const STEP_DELAY = 3000;
 
 let steps = [];
 let currentStep = 0;
@@ -24,6 +24,7 @@ let playing = false;
 let timer = null;
 let animations = [];
 let ghosts = [];
+let animationVersion = 0;
 
 // Format numbers neatly
 function fmt(n) {
@@ -32,6 +33,9 @@ function fmt(n) {
 }
 
 function gcd(a, b) {
+    a = Math.abs(a);
+    b = Math.abs(b);
+
     while (b !== 0) {
         const remainder = a % b;
         a = b;
@@ -41,17 +45,20 @@ function gcd(a, b) {
     return a;
 }
 
-// Convert a decimal into a fraction where possible
+function fraction(top, bottom) {
+    return `[[${top}|${bottom}]]`;
+}
+
 function rational(n) {
     if (Math.abs(n - Math.round(n)) < EPS) {
         return fmt(Math.round(n));
     }
 
-    for (let denominator = 1; denominator <= 10000; denominator++) {
+    for (let denominator = 1; denominator <= 1000; denominator++) {
         const numerator = Math.round(n * denominator);
 
-        if (Math.abs(n - numerator / denominator) < EPS) {
-            const divisor = gcd(Math.abs(numerator), denominator);
+        if (Math.abs(n - numerator / denominator) < 1e-10) {
+            const divisor = gcd(numerator, denominator);
 
             return fraction(
                 fmt(numerator / divisor),
@@ -63,210 +70,8 @@ function rational(n) {
     return fmt(n);
 }
 
-// Represent a linear expression as ax + b
-function linear(a = 0, b = 0) {
-    return { a, b };
-}
-
-function add(p, q) {
-    return linear(p.a + q.a, p.b + q.b);
-}
-
-function scale(p, n) {
-    return linear(p.a * n, p.b * n);
-}
-
-function multiply(p, q) {
-    if (Math.abs(p.a * q.a) > EPS) {
-        throw Error("Only linear equations are currently supported.");
-    }
-
-    return linear(
-        p.a * q.b + p.b * q.a,
-        p.b * q.b
-    );
-}
-
-function divide(p, q) {
-    if (Math.abs(q.a) > EPS) {
-        throw Error("Division by an expression containing x is not supported.");
-    }
-
-    if (Math.abs(q.b) < EPS) {
-        throw Error("Division by zero.");
-    }
-
-    return scale(p, 1 / q.b);
-}
-
-// Convert input into tokens
-function tokenize(source) {
-    source = source
-        .replace(/\s/g, "")
-        .replace(/×/g, "*")
-        .replace(/÷/g, "/")
-        .replace(/−/g, "-")
-        .toLowerCase();
-
-    if (!source) throw Error("Enter an equation.");
-
-    const tokens = source.match(/(?:\d+(?:\.\d*)?|\.\d+)|x|[()+\-*/]/g);
-
-    if (!tokens || tokens.join("") !== source) {
-        throw Error("The equation contains unsupported characters.");
-    }
-
-    // Insert implicit multiplication
-    const result = [];
-
-    for (const token of tokens) {
-        const prev = result[result.length - 1];
-
-        const leftEnd = prev && (
-            /^(?:\d|\.)/.test(prev) ||
-            prev === "x" ||
-            prev === ")"
-        );
-
-        const rightStart = (
-            /^(?:\d|\.)/.test(token) ||
-            token === "x" ||
-            token === "("
-        );
-
-        if (leftEnd && rightStart) {
-            result.push("*");
-        }
-
-        result.push(token);
-    }
-
-    return result;
-}
-
-// Parse expressions containing brackets and fractions
-function parseExpression(source) {
-    const tokens = tokenize(source);
-    let pos = 0;
-
-    function peek() {
-        return tokens[pos];
-    }
-
-    function primary() {
-        const t = tokens[pos++];
-
-        if (t === "+") return primary();
-        if (t === "-") return scale(primary(), -1);
-
-        if (t === "(") {
-            const value = expression();
-
-            if (tokens[pos++] !== ")") {
-                throw Error("Missing closing bracket.");
-            }
-
-            return value;
-        }
-
-        if (t === "x") return linear(1, 0);
-
-        if (t !== undefined && !isNaN(Number(t))) {
-            return linear(0, Number(t));
-        }
-
-        throw Error("Invalid expression.");
-    }
-
-    function term() {
-        let value = primary();
-
-        while (peek() === "*" || peek() === "/") {
-            const op = tokens[pos++];
-            const right = primary();
-
-            value = op === "*"
-                ? multiply(value, right)
-                : divide(value, right);
-        }
-
-        return value;
-    }
-
-    function expression() {
-        let value = term();
-
-        while (peek() === "+" || peek() === "-") {
-            const op = tokens[pos++];
-            const right = term();
-
-            value = op === "+"
-                ? add(value, right)
-                : add(value, scale(right, -1));
-        }
-
-        return value;
-    }
-
-    const result = expression();
-
-    if (pos !== tokens.length) {
-        throw Error("Could not read the whole expression.");
-    }
-
-    return result;
-}
-
-// Display ax + b in readable form
-function xTerm(a) {
-    if (Math.abs(a) < EPS) return "0";
-    if (Math.abs(a - 1) < EPS) return "x";
-    if (Math.abs(a + 1) < EPS) return "-x";
-
-    return fmt(a) + "x";
-}
-
-function formatLinear(a, b) {
-    let output = "";
-
-    if (Math.abs(a) > EPS) {
-        output = xTerm(a);
-    }
-
-    if (Math.abs(b) > EPS) {
-        if (output) {
-            output += b > 0 ? " + " : " - ";
-            output += fmt(Math.abs(b));
-        } else {
-            output = fmt(b);
-        }
-    }
-
-    return output || "0";
-}
-
-function appendConstant(expr, n) {
-    if (Math.abs(n) < EPS) return expr;
-
-    return expr +
-        (n > 0 ? " + " : " - ") +
-        fmt(Math.abs(n));
-}
-
-function appendX(expr, coefficient) {
-    if (Math.abs(coefficient) < EPS) return expr;
-
-    return expr +
-        (coefficient > 0 ? " + " : " - ") +
-        xTerm(Math.abs(coefficient));
-}
-
-// Fraction notation for the renderer
-function fraction(top, bottom) {
-    return `[[${top}|${bottom}]]`;
-}
-
-function addStep(equation, message, answer = false, merges = []) {
+// Create equation steps
+function addStep(equation, message, answer = false, merges = [], tokens = null) {
     const previous = steps[steps.length - 1];
 
     if (previous && previous.equation === equation) {
@@ -278,112 +83,387 @@ function addStep(equation, message, answer = false, merges = []) {
         return;
     }
 
-    steps.push({ equation, message, answer, merges });
+    steps.push({
+        equation,
+        message,
+        answer,
+        merges,
+        tokens
+    });
 }
 
-// Build algebra steps
-function buildSteps(source) {
-    steps = [];
+// Format linear expressions
+function xTerm(a) {
+    if (Math.abs(a) < EPS) return "0";
+    if (Math.abs(a - 1) < EPS) return "x";
+    if (Math.abs(a + 1) < EPS) return "-x";
 
-    const sides = source.split("=");
+    return fmt(a) + "x";
+}
 
-    if (sides.length !== 2) {
-        throw Error("Use exactly one equals sign (=).");
+function formatLinear(a, b) {
+    let result = "";
+
+    if (Math.abs(a) > EPS) {
+        result = xTerm(a);
     }
 
-    if (!sides[0].trim() || !sides[1].trim()) {
-        throw Error("Both sides of the equation are required.");
+    if (Math.abs(b) > EPS) {
+        if (result) {
+            result += b > 0 ? " + " : " - ";
+            result += fmt(Math.abs(b));
+        } else {
+            result = fmt(b);
+        }
     }
 
-    if (!/[xX]/.test(source)) {
-        throw Error("Include the variable x.");
+    return result || "0";
+}
+
+// Represent signed terms as single objects
+function signedTerm(n, variable = false) {
+    const value = variable ? xTerm(Math.abs(n)) : fmt(Math.abs(n));
+
+    return {
+        value: (n < 0 ? "-" : "+") + value,
+        type: variable ? "variable" : "number"
+    };
+}
+
+function plainTerm(value) {
+    return {
+        value: String(value),
+        type: String(value).includes("x") ? "variable" : "number"
+    };
+}
+
+function linearTerms(a, b) {
+    const result = [];
+
+    if (Math.abs(a) > EPS) {
+        result.push(plainTerm(xTerm(a)));
     }
 
-    const L = parseExpression(sides[0]);
-    const R = parseExpression(sides[1]);
-
-    let a = L.a;
-    let b = L.b;
-    let c = R.a;
-    let d = R.b;
-
-    if (![a, b, c, d].every(Number.isFinite)) {
-        throw Error("The numbers are too large.");
+    if (Math.abs(b) > EPS) {
+        if (result.length) {
+            result.push(signedTerm(b));
+        } else {
+            result.push(plainTerm(fmt(b)));
+        }
     }
 
-    const original = source
-        .replace(/−/g, "-")
-        .replace(/×/g, "*")
-        .replace(/÷/g, "/")
-        .replace(/\s+/g, " ")
-        .trim();
+    if (!result.length) {
+        result.push(plainTerm("0"));
+    }
 
-    addStep(original, "Start with the original equation.");
+    return result;
+}
+
+function equationTokens(left, right) {
+    return [
+        ...left,
+        { value: "=", type: "equals" },
+        ...right
+    ];
+}
+
+function tokensText(tokens) {
+    return tokens.map(token => token.value).join(" ");
+}
+
+// Create an explicit operation step
+function operationStep(left, right, message) {
+    const tokens = equationTokens(left, right);
+
+    addStep(tokensText(tokens), message, false, [], tokens);
+}
+
+// Create a simplification step with merge instructions
+function mergeStep(left, right, message, merges) {
+    const tokens = equationTokens(left, right);
+
+    addStep(tokensText(tokens), message, false, merges, tokens);
+}
+
+// Validate mathematical expressions
+function parseSide(source) {
+    const allowedFunctions = new Set([
+        "sin", "cos", "tan", "asin", "acos", "atan",
+        "exp", "log", "log10", "sqrt", "abs"
+    ]);
+
+    const node = math.parse(source);
+
+    node.traverse((child, path, parent) => {
+        if (child.isSymbolNode) {
+            const name = child.name;
+
+            if (name === "x" || name === "pi" || name === "e") return;
+
+            if (parent && parent.isFunctionNode &&
+                parent.fn === child && allowedFunctions.has(name)) {
+                return;
+            }
+
+            throw Error("Unsupported symbol: " + name);
+        }
+
+        if (child.isFunctionNode) {
+            if (!child.fn.isSymbolNode ||
+                !allowedFunctions.has(child.fn.name)) {
+                throw Error("Unsupported function.");
+            }
+        }
+
+        if (!child.isConstantNode &&
+            !child.isSymbolNode &&
+            !child.isOperatorNode &&
+            !child.isParenthesisNode &&
+            !child.isFunctionNode) {
+            throw Error("Unsupported expression.");
+        }
+
+        if (child.isOperatorNode &&
+            !["+", "-", "*", "/", "^"].includes(child.op)) {
+            throw Error("Unsupported operator.");
+        }
+    });
+
+    return node;
+}
+
+// Polynomial arithmetic
+function polyAdd(a, b) {
+    const length = Math.max(a.length, b.length);
+    const result = [];
+
+    for (let i = 0; i < length; i++) {
+        result.push((a[i] || 0) + (b[i] || 0));
+    }
+
+    return result;
+}
+
+function polyScale(a, n) {
+    return a.map(value => value * n);
+}
+
+function polyMultiply(a, b) {
+    const result = Array(a.length + b.length - 1).fill(0);
+
+    for (let i = 0; i < a.length; i++) {
+        for (let j = 0; j < b.length; j++) {
+            result[i + j] += a[i] * b[j];
+        }
+    }
+
+    if (result.length > 9) return null;
+
+    return result;
+}
+
+function polyPower(a, n) {
+    if (!Number.isInteger(n) || n < 0 || n > 8) return null;
+
+    let result = [1];
+
+    for (let i = 0; i < n; i++) {
+        result = polyMultiply(result, a);
+
+        if (!result) return null;
+    }
+
+    return result;
+}
+
+// Extract polynomial coefficients from a Math.js expression
+function getPolynomial(node) {
+    if (node.isParenthesisNode) {
+        return getPolynomial(node.content);
+    }
+
+    if (node.isConstantNode) {
+        const value = Number(node.value);
+
+        return Number.isFinite(value) ? [value] : null;
+    }
+
+    if (node.isSymbolNode) {
+        if (node.name === "x") return [0, 1];
+
+        if (node.name === "pi") return [Math.PI];
+        if (node.name === "e") return [Math.E];
+
+        return null;
+    }
+
+    if (!node.isOperatorNode) return null;
+
+    const args = node.args.map(getPolynomial);
+
+    if (args.some(arg => arg === null)) return null;
+
+    if (node.op === "+") {
+        return args.length === 1 ? args[0] : polyAdd(args[0], args[1]);
+    }
+
+    if (node.op === "-") {
+        return args.length === 1
+            ? polyScale(args[0], -1)
+            : polyAdd(args[0], polyScale(args[1], -1));
+    }
+
+    if (node.op === "*") {
+        return polyMultiply(args[0], args[1]);
+    }
+
+    if (node.op === "/") {
+        if (args[1].length !== 1 || Math.abs(args[1][0]) < EPS) {
+            return null;
+        }
+
+        return polyScale(args[0], 1 / args[1][0]);
+    }
+
+    if (node.op === "^") {
+        if (args[1].length !== 1) return null;
+
+        return polyPower(args[0], args[1][0]);
+    }
+
+    return null;
+}
+
+function trimPolynomial(p) {
+    const result = [...p];
+
+    while (result.length > 1 &&
+        Math.abs(result[result.length - 1]) < EPS) {
+        result.pop();
+    }
+
+    return result;
+}
+
+// Solve linear equations with explicit merging steps
+function solveLinear(L, R) {
+    let a = L[1] || 0;
+    let b = L[0] || 0;
+    let c = R[1] || 0;
+    let d = R[0] || 0;
 
     const simplified = formatLinear(a, b) + " = " + formatLinear(c, d);
 
-    if (original.replace(/\s/g, "") !== simplified.replace(/\s/g, "")) {
-        addStep(simplified, "Expand brackets and simplify both sides.");
+    if (steps[steps.length - 1].equation.replace(/\s/g, "") !==
+        simplified.replace(/\s/g, "")) {
+        addStep(simplified, "Expand and collect terms on each side.");
     }
 
-    // Add or subtract x terms from both sides
+    // Collect x terms
     if (Math.abs(c) > EPS) {
-        const left = formatLinear(a, b);
-        const right = formatLinear(c, d);
+        const left = linearTerms(a, b);
+        const right = linearTerms(c, d);
 
-        addStep(
-            appendX(left, -c) + " = " + appendX(right, -c),
+        left.push(signedTerm(-c, true));
+        right.push(signedTerm(-c, true));
+
+        operationStep(
+            left,
+            right,
             (c > 0 ? "Subtract " : "Add ") +
             xTerm(Math.abs(c)) + " on both sides."
         );
 
-        const oldA = a;
-        const oldC = c;
+        const leftX = left.findIndex(term => term.value.includes("x"));
+        const rightX = right.findIndex(term => term.value.includes("x"));
+
+        const merges = [];
+
+        if (leftX !== -1 && leftX !== left.length - 1) {
+            merges.push({
+                side: "left",
+                source: left.length - 1,
+                target: leftX
+            });
+        }
+
+        if (rightX !== -1) {
+            merges.push({
+                side: "right",
+                source: right.length - 1,
+                target: rightX
+            });
+        }
 
         a -= c;
         c = 0;
 
-        addStep(formatLinear(a, b) + " = " + fmt(d), "Combine the x terms on both sides.", false, [
-            { side: "left", type: "variable", values: [oldA, -oldC] },
-            { side: "right", type: "variable", values: [oldC, -oldC] }
-        ]);
+        mergeStep(
+            linearTerms(a, b),
+            [plainTerm(fmt(d))],
+            "Merge the x terms together.",
+            merges
+        );
     }
 
-    // Add or subtract constants from both sides
+    // Collect constants
     if (Math.abs(b) > EPS) {
-        const left = formatLinear(a, b);
-        const right = fmt(d);
+        const left = linearTerms(a, b);
+        const right = [plainTerm(fmt(d))];
 
-        addStep(
-            appendConstant(left, -b) + " = " + appendConstant(right, -b),
+        const constantIndex = left.findIndex(
+            term => !term.value.includes("x")
+        );
+
+        left.push(signedTerm(-b));
+        right.push(signedTerm(-b));
+
+        operationStep(
+            left,
+            right,
             (b > 0 ? "Subtract " : "Add ") +
             fmt(Math.abs(b)) + " on both sides."
         );
 
-        const oldB = b;
-        const oldD = d;
+        const merges = [];
+
+        if (constantIndex !== -1) {
+            merges.push({
+                side: "left",
+                source: left.length - 1,
+                target: constantIndex
+            });
+        }
+
+        merges.push({
+            side: "right",
+            source: right.length - 1,
+            target: 0
+        });
 
         d -= b;
         b = 0;
 
-        addStep(xTerm(a) + " = " + fmt(d), "Combine the constants and simplify.", false, [
-            { side: "left", type: "constant", values: [oldB, -oldB] },
-            { side: "right", type: "constant", values: [oldD, -oldB] }
-        ]);
+        mergeStep(
+            linearTerms(a, 0),
+            [plainTerm(fmt(d))],
+            "Move each term onto its matching term and combine.",
+            merges
+        );
     }
 
-    // Check special cases
+    // Special cases
     if (Math.abs(a) < EPS) {
         if (Math.abs(d) < EPS) {
             addStep(
                 "0 = 0",
-                "Both sides are identical. Every real value of x is a solution.",
+                "Every real number is a solution.",
                 true
             );
         } else {
             addStep(
                 "0 = " + fmt(d),
-                "This is a contradiction. There is no solution.",
+                "There are no solutions.",
                 true
             );
         }
@@ -391,64 +471,276 @@ function buildSteps(source) {
         return;
     }
 
-    const answer = d / a;
-
-    if (!Number.isFinite(answer)) {
-        throw Error("The answer is outside the supported range.");
-    }
-
-    // Divide both sides using proper fractions
+    // Divide both sides
     if (Math.abs(a - 1) > EPS) {
         addStep(
-            fraction(xTerm(a), fmt(a)) + " = " + fraction(fmt(d), fmt(a)),
+            fraction(xTerm(a), fmt(a)) +
+            " = " +
+            fraction(fmt(d), fmt(a)),
             "Divide both sides by " + fmt(a) + "."
         );
     }
 
     addStep(
-        "x = " + rational(answer),
-        "Solved! The value of x is " + fmt(answer) + ".",
+        "x = " + rational(d / a),
+        "The equation has been solved.",
         true
     );
 }
 
-// Create individual mathematical tokens
-function makeToken(text, type = "number") {
-    const el = document.createElement("span");
+// Solve quadratic equations
+function solveQuadratic(p) {
+    const a = p[2];
+    const b = p[1] || 0;
+    const c = p[0] || 0;
 
-    el.className = "math-token " + type;
-    el.textContent = text;
-    el.dataset.value = text;
+    const discriminant = b * b - 4 * a * c;
 
-    return el;
-}
+    addStep(
+        "a = " + fmt(a) + ", b = " + fmt(b) + ", c = " + fmt(c),
+        "Identify the coefficients of the quadratic."
+    );
 
-function tokenClass(token) {
-    if (token === "x") return "variable";
-    if (token === "=") return "equals";
-    if (["+", "-", "*", "/"].includes(token)) return "operator";
-    if (token === "(" || token === ")") return "bracket";
+    addStep(
+        "D = " + fmt(b) + "^2 - 4(" + fmt(a) + ")(" + fmt(c) + ")",
+        "Calculate the discriminant."
+    );
 
-    return "number";
-}
+    addStep(
+        "D = " + fmt(discriminant),
+        "Simplify the discriminant."
+    );
 
-// Render ordinary mathematical terms
-function renderTextTokens(text, container) {
-    const tokens = text.match(
-        /(?:\d+(?:\.\d+)?|\.\d+)|x|[=+\-*/()]|[^\s]/g
-    ) || [];
+    if (discriminant < -EPS) {
+        addStep(
+            "D < 0",
+            "There are no real solutions.",
+            true
+        );
 
-    for (const token of tokens) {
-        container.appendChild(
-            makeToken(token, tokenClass(token))
+        return;
+    }
+
+    addStep(
+        "x = " + fraction("-b +/- sqrt(D)", "2a"),
+        "Use the quadratic formula."
+    );
+
+    const root = Math.sqrt(Math.max(0, discriminant));
+    const x1 = (-b + root) / (2 * a);
+    const x2 = (-b - root) / (2 * a);
+
+    if (Math.abs(x1 - x2) < EPS) {
+        addStep(
+            "x = " + rational(x1),
+            "The quadratic has one repeated real root.",
+            true
+        );
+    } else {
+        addStep(
+            "x = " + rational(x1) + " or x = " + rational(x2),
+            "These are the two real roots.",
+            true
         );
     }
 }
 
-// Create a vertically stacked fraction
+// Evaluate an equation numerically
+function makeFunction(left, right) {
+    const leftCode = left.compile();
+    const rightCode = right.compile();
+
+    return x => {
+        try {
+            const scope = { x };
+            const a = leftCode.evaluate(scope);
+            const b = rightCode.evaluate(scope);
+            const result = a - b;
+
+            return typeof result === "number" &&
+                Number.isFinite(result) ? result : NaN;
+        } catch (err) {
+            return NaN;
+        }
+    };
+}
+
+// Find roots within a finite interval
+function findRoots(fn, min = -50, max = 50) {
+    const roots = [];
+    const count = 4000;
+    const step = (max - min) / count;
+
+    function addRoot(x) {
+        if (!Number.isFinite(x)) return;
+
+        const value = fn(x);
+
+        if (!Number.isFinite(value) || Math.abs(value) > 1e-6) {
+            return;
+        }
+
+        if (!roots.some(root => Math.abs(root - x) < 1e-4)) {
+            roots.push(x);
+        }
+    }
+
+    for (let i = 0; i <= count; i++) {
+        const x = min + i * step;
+        const y = fn(x);
+
+        if (!Number.isFinite(y)) continue;
+
+        if (Math.abs(y) < 1e-8) {
+            addRoot(x);
+        }
+
+        if (i === count) continue;
+
+        let lo = x;
+        let hi = x + step;
+        let flo = y;
+        const fhi = fn(hi);
+
+        if (!Number.isFinite(fhi) || flo * fhi >= 0) {
+            continue;
+        }
+
+        // Bisection
+        for (let j = 0; j < 65; j++) {
+            const mid = (lo + hi) / 2;
+            const fm = fn(mid);
+
+            if (!Number.isFinite(fm)) break;
+
+            if (flo * fm <= 0) {
+                hi = mid;
+            } else {
+                lo = mid;
+                flo = fm;
+            }
+        }
+
+        addRoot((lo + hi) / 2);
+    }
+
+    return roots.sort((a, b) => a - b);
+}
+
+// Numerical solution for more complicated equations
+function solveNumerically(left, right, polynomial = false) {
+    const fn = makeFunction(left, right);
+    const roots = findRoots(fn);
+
+    addStep(
+        "f(x) = 0",
+        "Move everything to one side and define a function."
+    );
+
+    addStep(
+        "f(x) -> 0",
+        "Search for real roots numerically using interval scanning and bisection."
+    );
+
+    if (!roots.length) {
+        addStep(
+            "No roots found",
+            "No real roots were detected in the search interval.",
+            true
+        );
+
+        solutionNote.textContent =
+            "Search interval: -50 to 50. Roots outside this range, repeated roots or roots without a sign change may be missed.";
+
+        return;
+    }
+
+    const result = roots.map(root => "x ≈ " + fmt(root)).join(" ; ");
+
+    addStep(
+        result,
+        "These are the approximate real roots detected.",
+        true
+    );
+
+    solutionNote.textContent =
+        "Numerical search from -50 to 50. " +
+        (polynomial ? "Higher-degree polynomial roots may be missed. " : "") +
+        "Trigonometric equations may have infinitely many solutions. " +
+        "Only detected roots in this interval are displayed.";
+}
+
+// Choose the solving method
+function buildSteps(source) {
+    steps = [];
+    solutionNote.textContent = "";
+
+    if (typeof math === "undefined") {
+        throw Error("Math.js could not load. Check your internet connection.");
+    }
+
+    const sides = source.split("=");
+
+    if (sides.length !== 2) {
+        throw Error("Enter exactly one equals sign.");
+    }
+
+    if (!sides[0].trim() || !sides[1].trim()) {
+        throw Error("Both sides of the equation are required.");
+    }
+
+    if (!/[xX]/.test(source)) {
+        throw Error("The equation must contain x.");
+    }
+
+    const left = parseSide(sides[0].replace(/−/g, "-"));
+    const right = parseSide(sides[1].replace(/−/g, "-"));
+
+    addStep(
+        source.trim(),
+        "Start with the original equation."
+    );
+
+    const L = getPolynomial(left);
+    const R = getPolynomial(right);
+
+    if (L && R) {
+        const difference = trimPolynomial(
+            polyAdd(L, polyScale(R, -1))
+        );
+
+        if (difference.length <= 2) {
+            solveLinear(L, R);
+            return;
+        }
+
+        if (difference.length === 3) {
+            solveQuadratic(difference);
+            return;
+        }
+
+        solveNumerically(left, right, true);
+        return;
+    }
+
+    solveNumerically(left, right);
+}
+
+// Create a mathematical term
+function makeTerm(value, type = "number") {
+    const el = document.createElement("span");
+
+    el.className = "math-term " + type;
+    el.dataset.value = value;
+    el.textContent = value;
+
+    return el;
+}
+
+// Render a stacked fraction
 function renderFraction(top, bottom) {
     const wrapper = document.createElement("span");
-    wrapper.className = "math-token math-fraction";
+    wrapper.className = "math-term math-fraction";
     wrapper.dataset.value = `frac:${top}/${bottom}`;
 
     const numerator = document.createElement("span");
@@ -457,8 +749,8 @@ function renderFraction(top, bottom) {
     const denominator = document.createElement("span");
     denominator.className = "fraction-bottom";
 
-    renderTextTokens(top, numerator);
-    renderTextTokens(bottom, denominator);
+    renderText(top, numerator);
+    renderText(bottom, denominator);
 
     wrapper.appendChild(numerator);
     wrapper.appendChild(denominator);
@@ -466,41 +758,94 @@ function renderFraction(top, bottom) {
     return wrapper;
 }
 
-// Render the complete equation
-function renderEquation(equation) {
-    const fragment = document.createDocumentFragment();
-    const parts = equation.split(/(\[\[[^\]]+\]\])/g);
+// Render a mathematical expression
+function renderText(text, container) {
+    const parts = text.match(
+        /\[\[[^\]]+\]\]|(?:\d+(?:\.\d+)?|\.\d+)|[a-zA-Z]+|[^\s]/g
+    ) || [];
 
-    for (const part of parts) {
-        if (!part) continue;
+    for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
 
         if (part.startsWith("[[") && part.endsWith("]]")) {
             const contents = part.slice(2, -2);
             const separator = contents.indexOf("|");
 
-            if (separator === -1) continue;
+            if (separator !== -1) {
+                container.appendChild(
+                    renderFraction(
+                        contents.slice(0, separator),
+                        contents.slice(separator + 1)
+                    )
+                );
+            }
 
-            const top = contents.slice(0, separator);
-            const bottom = contents.slice(separator + 1);
-
-            fragment.appendChild(renderFraction(top, bottom));
-        } else {
-            renderTextTokens(part, fragment);
+            continue;
         }
+
+        // Render powers as superscripts
+        if (part === "^" && i > 0 && i + 1 < parts.length) {
+            const previous = container.lastElementChild;
+
+            if (previous) {
+                const power = document.createElement("span");
+                power.className = "math-term math-power";
+                power.dataset.value = previous.dataset.value + "^" + parts[i + 1];
+
+                const base = document.createElement("span");
+                base.className = "power-base";
+                base.appendChild(previous.cloneNode(true));
+
+                const exponent = document.createElement("span");
+                exponent.className = "power-exponent";
+                exponent.textContent = parts[i + 1];
+
+                power.appendChild(base);
+                power.appendChild(exponent);
+
+                previous.replaceWith(power);
+                i++;
+                continue;
+            }
+        }
+
+        let type = "number";
+
+        if (part === "x") type = "variable";
+        else if (part === "=") type = "equals";
+        else if (["+", "-", "*", "/", "±"].includes(part)) type = "operator";
+        else if (["(", ")"].includes(part)) type = "bracket";
+        else if (/^[a-zA-Z]+$/.test(part)) type = "function";
+
+        container.appendChild(makeTerm(part, type));
+    }
+}
+
+// Render a step
+function renderStep(step) {
+    const fragment = document.createDocumentFragment();
+
+    if (step.tokens) {
+        for (const token of step.tokens) {
+            const el = document.createElement("span");
+
+            el.className = "math-term " + token.type;
+            el.dataset.value = token.value;
+            el.textContent = token.value;
+
+            fragment.appendChild(el);
+        }
+    } else {
+        renderText(step.equation, fragment);
     }
 
     return fragment;
 }
 
-// Get the main tokens without including fraction children
-function getTokens() {
-    return [...display.children].filter(
-        el => el.classList.contains("math-token")
-    );
-}
-
-// Stop animations before changing steps
+// Stop running animations
 function clearAnimations() {
+    animationVersion++;
+
     for (const animation of animations) {
         animation.cancel();
     }
@@ -513,107 +858,63 @@ function clearAnimations() {
     ghosts = [];
 }
 
-// Match terms based on their value and position
-function matchTokens(oldItems, newItems) {
-    const matches = new Map();
-    const used = new Set();
+function getTerms() {
+    return [...display.children];
+}
 
-    // Match identical terms first
+// Get tokens on a particular side
+function getSideItems(items, side) {
+    const index = items.findIndex(item => item.value === "=");
+
+    if (index === -1) return [];
+
+    return side === "left"
+        ? items.slice(0, index)
+        : items.slice(index + 1);
+}
+
+// Match tokens by value and nearby position
+function matchTerms(oldItems, newItems, excluded = new Set()) {
+    const matches = new Map();
+    const used = new Set(excluded);
+
     newItems.forEach((item, newIndex) => {
-        let bestIndex = -1;
-        let bestDistance = Infinity;
+        let best = -1;
+        let distance = Infinity;
 
         oldItems.forEach((old, oldIndex) => {
             if (used.has(oldIndex)) return;
             if (old.value !== item.value) return;
 
-            const distance =
+            const delta =
                 Math.abs(old.rect.left - item.rect.left) +
                 Math.abs(old.rect.top - item.rect.top) * 2;
 
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                bestIndex = oldIndex;
+            if (delta < distance) {
+                distance = delta;
+                best = oldIndex;
             }
         });
 
-        if (bestIndex !== -1) {
-            matches.set(newIndex, bestIndex);
-            used.add(bestIndex);
-        }
-    });
-
-    // Match changed numbers only when they are nearby
-    newItems.forEach((item, newIndex) => {
-        if (matches.has(newIndex)) return;
-        if (!/^\d/.test(item.value)) return;
-
-        let bestIndex = -1;
-        let bestDistance = Infinity;
-
-        oldItems.forEach((old, oldIndex) => {
-            if (used.has(oldIndex)) return;
-            if (!/^\d/.test(old.value)) return;
-
-            const distance =
-                Math.abs(old.rect.left - item.rect.left) +
-                Math.abs(old.rect.top - item.rect.top) * 2;
-
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                bestIndex = oldIndex;
-            }
-        });
-
-        if (bestIndex !== -1 && bestDistance < 90) {
-            matches.set(newIndex, bestIndex);
-            used.add(bestIndex);
+        if (best !== -1) {
+            matches.set(newIndex, best);
+            used.add(best);
         }
     });
 
     return { matches, used };
 }
 
-// Find the terms belonging to each side of the equation
-function getSideTokens(items, side) {
-    const equalsIndex = items.findIndex(item => item.value === "=");
-
-    if (equalsIndex === -1) return [];
-
-    return side === "left"
-        ? items.slice(0, equalsIndex)
-        : items.slice(equalsIndex + 1);
-}
-
-// Find the mathematical terms to combine
-function findMergeTerms(items, merge) {
-    const sideItems = getSideTokens(items, merge.side);
-    const candidates = [];
-
-    for (let i = 0; i < sideItems.length; i++) {
-        const item = sideItems[i];
-
-        if (merge.type === "variable" && item.value === "x") {
-            candidates.push(item);
-        }
-
-        if (merge.type === "constant" && /^\d/.test(item.value)) {
-            candidates.push(item);
-        }
-    }
-
-    return candidates.slice(-2);
-}
-
-// Animate one term moving on top of another
+// Animate one term moving directly on top of another
 function animateMerge(source, target) {
-    if (!source || !target) return Promise.resolve();
+    const a = source.element.getBoundingClientRect();
+    const b = target.element.getBoundingClientRect();
 
-    const sourceRect = source.element.getBoundingClientRect();
-    const targetRect = target.element.getBoundingClientRect();
+    const dx = b.left + b.width / 2 - a.left - a.width / 2;
+    const dy = b.top + b.height / 2 - a.top - a.height / 2;
 
-    const dx = targetRect.left + targetRect.width / 2 - (sourceRect.left + sourceRect.width / 2);
-    const dy = targetRect.top + targetRect.height / 2 - (sourceRect.top + sourceRect.height / 2);
+    source.element.classList.add("merge-source");
+    target.element.classList.add("merge-target");
 
     const animation = source.element.animate([
         {
@@ -621,16 +922,16 @@ function animateMerge(source, target) {
             opacity: 1
         },
         {
-            transform: `translate(${dx}px, ${dy}px) scale(1.1)`,
+            transform: `translate(${dx}px, ${dy}px) scale(1)`,
             opacity: 1,
             offset: 0.75
         },
         {
-            transform: `translate(${dx}px, ${dy}px) scale(0.4)`,
+            transform: `translate(${dx}px, ${dy}px) scale(0.65)`,
             opacity: 0
         }
     ], {
-        duration: 850,
+        duration: DURATION,
         easing: "cubic-bezier(0.22, 1, 0.36, 1)",
         fill: "forwards"
     });
@@ -640,42 +941,20 @@ function animateMerge(source, target) {
     return animation.finished.catch(() => {});
 }
 
-// Animate the equation and merge like terms
-async function animateEquation(equation, isAnswer, merges = []) {
+// Animate the entire equation
+async function animateEquation(step) {
     clearAnimations();
 
-    const oldItems = getTokens().map(el => ({
+    const version = animationVersion;
+
+    const oldItems = getTerms().map(el => ({
         value: el.dataset.value,
         rect: el.getBoundingClientRect(),
         element: el
     }));
 
-    // Merge terms before changing the equation
-    if (merges.length > 0) {
-        const mergeAnimations = [];
-
-        for (const merge of merges) {
-            const terms = findMergeTerms(oldItems, merge);
-
-            if (terms.length === 2) {
-                mergeAnimations.push(
-                    animateMerge(terms[1], terms[0])
-                );
-            }
-        }
-
-        await Promise.all(mergeAnimations);
-    }
-
-    // Record positions after the merge
-    const previousItems = getTokens().map(el => ({
-        value: el.dataset.value,
-        rect: el.getBoundingClientRect(),
-        element: el
-    }));
-
-    // Create visual copies of the previous equation
-    for (const item of previousItems) {
+    // Make copies of old terms
+    for (const item of oldItems) {
         const ghost = item.element.cloneNode(true);
         const rect = item.rect;
 
@@ -694,33 +973,55 @@ async function animateEquation(equation, isAnswer, merges = []) {
         ghosts.push(ghost);
     }
 
-    display.replaceChildren(renderEquation(equation));
-    display.classList.toggle("is-answer", isAnswer);
+    const oldGhostItems = ghosts.map((el, index) => ({
+        value: oldItems[index].value,
+        rect: oldItems[index].rect,
+        element: el
+    }));
 
-    const newItems = getTokens().map(el => ({
+    // Merge specified terms before displaying the result
+    const mergedSources = new Set();
+
+    if (step.merges && step.merges.length) {
+        const tasks = [];
+
+        for (const merge of step.merges) {
+            const sideItems = getSideItems(oldGhostItems, merge.side);
+            const source = sideItems[merge.source];
+            const target = sideItems[merge.target];
+
+            if (!source || !target || source === target) continue;
+
+            const sourceIndex = oldGhostItems.indexOf(source);
+            mergedSources.add(sourceIndex);
+
+            tasks.push(animateMerge(source, target));
+        }
+
+        await Promise.all(tasks);
+
+        if (version !== animationVersion) return;
+    }
+
+    // Display the new equation
+    display.replaceChildren(renderStep(step));
+    display.classList.toggle("is-answer", step.answer);
+
+    const newItems = getTerms().map(el => ({
         value: el.dataset.value,
         rect: el.getBoundingClientRect(),
         element: el
     }));
 
-    if (!previousItems.length) {
-        for (const item of newItems) {
-            animations.push(item.element.animate([
-                { opacity: 0 },
-                { opacity: 1 }
-            ], {
-                duration: 450,
-                easing: "ease-out"
-            }));
-        }
+    const { matches, used } = matchTerms(
+        oldItems,
+        newItems,
+        mergedSources
+    );
 
-        return;
-    }
-
-    const { matches, used } = matchTokens(previousItems, newItems);
-
-    newItems.forEach((item, newIndex) => {
-        const oldIndex = matches.get(newIndex);
+    // Animate each term to its new location
+    newItems.forEach((item, index) => {
+        const oldIndex = matches.get(index);
 
         if (oldIndex === undefined) {
             animations.push(item.element.animate([
@@ -733,14 +1034,14 @@ async function animateEquation(equation, isAnswer, merges = []) {
                     transform: "scale(1)"
                 }
             ], {
-                duration: DURATION * 0.7,
+                duration: DURATION,
                 easing: "ease-out"
             }));
 
             return;
         }
 
-        const old = previousItems[oldIndex];
+        const old = oldItems[oldIndex];
 
         const dx = old.rect.left - item.rect.left;
         const dy = old.rect.top - item.rect.top;
@@ -762,39 +1063,34 @@ async function animateEquation(equation, isAnswer, merges = []) {
         ghosts[oldIndex].style.opacity = "0";
     });
 
+    // Fade away removed terms
     ghosts.forEach((ghost, index) => {
-        if (used.has(index)) return;
+        if (used.has(index) || mergedSources.has(index)) return;
 
         animations.push(ghost.animate([
-            {
-                opacity: 1,
-                transform: "scale(1)"
-            },
-            {
-                opacity: 0,
-                transform: "scale(0.85)"
-            }
+            { opacity: 1 },
+            { opacity: 0 }
         ], {
-            duration: DURATION * 0.65,
-            easing: "ease-in",
+            duration: DURATION * 0.7,
             fill: "forwards"
         }));
     });
 
     const currentGhosts = [...ghosts];
+    const currentAnimations = [...animations];
 
-    Promise.all(
-        animations.map(animation => animation.finished.catch(() => {}))
-    ).then(() => {
-        currentGhosts.forEach(ghost => ghost.remove());
-    });
+    await Promise.all(
+        currentAnimations.map(animation => animation.finished.catch(() => {}))
+    );
+
+    currentGhosts.forEach(ghost => ghost.remove());
 }
 
 // Show the selected step
 function showStep() {
     const step = steps[currentStep];
 
-    animateEquation(step.equation, step.answer, step.merges || []);
+    animateEquation(step);
 
     explanation.textContent = step.message;
     stepCount.textContent = `Step ${currentStep + 1} of ${steps.length}`;

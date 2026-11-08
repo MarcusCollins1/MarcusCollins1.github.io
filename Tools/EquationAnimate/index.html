@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Equation Animator</title>
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/13.2.0/math.min.js"></script>
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -14,7 +16,7 @@
         <header>
             <div class="eyebrow">INTERACTIVE MATHEMATICS</div>
             <h1>Equation <span>Animator</span></h1>
-            <p>Watch equations solve themselves, one step at a time.</p>
+            <p>Watch mathematical expressions transform, step by step.</p>
         </header>
 
         <section class="panel">
@@ -27,9 +29,10 @@
 
             <div class="examples">
                 <span>Try:</span>
-                <button class="example" data-equation="2x + 7 = 19">2x + 7 = 19</button>
-                <button class="example" data-equation="3(x + 2) = 21">3(x + 2) = 21</button>
-                <button class="example" data-equation="5x - 4 = 2x + 11">5x - 4 = 2x + 11</button>
+                <button class="example" data-equation="3x + 5 = 20">Linear</button>
+                <button class="example" data-equation="x^2 - 5x + 6 = 0">Polynomial</button>
+                <button class="example" data-equation="2^x = 16">Exponential</button>
+                <button class="example" data-equation="sin(x) = 0.5">Trigonometric</button>
             </div>
 
             <p id="error" role="alert"></p>
@@ -53,6 +56,8 @@
             <div class="progress-track">
                 <div id="progressBar"></div>
             </div>
+
+            <p id="solutionNote" class="solution-note"></p>
         </section>
 
         <footer>Learn algebra visually, step by step.</footer>

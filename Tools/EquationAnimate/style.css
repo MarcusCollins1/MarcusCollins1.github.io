@@ -191,50 +191,76 @@ h2 {
 /* Equation display */
 
 .equation-display {
-    min-height: 190px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 0.16em;
-    padding: 40px 10px;
+    gap: 0.18em;
+    min-height: 200px;
+    padding: 45px 12px;
     font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(24px, 5.5vw, 44px);
+    font-size: clamp(23px, 5.5vw, 43px);
     font-weight: 600;
+    line-height: 1.4;
     position: relative;
     overflow: visible;
     isolation: isolate;
 }
 
-.math-token {
+.math-term {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     position: relative;
     white-space: nowrap;
-    line-height: 1.25;
     transform-origin: center;
+    will-change: transform, opacity;
 }
 
-.math-token.variable {
+.math-term.variable {
     color: var(--blue);
 }
 
-.math-token.number {
+.math-term.number {
     color: var(--text);
 }
 
-.math-token.operator {
+.math-term.operator {
     color: var(--muted);
 }
 
-.math-token.equals {
+.math-term.equals {
     color: var(--purple);
     padding: 0 0.12em;
 }
 
-.math-token.bracket {
+.math-term.function {
+    color: var(--purple);
+}
+
+.math-term.bracket {
     color: #d1d9ef;
+}
+
+/* Powers */
+
+.math-power {
+    display: inline-flex;
+    align-items: flex-start;
+    white-space: nowrap;
+}
+
+.math-power .power-base {
+    display: inline-flex;
+    align-items: center;
+}
+
+.math-power .power-exponent {
+    font-size: 0.58em;
+    line-height: 1;
+    margin-left: 0.04em;
+    margin-top: -0.12em;
+    color: var(--purple);
 }
 
 /* Fractions */
@@ -255,9 +281,8 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.04em;
+    gap: 0.05em;
     padding: 0.12em 0.18em;
-    white-space: nowrap;
 }
 
 .fraction-top {
@@ -269,63 +294,55 @@ h2 {
     padding-top: 0.18em;
 }
 
-.math-fraction .math-token {
-    font-size: 1em;
-}
-
-/* Animation elements */
+/* Merging animations */
 
 .animation-ghost {
     position: fixed;
     z-index: 100;
     pointer-events: none;
     margin: 0;
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
-    white-space: nowrap;
-    transform-origin: top left;
+    transform-origin: center;
 }
 
-.equation-display.is-answer .math-token {
+.merge-source {
+    z-index: 12;
+    color: var(--purple);
+}
+
+.merge-target {
+    z-index: 11;
+}
+
+@keyframes merge-pulse {
+    0% {
+        filter: brightness(1);
+        text-shadow: none;
+    }
+
+    50% {
+        filter: brightness(1.8);
+        text-shadow: 0 0 24px var(--purple);
+    }
+
+    100% {
+        filter: brightness(1);
+        text-shadow: none;
+    }
+}
+
+.merge-target {
+    animation: merge-pulse 0.9s ease-in-out;
+}
+
+/* Final answers */
+
+.equation-display.is-answer .math-term {
     color: var(--green);
 }
 
 .equation-display.is-answer {
     text-shadow: 0 0 24px #70e2b150;
 }
-
-/* Like-term merging */
-
-.math-token.merging {
-    z-index: 10;
-    color: var(--purple);
-    text-shadow: 0 0 18px rgba(174, 140, 255, 0.5);
-}
-
-.math-token.merge-target {
-    z-index: 9;
-    text-shadow: 0 0 22px rgba(101, 183, 255, 0.5);
-}
-
-@keyframes merge-pulse {
-    0% {
-        filter: brightness(1);
-    }
-
-    50% {
-        filter: brightness(1.6);
-    }
-
-    100% {
-        filter: brightness(1);
-    }
-}
-
-.merge-target {
-    animation: merge-pulse 0.85s ease-in-out;
-}
-
-/* Explanations and controls */
 
 .explanation {
     text-align: center;
@@ -334,6 +351,18 @@ h2 {
     font-size: 16px;
     line-height: 1.6;
     margin: 0 0 24px;
+}
+
+.solution-note {
+    color: var(--muted);
+    text-align: center;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 18px 0 0;
+}
+
+.solution-note:empty {
+    display: none;
 }
 
 .controls {
@@ -378,14 +407,10 @@ footer {
     }
 
     .equation-display {
-        font-size: clamp(21px, 5.8vw, 32px);
-        min-height: 170px;
+        font-size: clamp(20px, 5.6vw, 31px);
+        min-height: 180px;
         padding: 35px 8px;
         gap: 0.12em;
-    }
-
-    .math-fraction {
-        font-size: 0.82em;
     }
 
     .fraction-top {
