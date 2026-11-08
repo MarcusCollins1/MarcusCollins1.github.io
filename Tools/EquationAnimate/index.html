@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equation Animator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <main class="container">
+        <a href="../../games.html" class="return-btn">&larr; Return</a>
+
+        <header>
+            <div class="eyebrow">INTERACTIVE MATHEMATICS</div>
+            <h1>Equation <span>Animator</span></h1>
+            <p>Watch equations solve themselves, one step at a time.</p>
+        </header>
+
+        <section class="panel">
+            <label for="equation">Enter an equation</label>
+
+            <div class="input-row">
+                <input type="text" name="equation" id="equation" placeholder="e.g. 3x + 5 = 20" value="3x + 5 = 20" autocomplete="off" spellcheck="false">
+                <button id="solveBtn">Solve &rarr;</button>
+            </div>
+
+            <div class="examples">
+                <span>Try:</span>
+                <button class="example" data-equation="2x + 7 = 19">2x + 7 = 19</button>
+                <button class="example" data-equation="3(x + 2) = 21">3(x + 2) = 21</button>
+                <button class="example" data-equation="5x - 4 = 2x + 11">5x - 4 = 2x + 11</button>
+            </div>
+
+            <p id="error" role="alert"></p>
+        </section>
+
+        <section id="workspace" class="panel workspace" hidden>
+            <div class="workspace-heading">
+                <h2>Animated solution</h2>
+                <span id="stepCount">Step 1</span>
+            </div>
+
+            <div id="equationDisplay" class="equation-display"></div>
+            <p id="explanation" class="explanation"></p>
+
+            <div class="controls">
+                <button id="previousBtn" class="secondary">Previous</button>
+                <button id="playBtn" class="secondary">Pause</button>
+                <button id="nextBtn" class="secondary">Next step &rarr;</button>
+            </div>
+
+            <div class="progress-track">
+                <div id="progressBar"></div>
+            </div>
+        </section>
+
+        <footer>Learn algebra visually, step by step.</footer>
+    </main>
+</body>
+</html>
