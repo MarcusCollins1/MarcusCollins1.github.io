@@ -3,35 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
+
     <title>Games</title>
+
     <link rel="stylesheet" href="games.css">
     <link rel="icon" type="image/ico" href="games.ico">
 </head>
 <body>
-    <h1>Welcome to the Games Page</h1>
-    <button id="return-button" class="return-button" onclick="location.href='..'">← Return</button>
-    <br>
-    <button id="number-guessing-game-button" onclick="location.href='Games/NumberGuessingGame/numberGuessingGame.html'">Number Guessing Game</button>
-    <br>
-    <button disabled id="car-maze-game-button" onclick="location.href='Games/CarMazeGame/carMazeGame.html'">Car Maze Game</button>
-    <br>
-    <button disabled id="teddadle-game-button" onclick="location.href='Games/Teddadle/teddadle.html'">Teddadle</button>
-    <br>
-    <button id="polygon-game-button" onclick="location.href='polygon/'">Polygon Game</button>
-    <a href="https://github.com/marcuscollins1/polygon/releases/latest" target="_blank" rel="noopener noreferrer" class="download-button">Download Polygon for Android</a>
-    <br>
-    <button id="noughts-and-crosses-button" onclick="location.href='Games/NoughtsAndCrosses/noughtsAndCrosses.html'">Noughts and Crosses</button>
-    <br>
-    <button disabled id="mapominoes-button" onclick="location.href='Games/Mapominoes/home.html'">Mapominoes</button>
-    <br>
-    <button id="chess-button" onclick="location.href='Games/Chess/chess.html'">Chess</button>
-    <br>
-    <button id="family-framed-button" onclick="location.href='Games/FamilyFramed/familyFramed.html'">Family Framed</button>
-    <br>
-    <button id="lantern-run-button" onclick="location.href='../lantern-run/'">Lantern Run</button>
-    <br>
-    <button id="battleships-button" onclick="location.href='../battleships/'">Battleships</button>
-    <br>
-    <button id="factorwang-button" onclick="location.href='Games/Factorwang'">Factorwang</button>
+    <div class="container">
+
+        <!-- Navigation -->
+        <nav class="navbar">
+            <a href=".." class="return-button">
+                &larr; Back to Home
+            </a>
+            <span class="nav-title">Games Hub</span>
+        </nav>
+
+        <!-- Header -->
+        <header class="page-header">
+            <div class="header-icon">🎮</div>
+
+            <h1>Welcome to the Games Hub</h1>
+        </header>
+
+        <!-- Games -->
+        <main>
+            <div class="section-heading">
+                <h2>Explore Games</h2>
+            </div>
+
+            <div class="games-grid">
+
+                <!-- Number guessing -->
+                <article class="game-card">
+                    <div class="game-icon">🔢</div>
+                    <h3>Number Guessing</h3>
+                    <a href="Games/NumberGuessingGame/numberGuessingGame.html" class="play-button">Play Now &rarr;</a>
+                </article>
+
+                <!-- Car Maze -->
+                <article class="game-card unavailable">
+                    <div class="game-icon">🚗</div>
+                    <span class="status-badge">Coming Soon</span>
+                    <h3>Car Maze</h3>
+                    <span class="play-button disabled">Coming Soon</span>
+                </article>
+
+                <!-- Teddadle -->
+                <article class="game-card unavailable">
+                    <div class="game-icon">🧸</div>
+                    <span class="status-badge">Coming Soon</span>
+                    <h3>Teddadle</h3>
+                    <span class="play-button disabled">Coming Soon</span>
+                </article>
+
+                <!-- Polygon -->
+                <article class="game-card">
+                    <div class="game-icon">🔷</div>
+                    <span class="featured-badge">Android Available</span>
+                    <h3>Polygon</h3>
+                    <div class="card-actions">
+                        <a href="polygon/" class="play-button">Play Now &rarr;</a>
+                        <a
+                            href="https://github.com/marcuscollins1/polygon/releases/latest"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="download-button"
+                        >↓ Android</a>
+                    </div>
+                </article>
+
+                <!-- Noughts and Crosses -->
+                <article class="game-card">
+                    <div class="game-icon">❌</div>
+                    <h3>Noughts and Crosses</h3>
+                     <a href="Games/NoughtsAndCrosses/noughtsAndCrosses.html" class="play-button">
+                        Play Now &rarr;
+                    </a>
+                </article>
+
+                <!-- Mapominoes -->
+                <article class="game-card unavailable">
+                    <div class="game-icon">🗺️</div>
+                    <span class="status-badge">Coming Soon</span>
+                    <h3>Mapominoes</h3>
+                    <span class="play-button disabled">Coming Soon</span>
+                </article>
+
+                <!-- Chess -->
+                <article class="game-card">
+                    <div class="game-icon">♟️</div>
+                    <h3>Chess</h3>
+                    <a href="Games/Chess/chess.html" class="play-button">
+                        Play Now &rarr;
+                    </a>
+                </article>
+
+                <!-- Family Framed -->
+                <article class="game-card">
+                    <div class="game-icon">🖼️</div>
+                    <h3>Family Framed</h3>
+                    <a href="Games/FamilyFramed/familyFramed.html" class="play-button">
+                        Play Now &rarr;
+                    </a>
+                </article>
+
+                <!-- Lantern Run -->
+                <article class="game-card">
+                    <div class="game-icon">🏮</div>
+                    <h3>Lantern Run</h3>
+                    <a href="../lantern-run/" class="play-button">
+                        Play Now &rarr;
+                    </a>
+                </article>
+
+                <!-- Battleships -->
+                <article class="game-card">
+                    <div class="game-icon">🚢</div>
+                    <h3>Battleships</h3>
+                    <a href="../battleships/" class="play-button">
+                        Play Now &rarr;
+                    </a>
+                </article>
+
+                <!-- Factorwang -->
+                <article class="game-card">
+                    <div class="game-icon">🧮</div>
+                    <h3>Factorwang</h3>
+                    <a href="Games/Factorwang" class="play-button">
+                        Play Now &rarr;
+                    </a>
+                </article>
+
+            </div>
+        </main>
+    </div>
 </body>
 </html>
