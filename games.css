@@ -30,3 +30,18 @@ button:hover:not(:disabled) {
     background-color: hotpink;
     color: lightblue;
 }
+
+.download-button {
+    display: inline-block;
+    background: #2f6fed;
+    color: white;
+    padding: 14px 22px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+}
+.download-button:hover {
+    background: white;
+    color: #2f6fed;
+}
